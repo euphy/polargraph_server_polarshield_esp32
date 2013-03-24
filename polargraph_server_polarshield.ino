@@ -46,7 +46,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.6";
+const String FIRMWARE_VERSION_NO = "1.5";
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
@@ -255,7 +255,6 @@ void loop()
 /*===========================================================  
     These variables are for the polarshield / mega
 =========================================================== */    
-#include <AFMotor.h>
 #include <SD.h>
 #include <UTFT.h>
 #include <UTouch.h>

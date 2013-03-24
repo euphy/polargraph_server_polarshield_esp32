@@ -168,7 +168,7 @@ void exec_setMachineStepMultiplierFromCommand()
 void exec_setPenLiftRange()
 {
   int down = asInt(inParam1);
-  int up = as Int(inParam2);
+  int up = asInt(inParam2);
   EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
   EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
   eeprom_loadPenLiftRange();
