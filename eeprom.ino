@@ -73,6 +73,25 @@ void eeprom_loadSpoolSpec()
   Serial.println(motorStepsPerRev);
 }  
 
+void eeprom_loadPenLiftRange()
+{
+  EEPROM_readAnything(EEPROM_PENLIFT_DOWN, downPosition);
+  if (downPosition < 1)
+  {
+    downPosition = DEFAULT_DOWN_POSITION;
+  }
+  Serial.print(F("Loaded down pos:"));
+  Serial.println(downPosition);
+
+  EEPROM_readAnything(EEPROM_PENLIFT_UP, upPosition);
+  if (upPosition < 1)
+  {
+    upPosition = DEFAULT_UP_POSITION;
+  }
+  Serial.print(F("Loaded up pos:"));
+  Serial.println(upPosition);
+}  
+
 void eeprom_loadMachineName()
 {
   String name = "";
@@ -109,6 +128,7 @@ void eeprom_loadMachineSpecFromEeprom()
   eeprom_loadSpoolSpec();
   eeprom_loadStepMultiplier();
   eeprom_loadMachineName();
+  eeprom_loadPenLiftRange();
 
   
   // load speed, acceleration
@@ -129,20 +149,20 @@ void eeprom_loadMachineSpecFromEeprom()
   mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
   stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
   
-  Serial.print(F("Recalculated mmPerStep ("));
+  Serial.print(F("Recalc mmPerStep ("));
   Serial.print(mmPerStep);
-  Serial.print(F(") and stepsPerMM ("));
+  Serial.print(F("), stepsPerMM ("));
   Serial.print(stepsPerMM);
   Serial.print(F(")"));
   Serial.println();
 
   pageWidth = machineWidth * stepsPerMM;
-  Serial.print(F("Recalculated pageWidth in steps ("));
+  Serial.print(F("Recalc pageWidth in steps ("));
   Serial.print(pageWidth);
   Serial.print(F(")"));
   Serial.println();
   pageHeight = machineHeight * stepsPerMM;
-  Serial.print(F("Recalculated pageHeight in steps ("));
+  Serial.print(F("Recalc pageHeight in steps ("));
   Serial.print(pageHeight);
   Serial.print(F(")"));
   Serial.println();

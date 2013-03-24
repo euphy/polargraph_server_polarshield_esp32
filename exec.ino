@@ -61,6 +61,8 @@ boolean exec_executeBasicCommand(String &com)
     exec_setMachineStepsPerRevFromCommand();
   else if (com.startsWith(CMD_SETMACHINESTEPMULTIPLIER))
     exec_setMachineStepMultiplierFromCommand();
+  else if (com.startsWith(CMD_SETPENLIFTRANGE))
+    exec_setPenLiftRange();
   else if (com.startsWith(CMD_GETMACHINEDETAILS))
     exec_reportMachineSpec();
   else if (com.startsWith(CMD_RESETEEPROM))
@@ -162,6 +164,14 @@ void exec_setMachineStepMultiplierFromCommand()
 {
   EEPROM_writeAnything(EEPROM_MACHINE_STEP_MULTIPLIER, asInt(inParam1));
   eeprom_loadMachineSpecFromEeprom();
+}
+void exec_setPenLiftRange()
+{
+  int down = asInt(inParam1);
+  int up = as Int(inParam2);
+  EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
+  EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
+  eeprom_loadPenLiftRange();
 }
 
 void exec_setMotorSpeed()

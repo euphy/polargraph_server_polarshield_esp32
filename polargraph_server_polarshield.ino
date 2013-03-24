@@ -46,7 +46,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.5";
+const String FIRMWARE_VERSION_NO = "1.6";
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
@@ -70,13 +70,19 @@ const int EEPROM_MACHINE_MOTOR_SPEED = 20;
 const int EEPROM_MACHINE_MOTOR_ACCEL = 22;
 const int EEPROM_MACHINE_PEN_WIDTH = 24;
 
-const int EEPROM_MACHINE_HOME_A = 26; // to 29
-const int EEPROM_MACHINE_HOME_B = 30; // to 33
+const long EEPROM_MACHINE_HOME_A = 26; // to 29
+const long EEPROM_MACHINE_HOME_B = 30; // to 33
+
+const int EEPROM_PENLIFT_DOWN = 34; // 2 bytes
+const int EEPROM_PENLIFT_UP = 36; // 2 bytes
 
 // Pen raising servo
 Servo penHeight;
-int const UP_POSITION = 180;
-int const DOWN_POSITION = 90;
+const int DEFAULT_DOWN_POSITION = 90;
+const int DEFAULT_UP_POSITION = 180;
+static int upPosition = DEFAULT_UP_POSITION; // defaults
+static int downPosition = DEFAULT_DOWN_POSITION;
+static int penLiftSpeed = 3; // ms between steps of moving motor
 int const PEN_HEIGHT_SERVO_PIN = 9;
 boolean isPenUp = true;
 
@@ -211,6 +217,7 @@ const static String CMD_SETMACHINESTEPSPERREV = "C30";
 const static String CMD_SETMOTORSPEED = "C31";
 const static String CMD_SETMOTORACCEL = "C32";
 const static String CMD_SETMACHINESTEPMULTIPLIER = "C37";
+const static String CMD_SETPENLIFTRANGE = "C45";
 
 void setup() 
 {
