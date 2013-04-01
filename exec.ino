@@ -269,7 +269,6 @@ void exec_changeLengthDirect()
   }
   else
   {
-  Serial.println("dr.5");
     exec_drawBetweenPoints(startA, startB, endA, endB, maxSegmentLength);
   }
 }  
