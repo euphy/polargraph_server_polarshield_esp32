@@ -172,6 +172,19 @@ void exec_setPenLiftRange()
   EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
   EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
   eeprom_loadPenLiftRange();
+  
+  if (inNoOfParams > 3)
+  {
+    // also do a test
+    penlift_movePen(down, up, penLiftSpeed);
+    delay(200);
+    penlift_movePen(up, down, penLiftSpeed);
+    delay(200);
+    penlift_movePen(down, up, penLiftSpeed);
+    delay(200);
+    penlift_movePen(up, down, penLiftSpeed);
+    delay(200);
+  }
 }
 
 void exec_setMotorSpeed()
