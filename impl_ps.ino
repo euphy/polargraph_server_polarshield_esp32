@@ -410,11 +410,15 @@ void impl_drawCurve(long x, long y, long fx, long fy, long cx, long cy) {
   float xt=0;
   float yt=0;
 
-  for (float t=0; t<=1; t+=.0025) {
+  reportingPosition = false;
+  usingAcceleration = false;
+  for (float t=0; t<=1; t+=.01) { //025) {
     xt = pow((1-t),2) *x + 2*t*(1-t)*cx+ pow(t,2)*fx;
     yt = pow((1-t),2) *y + 2*t*(1-t)*cy+ pow(t,2)*fy;
     changeLength(xt, yt);
   }  
+  reportingPosition = true;
+  usingAcceleration = true;
 }
                                                      
 

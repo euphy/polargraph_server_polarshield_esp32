@@ -169,6 +169,12 @@ void exec_setPenLiftRange()
 {
   int down = asInt(inParam1);
   int up = asInt(inParam2);
+  
+  Serial.print("Down: ");
+  Serial.println(down);
+  Serial.print("Up: ");
+  Serial.println(up);
+  
   EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
   EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
   eeprom_loadPenLiftRange();
@@ -307,8 +313,19 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
   float c2y = getCartesianYFP(c2x, p2a);
   
   // test to see if it's on the page
-  if (c2x > 20 && c2x<pageWidth-20 && c2y > 20 && c2y <pageHeight-20)
-  {
+  // AND ALSO TO see if the current position is on the page.
+  // Remember, the native system can easily specify points that can't exist,
+  // particularly up at the top.
+  if (c2x > 20 
+    && c2x<pageWidth-20 
+    && c2y > 20 
+    && c2y <pageHeight-20
+    && c1x > 20 
+    && c1x<pageWidth-20 
+    && c1y > 20 
+    && c1y <pageHeight-20 
+    )
+    {
     reportingPosition = false;
     float deltaX = c2x-c1x;    // distance each must move (signed)
     float deltaY = c2y-c1y;
