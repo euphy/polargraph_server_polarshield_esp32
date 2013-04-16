@@ -103,7 +103,7 @@ static int defaultMachineWidth = 650;
 static int defaultMachineHeight = 650;
 static int defaultMmPerRev = 95;
 static int defaultStepsPerRev = 400;
-static int defaultStepMultiplier = 1;
+static int defaultStepMultiplier = 8;
 
 static long startLengthStepsA = 8000;
 static long startLengthStepsB = 8000;
@@ -114,7 +114,6 @@ const String DEFAULT_MACHINE_NAME = "PG01    ";
 float currentMaxSpeed = 800.0;
 float currentAcceleration = 800.0;
 boolean usingAcceleration = true;
-
 
 float mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
 float stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
@@ -159,7 +158,6 @@ volatile long lastInteractionTime = 0L;
 
 static boolean lastWaveWasTop = true;
 static boolean lastMotorBiasWasA = true;
-//static boolean drawingLeftToRight = true;
 
 //  Drawing direction
 const static byte DIR_NE = 1;
@@ -200,7 +198,6 @@ const static String CMD_CHANGEMOTORSPEED = "C03";
 const static String CMD_CHANGEMOTORACCEL = "C04";
 const static String CMD_DRAWPIXEL = "C05";
 const static String CMD_DRAWSCRIBBLEPIXEL = "C06";
-//const static String CMD_DRAWRECT = "C07";
 const static String CMD_CHANGEDRAWINGDIRECTION = "C08";
 const static String CMD_SETPOSITION = "C09";
 const static String CMD_TESTPATTERN = "C10";
@@ -222,8 +219,9 @@ const static String CMD_SETPENLIFTRANGE = "C45";
 void setup() 
 {
   Serial.begin(57600);           // set up Serial library at 57600 bps
-  Serial.print(F("POLARGRAPH ON!"));
-  Serial.println();
+  Serial.println(F("POLARGRAPH ON!"));
+  Serial.print(F("v"));
+  Serial.println(FIRMWARE_VERSION_NO);
 
   configuration_motorSetup();
   eeprom_loadMachineSpecFromEeprom();
