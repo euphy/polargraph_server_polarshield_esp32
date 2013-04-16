@@ -224,7 +224,6 @@ void setup()
   Serial.begin(57600);           // set up Serial library at 57600 bps
   Serial.print(F("POLARGRAPH ON!"));
   Serial.println();
-  penlift_penUp();
 
   configuration_motorSetup();
   eeprom_loadMachineSpecFromEeprom();
@@ -240,6 +239,7 @@ void setup()
   readyString = READY;
   comms_establishContact();
 
+  penlift_penUp();
   delay(500);
   outputAvailableMemory();
 }

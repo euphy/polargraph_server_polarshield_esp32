@@ -141,6 +141,8 @@ void comms_parseAndExecuteCommand(String &in)
     Serial.print(in);
     Serial.println(F(") not parsed."));
   }
+  inNoOfParams = 0;
+  
 }
 
 

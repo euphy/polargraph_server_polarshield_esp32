@@ -330,24 +330,11 @@ void impl_pixel_testPenWidthScribble()
 
 void impl_engageMotors()
 {
-  Serial.println("Engaged motors.");
   motorA.enableOutputs();
-  Serial.println("enabled A");
   motorB.enableOutputs();
-  Serial.println("enabled B");
   powerIsOn = true;
-  Serial.println("Power is on.");
-  Serial.print("A pos ");
-  Serial.println(motorA.currentPosition());
-  long target = motorA.currentPosition()+32;
-  Serial.print("A target ");
-  Serial.println(target);
-  motorA.runToNewPosition(target);
-  Serial.println("A forward");
-  Serial.print("B pos ");
-  Serial.println(motorB.currentPosition());
+  motorA.runToNewPosition(motorA.currentPosition()+32);
   motorB.runToNewPosition(motorB.currentPosition()+32);
-  Serial.println("B forward");
   motorA.runToNewPosition(motorA.currentPosition()-32);
   motorB.runToNewPosition(motorB.currentPosition()-32);
   Serial.println("Engaged motors.");

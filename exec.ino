@@ -27,10 +27,6 @@ boolean exec_executeBasicCommand(String &com)
     exec_changeLengthDirect();
   else if (com.startsWith(CMD_CHANGEPENWIDTH))
     exec_changePenWidth();
-  else if (com.startsWith(CMD_CHANGEMOTORSPEED))
-    exec_changeMotorSpeed();
-  else if (com.startsWith(CMD_CHANGEMOTORACCEL))
-    exec_changeMotorAcceleration();
   else if (com.startsWith(CMD_SETMOTORSPEED))
     exec_setMotorSpeed();
   else if (com.startsWith(CMD_SETMOTORACCEL))
@@ -39,8 +35,6 @@ boolean exec_executeBasicCommand(String &com)
     pixel_drawSquarePixel();
   else if (com.startsWith(CMD_DRAWSCRIBBLEPIXEL))
     pixel_drawScribblePixel();
-//  else if (com.startsWith(CMD_DRAWRECT))
-//    drawRectangle();
   else if (com.startsWith(CMD_CHANGEDRAWINGDIRECTION))
     exec_changeDrawingDirection();
   else if (com.startsWith(CMD_SETPOSITION))
@@ -77,10 +71,10 @@ void exec_changeDrawingDirection()
 {
   globalDrawDirectionMode = asInt(inParam1);
   globalDrawDirection = asInt(inParam2);
-  Serial.print(F("Changed draw direction mode to be "));
-  Serial.print(globalDrawDirectionMode);
-  Serial.print(F(" and direction is "));
-  Serial.println(globalDrawDirection);
+//  Serial.print(F("Changed draw direction mode to be "));
+//  Serial.print(globalDrawDirectionMode);
+//  Serial.print(F(" and direction is "));
+//  Serial.println(globalDrawDirection);
 }
 
 
@@ -109,6 +103,18 @@ void exec_reportMachineSpec()
   Serial.print(stepMultiplier);
   Serial.println(CMD_END);
 
+  Serial.print(F("PGLIFT,"));
+  Serial.print(downPosition);
+  Serial.print(COMMA);
+  Serial.print(upPosition);
+  Serial.println(CMD_END);
+
+  Serial.print(F("PGSPEED,"));
+  Serial.print(currentMaxSpeed);
+  Serial.print(COMMA);
+  Serial.print(currentAcceleration);
+  Serial.println(CMD_END);
+
 }
 
 void exec_setMachineSizeFromCommand()
@@ -135,6 +141,8 @@ void exec_setMachineSizeFromCommand()
   // reload 
   eeprom_loadMachineSize();
 }
+
+
 void exec_setMachineNameFromCommand()
 {
   String name = inParam1;
@@ -165,23 +173,27 @@ void exec_setMachineStepMultiplierFromCommand()
   EEPROM_writeAnything(EEPROM_MACHINE_STEP_MULTIPLIER, asInt(inParam1));
   eeprom_loadMachineSpecFromEeprom();
 }
+
 void exec_setPenLiftRange()
 {
   int down = asInt(inParam1);
   int up = asInt(inParam2);
   
-  Serial.print("Down: ");
+  Serial.print(F("Down: "));
   Serial.println(down);
-  Serial.print("Up: ");
+  Serial.print(F("Up: "));
   Serial.println(up);
   
-  EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
-  EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
-  eeprom_loadPenLiftRange();
-  
-  if (inNoOfParams > 3)
+  if (inNoOfParams == 4) 
   {
-    // also do a test
+    // 4 params (C45,<downpos>,<uppos>,1,END) means save values to EEPROM
+    EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
+    EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
+    eeprom_loadPenLiftRange();
+  }
+  else if (inNoOfParams == 3)
+  {
+    // 3 params (C45,<downpos>,<uppos>,END) means just do a range test
     penlift_movePen(down, up, penLiftSpeed);
     delay(200);
     penlift_movePen(up, down, penLiftSpeed);
@@ -193,9 +205,13 @@ void exec_setPenLiftRange()
   }
 }
 
+/* Single parameter to set max speed, add a second parameter of "1" to make it persist.
+*/
 void exec_setMotorSpeed()
 {
   exec_setMotorSpeed(asFloat(inParam1));
+  if (inNoOfParams == 3 && asInt(inParam2) == 1)
+    EEPROM_writeAnything(EEPROM_MACHINE_MOTOR_SPEED, currentMaxSpeed);
 }
 
 void exec_setMotorSpeed(float speed)
@@ -207,18 +223,13 @@ void exec_setMotorSpeed(float speed)
   Serial.println(currentMaxSpeed);
 }
 
-void exec_changeMotorSpeed()
-{
-  float speedChange = asFloat(inParam1);
-  float newSpeed = currentMaxSpeed + speedChange;
-  exec_setMotorSpeed(newSpeed);
-}
-
-
- 
+/* Single parameter to set acceleration, add a second parameter of "1" to make it persist.
+*/
 void exec_setMotorAcceleration()
 {
   exec_setMotorAcceleration(asFloat(inParam1));
+  if (inNoOfParams == 3 && asInt(inParam2) == 1)
+    EEPROM_writeAnything(EEPROM_MACHINE_MOTOR_ACCEL, currentAcceleration);
 }
 void exec_setMotorAcceleration(float accel)
 {
@@ -227,12 +238,6 @@ void exec_setMotorAcceleration(float accel)
   motorB.setAcceleration(currentAcceleration);
   Serial.print(F("New acceleration: "));
   Serial.println(currentAcceleration);
-}
-void exec_changeMotorAcceleration()
-{
-  float speedChange = asFloat(inParam1);
-  float newAccel = currentAcceleration + speedChange;
-  exec_setMotorAcceleration(newAccel);
 }
 
 void exec_changePenWidth()
