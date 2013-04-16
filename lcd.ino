@@ -187,10 +187,12 @@ void lcd_processTouchCommand()
     case BUTTON_RESET:
       break;
     case BUTTON_PEN_UP:
+      inNoOfParams=0;
       penlift_penUp();
       lcd_drawButton(BUTTON_PEN_DOWN);
       break;
     case BUTTON_PEN_DOWN:
+      inNoOfParams=0;
       penlift_penDown();
       lcd_drawButton(BUTTON_PEN_UP);
       break;

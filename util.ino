@@ -124,6 +124,7 @@ void changeLengthRelative(long tA, long tB)
   
   while (motorA.distanceToGo() != 0 || motorB.distanceToGo() != 0)
   {
+    //impl_runBackgroundProcesses();
     if (currentlyRunning)
     {
       if (usingAcceleration)
@@ -208,7 +209,7 @@ void reportPosition()
   //  Serial.print(cY*mmPerStep);
   //  Serial.println(CMD_END);
   //
-    outputAvailableMemory();
+    //outputAvailableMemory();
   }
 }
 
