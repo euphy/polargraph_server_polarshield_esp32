@@ -54,7 +54,7 @@ void impl_executeCommand(String &com)
     //Serial.println("Executed basic.");
   }
   else if (com.startsWith(CMD_DRAWCIRCLEPIXEL))
-    impl_pixel_drawCircularPixel();
+    curves_pixel_drawCircularPixel();
 //  else if (com.startsWith(CMD_TESTPATTERN))
 //    testPattern();
   else if (com.startsWith(CMD_TESTPENWIDTHSCRIBBLE))
@@ -245,32 +245,6 @@ void impl_exec_changeToLiveCommandMode()
   storeCommands = false;
 }
 
-void impl_pixel_drawCircularPixel() 
-{
-    long originA = multiplier(asLong(inParam1));
-    long originB = multiplier(asLong(inParam2));
-    int size = multiplier(asInt(inParam3));
-    int density = asInt(inParam4);
-     Serial.print("Density before: ");
-     Serial.println(density);
-     
-    density = pixel_scaleDensity(density, 255, 8);
-    Serial.print("Density scaled");
-    Serial.println(density);
-    
-    int radius = size / 2;
-    int increment = radius / 8;
-
-    if (density > 0)
-    {
-      Serial.print("Density:");
-      Serial.println(density);
-      impl_drawSpiral(originA, originB, radius, increment, density);
-    }
-    
-    //outputAvailableMemory(); 
-}
-
 void impl_pixel_testPenWidthScribble()
 {
   int rowWidth = multiplier(asInt(inParam1));
@@ -379,124 +353,6 @@ void drawRandom()
     }
     
     reportPosition();
-  }
-}
-
-
-
-
-/* AS220 Drawbot */
-float rads(int n) {
-  // Return an angle in radians
-  return (n/180.0 * PI);
-}    
-
-void impl_drawCurve(long x, long y, long fx, long fy, long cx, long cy) {
-  // Draw a Quadratic Bezier curve from (x, y) to (fx, fy) using control pt
-  // (cx, cy)
-  float xt=0;
-  float yt=0;
-
-  reportingPosition = false;
-  usingAcceleration = false;
-  for (float t=0; t<=1; t+=.01) { //025) {
-    xt = pow((1-t),2) *x + 2*t*(1-t)*cx+ pow(t,2)*fx;
-    yt = pow((1-t),2) *y + 2*t*(1-t)*cy+ pow(t,2)*fy;
-    changeLength(xt, yt);
-  }  
-  reportingPosition = true;
-  usingAcceleration = true;
-}
-                                                     
-
-void impl_drawCircle(long centerx, long centery, int radius) {
-  // Estimate a circle using 20 arc Bezier curve segments
-  int segments =20;
-  int angle1 = 0;
-  int midpoint=0;
-   
-//  changeLength(centerx+radius, centery);
-
-  for (float angle2=360/segments; angle2<=360; angle2+=360/segments) {
-
-    midpoint = angle1+(angle2-angle1)/2;
-
-    float startx=centerx+radius*cos(rads(angle1));
-    float starty=centery+radius*sin(rads(angle1));
-    float endx=centerx+radius*cos(rads(angle2));
-    float endy=centery+radius*sin(rads(angle2));
-    
-    int t1 = rads(angle1)*1000 ;
-    int t2 = rads(angle2)*1000;
-    int t3 = angle1;
-    int t4 = angle2;
-
-    impl_drawCurve(startx,starty,endx,endy,
-              centerx+2*(radius*cos(rads(midpoint))-.25*(radius*cos(rads(angle1)))-.25*(radius*cos(rads(angle2)))),
-              centery+2*(radius*sin(rads(midpoint))-.25*(radius*sin(rads(angle1)))-.25*(radius*sin(rads(angle2))))
-    );
-    
-    angle1=angle2;
-  }
-}
-
-void impl_drawSpiral(long centerx, long centery, int maxRadius, int increment, int density) 
-{
-  Serial.println("Draw spiral.");
-  Serial.print("Max radius: ");
-  Serial.println(maxRadius);
-  Serial.print("Increment:");
-  Serial.println(increment);
-  Serial.print("densitY:");
-  Serial.println(density);
-  // Estimate a circle using 20 arc Bezier curve segments
-  int segments = 20;
-
-  
-  float radius = float(increment);
-  // work out how many shells to draw
-  for (int turns = 0; turns < density; turns++)
-  {
-    if (increment < 80)
-      segments = radius / 4;
-    if (segments < 4)
-      segments == 4;
-
-    float anglePerSegment = 360/segments;
-    
-    float radiusIncrementPerSegment = float(increment) / float(segments);
-  
-    int angle1 = 0;
-    int midpoint=0;
-    boolean firstMove = true;
-    for (float angle2=anglePerSegment; angle2<=360; angle2+=anglePerSegment) 
-    {
-      midpoint = angle1+(angle2-angle1)/2;
-  
-      float startx=centerx+radius*cos(rads(angle1));
-      float starty=centery+radius*sin(rads(angle1));
-      float endx=centerx+radius*cos(rads(angle2));
-      float endy=centery+radius*sin(rads(angle2));
-      
-      int t1 = rads(angle1)*1000 ;
-      int t2 = rads(angle2)*1000;
-      int t3 = angle1;
-      int t4 = angle2;
-  
-      if (firstMove)
-      {
-        changeLength(startx, starty);
-        firstMove = false;
-      }
-      usingAcceleration = false;
-      impl_drawCurve(startx,starty,endx,endy,
-                centerx+2*(radius*cos(rads(midpoint))-.25*(radius*cos(rads(angle1)))-.25*(radius*cos(rads(angle2)))),
-                centery+2*(radius*sin(rads(midpoint))-.25*(radius*sin(rads(angle1)))-.25*(radius*sin(rads(angle2))))
-      );
-      usingAcceleration = true;
-      angle1=angle2;
-      radius += radiusIncrementPerSegment;
-    }
   }
 }
 
