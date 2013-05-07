@@ -46,7 +46,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.62";
+const String FIRMWARE_VERSION_NO = "1.65";
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
@@ -80,7 +80,7 @@ const int EEPROM_PENLIFT_UP = 44; // 2 bytes
 // Pen raising servo
 Servo penHeight;
 const int DEFAULT_DOWN_POSITION = 90;
-const int DEFAULT_UP_POSITION = 0;
+const int DEFAULT_UP_POSITION = 180;
 static int upPosition = DEFAULT_UP_POSITION; // defaults
 static int downPosition = DEFAULT_DOWN_POSITION;
 static int penLiftSpeed = 3; // ms between steps of moving motor
