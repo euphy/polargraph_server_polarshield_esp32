@@ -306,6 +306,14 @@ allowed to be.  1 is finest, slowest.  Use higher values for faster, wobblier.
 */
 void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxSegmentLength)
 {
+  Serial.print("From coords: ");
+  Serial.print(p1a);
+  Serial.print(",");
+  Serial.println(p1b);
+  Serial.print("To coords: ");
+  Serial.print(p2a);
+  Serial.print(",");
+  Serial.println(p2b);
   // ok, we're going to plot some dots between p1 and p2.  Using maths. I know! Brave new world etc.
   
   // First, convert these values to cartesian coordinates
@@ -316,6 +324,15 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
   
   float c2x = getCartesianXFP(p2a, p2b);
   float c2y = getCartesianYFP(c2x, p2a);
+  
+  Serial.print("From coords: ");
+  Serial.print(c1x);
+  Serial.print(",");
+  Serial.println(c1y);
+  Serial.print("To coords: ");
+  Serial.print(c2x);
+  Serial.print(",");
+  Serial.println(c2y);
   
   // test to see if it's on the page
   // AND ALSO TO see if the current position is on the page.

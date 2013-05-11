@@ -16,19 +16,29 @@ systems, and do transformations.
 */
 long multiplier(int in)
 {
-  return multiplier((long) in);
+  return multiplier(long(in));
 }
 long multiplier(long in)
 {
-  return in * stepMultiplier;
+  return in * long(stepMultiplier);
 }
 float multiplier(float in)
 {
-  return in * stepMultiplier;
+  Serial.print("float multiplier in: ");
+  Serial.println(in);
+  Serial.print("Step multiplier: ");
+  Serial.print(stepMultiplier);
+  Serial.print(", fl: ");
+  Serial.println((float) stepMultiplier);
+  
+  float out = in * (float) stepMultiplier;
+  Serial.print("out: ");
+  Serial.println(out);
+  return out;
 }
 long divider(long in)
 {
-  return in / stepMultiplier;
+  return in / float(stepMultiplier);
 }
 
 
@@ -275,12 +285,54 @@ void releaseMotors()
 
 float getCartesianXFP(float aPos, float bPos)
 {
-  float calcX = (sq(pageWidth) - sq(bPos) + sq(aPos)) / (pageWidth*2);
+//  Serial.print("aPos: ");
+//  Serial.print(aPos);
+//  Serial.print(" bPos: ");
+//  Serial.print(bPos);
+//  Serial.print(" pageWidth ");
+//  Serial.println(pageWidth);
+//
+//  Serial.print("Float calc: sq aPos: ");
+//  Serial.print(sq(aPos));
+//  Serial.print(" bPos: ");
+//  Serial.print(sq(bPos));
+//  Serial.print(" pageWidth*2 ");
+//  Serial.print((float)pageWidth * 2.0);
+//  Serial.print(" pageWidth sq ");
+//  Serial.println(sq((float)pageWidth));
+//
+//  Serial.print("Int calc: sq aPos: ");
+//  Serial.print(sq(aPos));
+//  Serial.print(" bPos: ");
+//  Serial.print(sq(bPos));
+//  Serial.print(" pageWidth*2 ");
+//  Serial.print(pageWidth * 2.0);
+//  Serial.print(" pageWidth sq ");
+//  Serial.println(sq(pageWidth));
+
+  float posSum = sq((float)bPos) + sq((float)aPos);
+  float calcX = (sq((float)pageWidth) - posSum) / ((long) pageWidth * 2.0);
+
+//  Serial.print("CalcX float: ");
+//  Serial.println(calcX);
+  
   return calcX;  
 }
 float getCartesianYFP(float cX, float aPos) 
 {
+//  Serial.print("aPos: ");
+//  Serial.print(aPos);
+//  Serial.print(" cx: ");
+//  Serial.println(cX);
+//
+//  Serial.print("sq aPos: ");
+//  Serial.print(sq(aPos));
+//  Serial.print(" cx: ");
+//  Serial.println(sq(cX));
+
   float calcY = sqrt(sq(aPos)-sq(cX));
+//  Serial.print("CalcY: ");
+//  Serial.println(calcY);
   return calcY;
 }
 
