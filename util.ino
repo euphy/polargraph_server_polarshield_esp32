@@ -24,16 +24,16 @@ long multiplier(long in)
 }
 float multiplier(float in)
 {
-  Serial.print("float multiplier in: ");
-  Serial.println(in);
-  Serial.print("Step multiplier: ");
-  Serial.print(stepMultiplier);
-  Serial.print(", fl: ");
-  Serial.println((float) stepMultiplier);
+//  Serial.print("float multiplier in: ");
+//  Serial.println(in);
+//  Serial.print("Step multiplier: ");
+//  Serial.print(stepMultiplier);
+//  Serial.print(", fl: ");
+//  Serial.println((float) stepMultiplier);
   
   float out = in * (float) stepMultiplier;
-  Serial.print("out: ");
-  Serial.println(out);
+//  Serial.print("out: ");
+//  Serial.println(out);
   return out;
 }
 long divider(long in)
@@ -310,8 +310,7 @@ float getCartesianXFP(float aPos, float bPos)
 //  Serial.print(" pageWidth sq ");
 //  Serial.println(sq(pageWidth));
 
-  float posSum = sq((float)bPos) + sq((float)aPos);
-  float calcX = (sq((float)pageWidth) - posSum) / ((long) pageWidth * 2.0);
+  float calcX = (sq((float)pageWidth) - sq((float)bPos) + sq((float)aPos)) / ((long) pageWidth * 2.0);
 
 //  Serial.print("CalcX float: ");
 //  Serial.println(calcX);
