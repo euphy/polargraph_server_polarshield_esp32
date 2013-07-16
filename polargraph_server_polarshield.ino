@@ -33,9 +33,23 @@ ones are the ones I use for the ITDB02-2.2 inch screen.
 #define CAL_Y 0x03A2C1DEUL
 #define CAL_S 0x000AF0DBUL
 
+// and for the 2.4in screen
+#define CAL_X 0x03C34136UL
+#define CAL_Y 0x03C0018AUL
+#define CAL_S 0x000EF13FUL
+
 Put them in libraries/UTouch/UTouchCD.h
 
-*/
+/*  ===========================================================  
+         CONFIGURATION!!
+    =========================================================== */    
+
+//Uncomment the following line to use a 2.4" panel
+#define LCD_TYPE ITDB24E_8
+//Uncomment the following line to use a 2.2" panel
+//#define LCD_TYPE ITDB22
+
+
 
 #include <AccelStepper.h>
 #include <Servo.h>
@@ -46,7 +60,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.66";
+const String FIRMWARE_VERSION_NO = "1.7";
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
@@ -99,6 +113,7 @@ static int rotateTransform = 0;
 
 static int machineWidth = 650;
 static int machineHeight = 800;
+static int sqtest = 0;
 
 static int defaultMachineWidth = 650;
 static int defaultMachineHeight = 650;
@@ -257,6 +272,8 @@ void loop()
 #include <UTFT.h>
 #include <UTouch.h>
 
+
+
 const static String CMD_TESTPENWIDTHSCRIBBLE = "C12";
 const static String CMD_DRAWCIRCLEPIXEL = "C16";
 const static String CMD_SET_ROVE_AREA = "C21";
@@ -288,8 +305,8 @@ long motorBRestPoint = 0;
 /* Stuff for display */
 extern uint8_t SmallFont[];
 extern uint8_t BigFont[];
-UTFT        lcd(ITDB22, 38,39,40,41);
-UTouch  touch(11,12,18,19,2);
+UTFT   lcd(LCD_TYPE, 38,39,40,41);
+UTouch touch(11,12,18,19,2);
 const int INTERRUPT_TOUCH_PIN = 0;
 volatile boolean displayTouched = false;
 volatile int touchX = 0;

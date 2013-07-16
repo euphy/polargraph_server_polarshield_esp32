@@ -14,6 +14,14 @@ input through the screen.
 
 There is a lot of this, but it's pretty samey.
 */
+
+//Uncomment the following line to use a 2.4" panel
+#define LCD_TYPE ITDB24E_8
+//Uncomment the following line to use a 2.2" panel
+//#define LCD_TYPE ITDB22
+static int screenWidth = (LCD_TYPE == ITDB24E_8) ? 320 : 220;
+static int screenHeight = (LCD_TYPE == ITDB24E_8) ? 240 : 176;
+
 /**  This is the method that is called by an interrupt when the touchscreen 
 is touched. It sets a parameter (displayTouched) to true, but does not act 
 directly on the touch.
@@ -452,7 +460,7 @@ void lcd_initLCD()
 
   lcd.setBackColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
   lcd.setColor(COL_LIGHT_R, COL_LIGHT_G, COL_LIGHT_B);
-  lcd.fillRect(0,buttonCoords[5][1], 220,buttonCoords[5][1]+56);
+  lcd.fillRect(0,buttonCoords[5][1], screenWidth,buttonCoords[5][1]+56);
   lcd.setBackColor(COL_LIGHT_R, COL_LIGHT_G, COL_LIGHT_B);
   lcd.setColor(COL_BRIGHT_R, COL_BRIGHT_G, COL_BRIGHT_B);
   lcd.setFont(BigFont);
@@ -845,7 +853,7 @@ void lcd_drawCurrentSelectedFilename()
 {
   // erase the previous stuff
   lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
-  lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, 220, buttonCoords[1][1]+24);
+  lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24);
   lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
   lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
 
@@ -942,7 +950,7 @@ String lcd_loadFilename(String selectedFilename, int direction)
 void lcd_echoLastCommandToDisplay(String com)
 {
   lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
-  lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, 220, buttonCoords[1][1]+24);
+  lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24);
   lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
   lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
   lcd.print(com, buttonCoords[0][0],buttonCoords[1][1]+10);
