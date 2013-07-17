@@ -54,7 +54,7 @@ void penlift_penUp()
 {
   if (inNoOfParams > 1)
   {
-//    Serial.print("Penup with params");
+    //Serial.print("Penup with params");
     int positionToMoveFrom = isPenUp ? upPosition : downPosition;
     upPosition = asInt(inParam1);
     penlift_movePen(positionToMoveFrom, upPosition, penLiftSpeed);

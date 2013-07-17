@@ -90,6 +90,7 @@ void impl_executeCommand(String &com)
     comms_unrecognisedCommand(com);
     comms_ready();
   }
+  inNoOfParams = 0;
 }
 
 /** Polarshield implementation of runBackgroundProcesses. This is basically stuff to do with 

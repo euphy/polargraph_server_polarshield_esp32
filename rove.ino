@@ -66,6 +66,7 @@ void rove_startText()
   {
     long tA = multiplier(asLong(inParam1));
     long tB = multiplier(asLong(inParam2));
+    inNoOfParams = 0;
     
     if (rove_inRoveArea(tA, tB))
     {
@@ -211,6 +212,7 @@ void rove_drawNorwegianFromFile()
     String filename = inParam1;
     int maxAmplitude = multiplier(asInt(inParam2));
     int wavelength = multiplier(asInt(inParam3));
+    inNoOfParams = 0;
     
     // Look up file and open it
     if (!sd_openPbm(filename))
