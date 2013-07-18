@@ -15,12 +15,6 @@ input through the screen.
 There is a lot of this, but it's pretty samey.
 */
 
-//Uncomment the following line to use a 2.4" panel
-#define LCD_TYPE ITDB24E_8
-//Uncomment the following line to use a 2.2" panel
-//#define LCD_TYPE ITDB22
-static int screenWidth = (LCD_TYPE == ITDB24E_8) ? 320 : 220;
-static int screenHeight = (LCD_TYPE == ITDB24E_8) ? 240 : 176;
 
 /**  This is the method that is called by an interrupt when the touchscreen 
 is touched. It sets a parameter (displayTouched) to true, but does not act 
@@ -95,10 +89,13 @@ void lcd_updateDisplay()
    This is the code for controlling the LCD, menus and the hardware controls
    There's a lot of it, but it's mostly all the same.
    =============================================================================*/
-byte buttonCoords[12][2];
-byte  gap = 10;
+int buttonCoords[12][2];
+byte  gap = (LCD_TYPE == ITDB24E_8) ? 10 : 10;
 byte  buttonSize = 60;
 byte  grooveSize = 36;
+static int screenWidth = (LCD_TYPE == ITDB24E_8) ? 320 : 220;
+static int screenHeight = (LCD_TYPE == ITDB24E_8) ? 240 : 176;
+static int centreYPosition = (LCD_TYPE == ITDB24E_8) ? 112 : 80;
 
 const byte MENU_INITIAL = 1;
 const byte MENU_RUNNING = 2;
@@ -206,46 +203,46 @@ void lcd_processTouchCommand()
       break;
     case BUTTON_INC_SPEED:
       exec_setMotorSpeed(currentMaxSpeed + speedChangeIncrement);
-      lcd_drawNumberWithBackground(buttonCoords[8][0], 80, currentMaxSpeed);
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, currentMaxSpeed);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_DEC_SPEED:
       exec_setMotorSpeed(currentMaxSpeed - speedChangeIncrement);
-      lcd_drawNumberWithBackground(buttonCoords[8][0], 80, currentMaxSpeed);
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, currentMaxSpeed);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_INC_ACCEL:
       exec_setMotorAcceleration(currentAcceleration + accelChangeIncrement);
-      lcd_drawNumberWithBackground(buttonCoords[10][0], 80, currentAcceleration);
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, currentAcceleration);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_DEC_ACCEL:
       exec_setMotorAcceleration(currentAcceleration - accelChangeIncrement);
-      lcd_drawNumberWithBackground(buttonCoords[10][0], 80, currentAcceleration);
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, currentAcceleration);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_INC_PENSIZE:
       penWidth = penWidth+penWidthIncrement;
-      lcd_drawFloatWithBackground(buttonCoords[10][0], 80, penWidth);
+      lcd_drawFloatWithBackground(buttonCoords[10][0], centreYPosition, penWidth);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_DEC_PENSIZE:
       penWidth = penWidth-penWidthIncrement;
       if (penWidth < penWidthIncrement)
         penWidth = penWidthIncrement;
-      lcd_drawFloatWithBackground(buttonCoords[10][0], 80, penWidth);
+      lcd_drawFloatWithBackground(buttonCoords[10][0], centreYPosition, penWidth);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_INC_PENSIZE_INC:
       penWidthIncrement += 0.005;
-      lcd_drawFloatWithBackground(buttonCoords[8][0], 80, penWidthIncrement);
+      lcd_drawFloatWithBackground(buttonCoords[8][0], centreYPosition, penWidthIncrement);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_DEC_PENSIZE_INC:
       penWidthIncrement -= 0.005;
       if (penWidthIncrement < 0.005)
         penWidthIncrement = 0.005;
-      lcd_drawFloatWithBackground(buttonCoords[8][0], 80, penWidthIncrement);
+      lcd_drawFloatWithBackground(buttonCoords[8][0], centreYPosition, penWidthIncrement);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_DRAW_THIS_FILE:
@@ -325,28 +322,28 @@ void lcd_processTouchCommand()
       motorA.move(moveIncrement);
       while (motorA.distanceToGo() != 0)
         motorA.run();
-      lcd_drawNumberWithBackground(buttonCoords[8][0], 80, motorA.currentPosition());
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, motorA.currentPosition());
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_MOVE_DEC_A:
       motorA.move(0-moveIncrement);
       while (motorA.distanceToGo() != 0)
         motorA.run();
-      lcd_drawNumberWithBackground(buttonCoords[8][0], 80, motorA.currentPosition());
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, motorA.currentPosition());
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_MOVE_INC_B:
       motorB.move(moveIncrement);
       while (motorB.distanceToGo() != 0)
         motorB.run();
-      lcd_drawNumberWithBackground(buttonCoords[10][0], 80, motorB.currentPosition());
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, motorB.currentPosition());
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_MOVE_DEC_B:
       motorB.move(0-moveIncrement);
       while (motorB.distanceToGo() != 0)
         motorB.run();
-      lcd_drawNumberWithBackground(buttonCoords[10][0], 80, motorB.currentPosition());
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, motorB.currentPosition());
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_CALIBRATE:
@@ -423,7 +420,6 @@ void lcd_initLCD()
 //  lcd.printNumI(lcd.getDisplayYSize(), 10, 52);
 
 
-  gap = 10;
   buttonSize = (lcd.getDisplayXSize() - (gap*4)) / 3;
   grooveSize = lcd.getDisplayYSize() - (gap*2) - (buttonSize*2);
 
@@ -468,7 +464,7 @@ void lcd_initLCD()
   lcd.setFont(SmallFont);
   lcd.print("Drawing with robots.", 20, buttonCoords[5][1]+32);
   lcd.setBackColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
-  lcd.print("v"+FIRMWARE_VERSION_NO, 20, 154);
+  lcd.print("v"+FIRMWARE_VERSION_NO, 20, buttonCoords[5][1]);
   delay(1000);
 
 }
@@ -529,8 +525,8 @@ void lcd_drawButtons()
     lcd_drawButton(BUTTON_INC_ACCEL);
     lcd_drawButton(BUTTON_DEC_ACCEL);
     lcd_drawButton(BUTTON_DONE);
-    lcd_drawNumberWithBackground(80, 80, currentMaxSpeed);
-    lcd_drawNumberWithBackground(150, 80, currentAcceleration);
+    lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, currentMaxSpeed);
+    lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, currentAcceleration);
   }
   else if (currentMenu == MENU_ADJUST_PENSIZE)
   {
@@ -539,8 +535,8 @@ void lcd_drawButtons()
     lcd_drawButton(BUTTON_INC_PENSIZE_INC);
     lcd_drawButton(BUTTON_DEC_PENSIZE_INC);
     lcd_drawButton(BUTTON_DONE);
-    lcd_drawFloatWithBackground(buttonCoords[8][0], 80, penWidthIncrement);
-    lcd_drawFloatWithBackground(buttonCoords[10][0], 80, penWidth);
+    lcd_drawFloatWithBackground(buttonCoords[8][0], centreYPosition, penWidthIncrement);
+    lcd_drawFloatWithBackground(buttonCoords[10][0], centreYPosition, penWidth);
   }
   else if (currentMenu == MENU_ADJUST_POSITION)
   {
@@ -549,8 +545,8 @@ void lcd_drawButtons()
     lcd_drawButton(BUTTON_MOVE_INC_B);
     lcd_drawButton(BUTTON_MOVE_DEC_B);
     lcd_drawButton(BUTTON_DONE);
-    lcd_drawNumberWithBackground(buttonCoords[8][0], 80, motorA.currentPosition());
-    lcd_drawNumberWithBackground(buttonCoords[10][0], 80, motorB.currentPosition());
+    lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, motorA.currentPosition());
+    lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, motorB.currentPosition());
   }
   else if (currentMenu == MENU_SETTINGS)
   {
