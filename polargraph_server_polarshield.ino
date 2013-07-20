@@ -60,7 +60,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.7";
+const String FIRMWARE_VERSION_NO = "1.7_22";
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
