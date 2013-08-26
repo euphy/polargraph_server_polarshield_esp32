@@ -45,9 +45,11 @@ Put them in libraries/UTouch/UTouchCD.h
     =========================================================== */    
 
 //Uncomment the following line to use a 2.4" panel
-//#define LCD_TYPE ITDB24E_8
+#define LCD_TYPE ITDB24E_8
 //Uncomment the following line to use a 2.2" panel
-#define LCD_TYPE ITDB22
+//#define LCD_TYPE ITDB22
+//Uncomment the following line to use a ElecFreaks 2.2" panel
+//#define LCD_TYPE CTE22
 
 
 
@@ -203,6 +205,12 @@ const static String OUT_CMD_SYNC = "SYNC,";
 
 static String readyString = READY;
 
+
+static const byte ALONG_A_AXIS = 0;
+static const byte ALONG_B_AXIS = 1;
+static const byte SQUARE_SHAPE = 0;
+static const byte SAW_SHAPE = 1;
+
 String lastCommand = "";
 boolean commandConfirmed = false;
 
@@ -275,6 +283,7 @@ void loop()
 
 
 const static String CMD_TESTPENWIDTHSCRIBBLE = "C12";
+const static String CMD_DRAWSAWPIXEL = "C15,";
 const static String CMD_DRAWCIRCLEPIXEL = "C16";
 const static String CMD_SET_ROVE_AREA = "C21";
 const static String CMD_DRAWDIRECTIONTEST = "C28";

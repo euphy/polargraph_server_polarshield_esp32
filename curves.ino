@@ -186,6 +186,7 @@ void curves_drawSpiral(long centerx, long centery, int maxRadius, int increment,
       usingAcceleration = true;
       angle1=angle2;
       radius += radiusIncrementPerSegment;
+
     }
 //    Serial.println("Finished drawing turn.");
   }

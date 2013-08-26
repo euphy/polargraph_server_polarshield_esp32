@@ -416,16 +416,9 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
   outputAvailableMemory();
 }
 
-// Work out and return a new speed.
-// Subclasses can override if they want
-// Implement acceleration, deceleration and max speed
-// Negative speed is anticlockwise
-// This is called:
-//  after each step
-//  after user changes:
-//   maxSpeed
-//   acceleration
-//   target position (relative or absolute)
+/*
+This is a method pinched from AccelStepper (older version).
+*/
 float desiredSpeed(long distanceTo, float currentSpeed, float acceleration)
 {
     float requiredSpeed;

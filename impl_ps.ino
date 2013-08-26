@@ -59,6 +59,8 @@ void impl_executeCommand(String &com)
 //    testPattern();
   else if (com.startsWith(CMD_TESTPENWIDTHSCRIBBLE))
     impl_pixel_testPenWidthScribble();
+  else if (com.startsWith(CMD_DRAWSAWPIXEL))
+    impl_pixel_drawSawtoothPixel();
   else if (com.startsWith(CMD_DRAWDIRECTIONTEST))
     impl_exec_drawTestDirectionSquare();
   else if (com.startsWith(CMD_MODE_STORE_COMMANDS))
@@ -375,4 +377,72 @@ void impl_exec_drawTestDirectionSquare()
   
 }
 
+void impl_pixel_drawSawtoothPixel()
+{
+    long originA = multiplier(asLong(inParam1));
+    long originB = multiplier(asLong(inParam2));
+    int size = multiplier(asInt(inParam3));
+    int density = asInt(inParam4);
 
+    int halfSize = size / 2;
+    
+    long startPointA;
+    long startPointB;
+    long endPointA;
+    long endPointB;
+
+    int calcFullSize = halfSize * 2; // see if there's any rounding errors
+    int offsetStart = size - calcFullSize;
+    
+    if (globalDrawDirectionMode == DIR_MODE_AUTO)
+      globalDrawDirection = pixel_getAutoDrawDirection(originA, originB, motorA.currentPosition(), motorB.currentPosition());
+      
+
+    if (globalDrawDirection == DIR_SE) 
+    {
+//      Serial.println(F("d: SE"));
+      startPointA = originA - halfSize;
+      startPointA += offsetStart;
+      startPointB = originB;
+      endPointA = originA + halfSize;
+      endPointB = originB;
+    }
+    else if (globalDrawDirection == DIR_SW)
+    {
+//      Serial.println(F("d: SW"));
+      startPointA = originA;
+      startPointB = originB - halfSize;
+      startPointB += offsetStart;
+      endPointA = originA;
+      endPointB = originB + halfSize;
+    }
+    else if (globalDrawDirection == DIR_NW)
+    {
+//      Serial.println(F("d: NW"));
+      startPointA = originA + halfSize;
+      startPointA -= offsetStart;
+      startPointB = originB;
+      endPointA = originA - halfSize;
+      endPointB = originB;
+    }
+    else //(drawDirection == DIR_NE)
+    {
+//      Serial.println(F("d: NE"));
+      startPointA = originA;
+      startPointB = originB + halfSize;
+      startPointB -= offsetStart;
+      endPointA = originA;
+      endPointB = originB - halfSize;
+    }
+
+    density = pixel_scaleDensity(density, 255, pixel_maxDensity(penWidth, size));
+    
+    changeLength(startPointA, startPointB);
+    if (density > 1)
+    {
+      pixel_drawWavePixel(size, size, density, globalDrawDirection, SAW_SHAPE);
+    }
+    changeLength(endPointA, endPointB);
+    
+    //outputAvailableMemory();   
+}
