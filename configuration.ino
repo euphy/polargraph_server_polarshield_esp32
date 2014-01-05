@@ -63,8 +63,13 @@ const byte motorbEnablePin = 6;
 const byte motorbStepPin = 7;
 const byte motorbDirPin = 8;
 
+//const byte motorcEnablePin = 30;
+//const byte motorcStepPin = 31;
+//const byte motorcDirPin = 32;
+
 AccelStepper motorA(1,motoraStepPin, motoraDirPin); 
 AccelStepper motorB(1,motorbStepPin, motorbDirPin); 
+//AccelStepper motorC(1,motorcStepPin, motorcDirPin); 
 
 void configuration_motorSetup()
 {
