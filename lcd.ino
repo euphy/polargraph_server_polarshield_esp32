@@ -464,9 +464,33 @@ void lcd_initLCD()
   lcd.setFont(SmallFont);
   lcd.print("Drawing with robots.", 20, buttonCoords[5][1]+32);
   lcd.setBackColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
-  lcd.print("v"+FIRMWARE_VERSION_NO, 20, buttonCoords[5][1]);
-  delay(1000);
+  lcd.print("v"+FIRMWARE_VERSION_NO, 20, buttonCoords[5][1]+buttonCoords[5][1]+gap);
+//  delay(1000);
+}
 
+void lcd_showSummary()
+{
+  int rowHeight = 17;
+  int row = 0;
+  
+  if (cardPresent) {
+    lcd.print("SD card present", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
+    delay(500);
+    if (cardInit) {
+      lcd.setColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
+      lcd.fillRect(0, buttonCoords[5][1]+buttonCoords[5][1]-gap, screenWidth, buttonCoords[5][1]+buttonCoords[5][1]-gap+17);
+      lcd.setColor(COL_BRIGHT_R, COL_BRIGHT_G, COL_BRIGHT_B);
+      lcd.print("Init: ", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
+      lcd.print(cardType, 60, buttonCoords[5][1]+buttonCoords[5][1]-gap);
+      lcd.print(fatType, 90, buttonCoords[5][1]+buttonCoords[5][1]-gap);
+    }
+    else
+      lcd.print("Card init failed!", 10, row+=rowHeight);
+  }
+  else {
+    lcd.print("No SD card present", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
+  }
+    
 }
 
 void lcd_drawButtons()

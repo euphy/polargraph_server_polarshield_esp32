@@ -48,9 +48,6 @@ Put them in libraries/UTouch/UTouchCD.h
 #define LCD_TYPE ITDB24E_8
 //Uncomment the following line to use a 2.2" panel
 //#define LCD_TYPE ITDB22
-//Uncomment the following line to use a ElecFreaks 2.2" panel
-//#define LCD_TYPE CTE22
-
 
 
 #include <AccelStepper.h>
@@ -62,7 +59,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.7_22";
+const String FIRMWARE_VERSION_NO = "1.7_23";
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
@@ -129,8 +126,8 @@ static long startLengthStepsB = 8000;
 String machineName = "";
 const String DEFAULT_MACHINE_NAME = "PG01    ";
 
-float currentMaxSpeed = 800.0;
-float currentAcceleration = 800.0;
+float currentMaxSpeed = 2000.0;
+float currentAcceleration = 2000.0;
 boolean usingAcceleration = true;
 
 float mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
@@ -354,6 +351,13 @@ boolean sdCardInit = false;
 Sd2Card card;
 SdVolume volume;
 SdFile root;
+boolean cardPresent = false;
+boolean cardInit = false;
+String cardType = "????";
+boolean volumeInit = false;
+long volumeSize = 0L;
+String fatType = "NOFAT";
+
 
 // the file itself
 File pbmFile;

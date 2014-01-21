@@ -94,6 +94,7 @@ void configuration_setup()
   // init SD card
   sd_initSD();
   lcd_initLCD();
+  lcd_showSummary();
   delay(1000);
   pinMode(2, INPUT_PULLUP);
   attachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, LOW);

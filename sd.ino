@@ -28,6 +28,7 @@ void sd_initSD()
     return;
   }
   Serial.println("card initialized.");
+  cardPresent = true;
 
   Serial.println("Initializing SD card...");
   // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
@@ -47,49 +48,48 @@ void sd_initSD()
   } 
   else 
   {
-   Serial.println("Wiring is correct and a card is present."); 
+   Serial.println("Wiring is correct and a card is present.");
+   cardInit = true;
   }
 
   // print the type of card
-  Serial.print("\nCard type: ");
   switch(card.type()) {
     case SD_CARD_TYPE_SD1:
-      Serial.println("SD1");
+      cardType = "SD1";
       break;
     case SD_CARD_TYPE_SD2:
-      Serial.println("SD2");
+      cardType = "SD2";
       break;
     case SD_CARD_TYPE_SDHC:
-      Serial.println("SDHC");
+      cardType = "SDHC";
       break;
-    default:
-      Serial.println("Unknown");
   }
-
+  Serial.print("\nCard type: ");
+  Serial.println(cardType);
+  
   // Now we will try to open the 'volume'/'partition' - it should be FAT16 or FAT32
   if (!volume.init(card)) {
     Serial.println("Could not find FAT16/FAT32 partition.\nMake sure you've formatted the card");
+    fatType = "VOL FAILED!";
     return;
   }
 
-
+  volumeInit = true;
   // print the type and size of the first FAT-type volume
-  uint32_t volumesize;
-  Serial.print("\nVolume type is FAT");
-  Serial.println(volume.fatType(), DEC);
-  Serial.println();
+  fatType = "FAT"+String(volume.fatType(), DEC);
+  Serial.println("\nVolume type is "+fatType);
   
-  volumesize = volume.blocksPerCluster();    // clusters are collections of blocks
-  volumesize *= volume.clusterCount();       // we'll have a lot of clusters
-  volumesize *= 512;                            // SD card blocks are always 512 bytes
+  volumeSize = volume.blocksPerCluster();    // clusters are collections of blocks
+  volumeSize *= volume.clusterCount();       // we'll have a lot of clusters
+  volumeSize *= 512;                            // SD card blocks are always 512 bytes
   Serial.print("Volume size (bytes): ");
-  Serial.println(volumesize);
+  Serial.println(volumeSize);
   Serial.print("Volume size (Kbytes): ");
-  volumesize /= 1024;
-  Serial.println(volumesize);
+  volumeSize /= 1024;
+  Serial.println(volumeSize);
   Serial.print("Volume size (Mbytes): ");
-  volumesize /= 1024;
-  Serial.println(volumesize);
+  volumeSize /= 1024;
+  Serial.println(volumeSize);
 
   
   Serial.println("\nFiles found on the card (name, date and size in bytes): ");
