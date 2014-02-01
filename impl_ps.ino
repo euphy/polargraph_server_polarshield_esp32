@@ -17,7 +17,7 @@ mega/polarshield version of the polargraph.
 have command storage features. */
 void impl_processCommand(String com)
 {
-  lcd_echoLastCommandToDisplay(com);
+  lcd_echoLastCommandToDisplay(com, "usb:");
   
   // check for change mode commands
   if (com.startsWith(CMD_MODE_STORE_COMMANDS)
@@ -179,6 +179,7 @@ void impl_exec_execFromStore(String inFilename)
 //            Serial.println("Stored command parsed.");
             Serial.print(F("Executing command:"));
             Serial.println(command);
+            lcd_echoLastCommandToDisplay(command, inFilename+": ");
             impl_executeCommand(command);
           }
 //          else

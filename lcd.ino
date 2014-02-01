@@ -480,9 +480,7 @@ void lcd_showSummary()
       lcd.setColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
       lcd.fillRect(0, buttonCoords[5][1]+buttonCoords[5][1]-gap, screenWidth, buttonCoords[5][1]+buttonCoords[5][1]-gap+17);
       lcd.setColor(COL_BRIGHT_R, COL_BRIGHT_G, COL_BRIGHT_B);
-      lcd.print("Init: ", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
-      lcd.print(cardType, 60, buttonCoords[5][1]+buttonCoords[5][1]-gap);
-      lcd.print(fatType, 90, buttonCoords[5][1]+buttonCoords[5][1]-gap);
+      lcd.print("Card loaded.", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
     }
     else
       lcd.print("Card init failed!", 10, row+=rowHeight);
@@ -878,14 +876,21 @@ void lcd_drawCurrentSelectedFilename()
   lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
 
   // see if there's one already found
+  String msg = "No card found";
+
   if (commandFilename == "" || commandFilename == "            ")
   {
-    lcd.print("None", buttonCoords[0][0],buttonCoords[1][1]+10);
+    if (cardInit) {
+      commandFilename = lcd_loadFilename("", 1);
+      msg = commandFilename;
+    }
   }
   else
   {
-    lcd.print(commandFilename, buttonCoords[0][0],buttonCoords[1][1]+10);
+    msg = commandFilename;
   }
+  
+  lcd.print(msg, buttonCoords[0][0],buttonCoords[1][1]+10);
 }
 
 String lcd_loadFilename(String selectedFilename, int direction)
@@ -893,87 +898,101 @@ String lcd_loadFilename(String selectedFilename, int direction)
   Serial.print("Current command filename: ");
   Serial.println(selectedFilename);
   Serial.println("Loading filename.");
-  dir_t p;
  
   // start from the beginning
-  root.rewind();
+  root = SD.open("/");
   String previousFilename = "            ";
-  boolean useNextFilename = false;
-  
-  if (selectedFilename == "" || selectedFilename == previousFilename)
-    useNextFilename = true;
-    
-  int it = 0;
-  while (root.readDir(p) > 0) 
-  {
-    // done if past last used entry
-    if (p.name[0] == DIR_NAME_FREE) break;
- 
-    // skip deleted entry and entries for . and  ..
-    if (p.name[0] == DIR_NAME_DELETED || p.name[0] == '.') continue;
- 
-    // only list subdirectories and files
-    if (!DIR_IS_FILE_OR_SUBDIR(&p)) continue;
- 
- 
-    // print file name with possible blank fill
-    //root.printDirName(*p, flags & (LS_DATE | LS_SIZE) ? 14 : 0);
 
-    String filename = "            "; 
- 
-    for (uint8_t i = 0; i < 11; i++) 
-    {
-      if (p.name[i] == ' ') continue;
+  // deal with first showing
+  if (selectedFilename == "") {
+    File entry =  root.openNextFile();
+    if (entry) 
+      selectedFilename = entry.name();
+    entry.close();
+  }
+  else {
+    if (direction > 0) 
+      selectedFilename = lcd_getNextFile(selectedFilename);
+    else if (direction < 0)
+      selectedFilename = lcd_getPreviousFile(selectedFilename);
+  }
 
-      if (i == 8) 
-        filename[i] = '.';
-      if (i >= 8)
-        filename[i+1] = p.name[i];
-      else
-        filename[i] = p.name[i];
-    }
-    
-    
-    if (direction > 0)
-    {
-      // looking for the file after
-      if (useNextFilename)
-      {
-        Serial.println(filename);
-        return filename;
+  Serial.print("Now command filename: ");
+  Serial.println(selectedFilename);
+
+  return selectedFilename;
+}
+
+String lcd_getNextFile(String selectedFilename) {
+  boolean fileIncremented = false;
+  while(true) {
+    File entry = root.openNextFile();
+    if (entry) {
+      if (selectedFilename.equals(entry.name())) {
+          
+        // looking for next file
+        entry =  root.openNextFile();
+        if (entry) {
+          selectedFilename = entry.name();
+          break;
+        } 
+        else break;
       }
-      else
-      {
-        if (filename == selectedFilename)
-        {
-          useNextFilename = true;
-        }
-      }
-    }
-    else
-    {
-      // looking for the file before
-      if (filename == selectedFilename)
-      {
-        return previousFilename;
-      }
-      else
-      {
-        previousFilename = filename;
-      }
-    }
+    } 
+    else break;
+    entry.close();
   }
   return selectedFilename;
 }
 
+String lcd_getPreviousFile(String selectedFilename) {
+  boolean fileIncremented = false;
+  String prevFilename = "";
+  
+  // see if it is the first one, and just return straight away if so
+  File entry =  root.openNextFile();
+  if (entry) {
+    Serial.println("ent1");
+    if (selectedFilename.equals(entry.name())) {
+      Serial.println("ent2");
+      return selectedFilename;
+    }
+  }
+  
+  // else go through and find the currently selected file, and keep track of the previous filename
+  prevFilename = entry.name();
+  Serial.print("Prev file: ");
+  Serial.println(prevFilename);
+  
+  while (true) {
+      entry =  root.openNextFile();
+      if (entry) {
+        Serial.print("next file: ");
+        Serial.println(entry.name());
+        if (selectedFilename.equals(entry.name())) {
+          selectedFilename = prevFilename;
+          break;
+        }
+        else {
+          prevFilename = entry.name();
+        }
+      }
+      else break;
+  } 
+  entry.close();
+  return selectedFilename;
+}
 
-void lcd_echoLastCommandToDisplay(String com)
+
+void lcd_echoLastCommandToDisplay(String com, String prefix)
 {
+  if (currentMenu != MENU_INITIAL) return;
+  
   lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
   lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24);
   lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
   lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
-  lcd.print(com, buttonCoords[0][0],buttonCoords[1][1]+10);
+  lcd.print(prefix + com, buttonCoords[0][0],buttonCoords[1][1]+10);
 }
 
 byte lcd_getWhichButtonPressed(byte buttonNumber, byte menu)

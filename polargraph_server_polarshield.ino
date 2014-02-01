@@ -49,6 +49,7 @@ Put them in libraries/UTouch/UTouchCD.h
 //Uncomment the following line to use a 2.2" panel
 //#define LCD_TYPE ITDB22
 
+#include <SD.h>
 
 #include <AccelStepper.h>
 #include <Servo.h>
@@ -59,7 +60,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.7_23";
+const String FIRMWARE_VERSION_NO = "1.7.24";
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
@@ -273,7 +274,6 @@ void loop()
 /*===========================================================  
     These variables are for the polarshield / mega
 =========================================================== */    
-#include <SD.h>
 #include <UTFT.h>
 #include <UTouch.h>
 
@@ -348,16 +348,9 @@ const int chipSelect = 53;
 boolean sdCardInit = false;
 
 // set up variables using the SD utility library functions:
-Sd2Card card;
-SdVolume volume;
-SdFile root;
+File root;
 boolean cardPresent = false;
 boolean cardInit = false;
-String cardType = "????";
-boolean volumeInit = false;
-long volumeSize = 0L;
-String fatType = "NOFAT";
-
 
 // the file itself
 File pbmFile;
@@ -375,6 +368,7 @@ volatile float penWidthIncrement = 0.05;
 volatile int moveIncrement = 400;
 
 boolean currentlyDrawingFromFile = false;
+String currentlyDrawingFilename = "";
 boolean powerIsOn = false;
 boolean isCalibrated = false;
 

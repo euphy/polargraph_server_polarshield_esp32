@@ -22,22 +22,33 @@ void sd_initSD()
   // see if the card is present and can be initialized:
 
   // see if the card is present and can be initialized:
-  if (!SD.begin(chipSelect)) {
-    Serial.println("Card failed, or not present");
-    // don't do anything more:
-    return;
+  byte connectAttempts = 1;
+  int initValue = 0;
+  for (int attempts=0; attempts<connectAttempts; attempts++) {
+    initValue = SD.begin(chipSelect);
+    if (initValue == 0) {
+      Serial.println("Card failed, or not present");
+    }
+    else {
+      Serial.println("Successfully beginned.");
+      cardPresent = true;
+      break;
+    }
   }
-  Serial.println("card initialized.");
-  cardPresent = true;
+  
+  if (cardPresent) {
+    Serial.println("card initialized.");
+    root = SD.open("/");
+    cardInit = true;
+    sd_printDirectory(root, 0);
+    Serial.println("done!");
+  }
+}
 
-  Serial.println("Initializing SD card...");
-  // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
-  // Note that even if it's not used as the CS pin, the hardware SS pin 
-  // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
-  // or the SD library functions will not work. 
-
-  // we'll use the initialization code from the utility libraries
-  // since we're just testing if the card is working!
+void sd_alternativeInit() {
+  Sd2Card card;
+  SdVolume volume;
+  SdFile sdFile;
   if (!card.init(SPI_HALF_SPEED, chipSelect)) 
   {
     Serial.println("initialization failed. Things to check:");
@@ -48,55 +59,80 @@ void sd_initSD()
   } 
   else 
   {
-   Serial.println("Wiring is correct and a card is present.");
-   cardInit = true;
+   Serial.println("Wiring is correct and a card is present."); 
   }
 
   // print the type of card
+  Serial.print("\nCard type: ");
   switch(card.type()) {
     case SD_CARD_TYPE_SD1:
-      cardType = "SD1";
+      Serial.println("SD1");
       break;
     case SD_CARD_TYPE_SD2:
-      cardType = "SD2";
+      Serial.println("SD2");
       break;
     case SD_CARD_TYPE_SDHC:
-      cardType = "SDHC";
+      Serial.println("SDHC");
       break;
+    default:
+      Serial.println("Unknown");
   }
-  Serial.print("\nCard type: ");
-  Serial.println(cardType);
-  
+
   // Now we will try to open the 'volume'/'partition' - it should be FAT16 or FAT32
   if (!volume.init(card)) {
     Serial.println("Could not find FAT16/FAT32 partition.\nMake sure you've formatted the card");
-    fatType = "VOL FAILED!";
     return;
   }
 
-  volumeInit = true;
+
   // print the type and size of the first FAT-type volume
-  fatType = "FAT"+String(volume.fatType(), DEC);
-  Serial.println("\nVolume type is "+fatType);
+  uint32_t volumesize;
+  Serial.print("\nVolume type is FAT");
+  Serial.println(volume.fatType(), DEC);
+  Serial.println();
   
-  volumeSize = volume.blocksPerCluster();    // clusters are collections of blocks
-  volumeSize *= volume.clusterCount();       // we'll have a lot of clusters
-  volumeSize *= 512;                            // SD card blocks are always 512 bytes
+  volumesize = volume.blocksPerCluster();    // clusters are collections of blocks
+  volumesize *= volume.clusterCount();       // we'll have a lot of clusters
+  volumesize *= 512;                            // SD card blocks are always 512 bytes
   Serial.print("Volume size (bytes): ");
-  Serial.println(volumeSize);
+  Serial.println(volumesize);
   Serial.print("Volume size (Kbytes): ");
-  volumeSize /= 1024;
-  Serial.println(volumeSize);
+  volumesize /= 1024;
+  Serial.println(volumesize);
   Serial.print("Volume size (Mbytes): ");
-  volumeSize /= 1024;
-  Serial.println(volumeSize);
+  volumesize /= 1024;
+  Serial.println(volumesize);
 
   
-  Serial.println("\nFiles found on the card (name, date and size in bytes): ");
-  root.openRoot(volume);
+//  Serial.println("\nFiles found on the card (name, date and size in bytes): ");
+  sdFile.openRoot(volume);
   
-  // list all files in the card with date and size
-  root.ls(LS_R | LS_DATE | LS_SIZE);
+// list all files in the card with date and size
+  sdFile.ls(LS_R | LS_DATE | LS_SIZE);
+}
+
+void sd_printDirectory(File dir, int numTabs) {
+   while(true) {
+     File entry =  dir.openNextFile();
+     if (! entry) {
+       // no more files
+       Serial.println("...");
+       break;
+     }
+     for (uint8_t i=0; i<numTabs; i++) {
+       Serial.print('\t');
+     }
+     Serial.print(entry.name());
+     if (entry.isDirectory()) {
+       Serial.println("/");
+       sd_printDirectory(entry, numTabs+1);
+     } else {
+       // files have sizes, directories do not
+       Serial.print("\t\t");
+       Serial.println(entry.size(), DEC);
+     }
+     entry.close();
+   }
 }
 
 void sd_storeCommand(String command)
