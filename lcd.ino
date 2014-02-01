@@ -900,8 +900,8 @@ String lcd_loadFilename(String selectedFilename, int direction)
   Serial.println("Loading filename.");
  
   // start from the beginning
-  root = SD.open("/");
-  String previousFilename = "            ";
+//  root = SD.open("/");
+  root.rewindDirectory();
 
   // deal with first showing
   if (selectedFilename == "") {
@@ -924,16 +924,17 @@ String lcd_loadFilename(String selectedFilename, int direction)
 }
 
 String lcd_getNextFile(String selectedFilename) {
-  boolean fileIncremented = false;
   while(true) {
     File entry = root.openNextFile();
+//    Serial.println(entry.name());
     if (entry) {
       if (selectedFilename.equals(entry.name())) {
-          
+        Serial.println("Found file!");
         // looking for next file
         entry =  root.openNextFile();
         if (entry) {
           selectedFilename = entry.name();
+          entry.close();
           break;
         } 
         else break;
@@ -955,6 +956,7 @@ String lcd_getPreviousFile(String selectedFilename) {
     Serial.println("ent1");
     if (selectedFilename.equals(entry.name())) {
       Serial.println("ent2");
+      entry.close();
       return selectedFilename;
     }
   }
