@@ -60,7 +60,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.7.24";
+const String FIRMWARE_VERSION_NO = "1.7.25";
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
@@ -351,6 +351,7 @@ boolean sdCardInit = false;
 File root;
 boolean cardPresent = false;
 boolean cardInit = false;
+boolean echoingStoredCommands = true;
 
 // the file itself
 File pbmFile;

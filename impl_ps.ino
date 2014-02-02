@@ -179,7 +179,7 @@ void impl_exec_execFromStore(String inFilename)
 //            Serial.println("Stored command parsed.");
             Serial.print(F("Executing command:"));
             Serial.println(command);
-            lcd_echoLastCommandToDisplay(command, inFilename+": ");
+            if (echoingStoredCommands) lcd_echoLastCommandToDisplay(command, inFilename+": ");
             impl_executeCommand(command);
           }
 //          else

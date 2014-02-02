@@ -104,6 +104,7 @@ const byte MENU_ADJUST_PENSIZE = 4;
 const byte MENU_ADJUST_POSITION = 5;
 const byte MENU_ADJUST_SPEED = 6;
 const byte MENU_SETTINGS = 7;
+const byte MENU_SETTINGS_2 = 8;
 volatile byte currentMenu = MENU_INITIAL;
 
 byte numberOfMenuButtons = 3;
@@ -142,6 +143,9 @@ const byte BUTTON_POWER_OFF = 33;
 const byte BUTTON_STOP_FILE = 34;
 const byte BUTTON_SETTINGS_MENU = 35;
 const byte BUTTON_CALIBRATE = 36;
+const byte BUTTON_TOGGLE_ECHO = 37;
+const byte BUTTON_RESET_SD = 38;
+const byte BUTTON_SETTINGS_MENU_2 = 39;
 
 
 const byte COL_LIGHT_R = 50;
@@ -179,6 +183,11 @@ void lcd_processTouchCommand()
     case BUTTON_DRAW_FROM_SD:
       lcd_drawStoreContentsMenu();
       break;
+//    case BUTTON_RESET_SD:
+//      root.close();
+//      sd_initSD();
+//      lcd_drawStoreContentsMenu();
+//      break;
     case BUTTON_MORE_RIGHT:
       break;
     case BUTTON_PAUSE_RUNNING:
@@ -245,6 +254,10 @@ void lcd_processTouchCommand()
       lcd_drawFloatWithBackground(buttonCoords[8][0], centreYPosition, penWidthIncrement);
       lcd_drawButton(pressedButton);
       break;
+    case BUTTON_TOGGLE_ECHO:
+      echoingStoredCommands = !echoingStoredCommands;
+      lcd_drawButton(pressedButton);
+      break;
     case BUTTON_DRAW_THIS_FILE:
       if (commandFilename != "None" && commandFilename != "" && commandFilename != "            ")
       {
@@ -308,6 +321,12 @@ void lcd_processTouchCommand()
       break;
     case BUTTON_SETTINGS_MENU:
       currentMenu = MENU_SETTINGS;
+      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.clrScr();
+      lcd_drawButtons();
+      break;
+    case BUTTON_SETTINGS_MENU_2:
+      currentMenu = MENU_SETTINGS_2;
       lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
       lcd.clrScr();
       lcd_drawButtons();
@@ -503,7 +522,8 @@ void lcd_drawButtons()
     else
       lcd_drawButton(BUTTON_POWER_ON);
     
-    lcd_drawButton(BUTTON_DRAW_FROM_SD);
+    if (cardInit)
+      lcd_drawButton(BUTTON_DRAW_FROM_SD);
     //lcd_drawButton(BUTTON_CALIBRATE);
       
     if (isPenUp)
@@ -531,6 +551,7 @@ void lcd_drawButtons()
   }
   else if (currentMenu == MENU_CHOOSE_FILE)
   {
+    lcd_drawButton(BUTTON_RESET_SD);
     lcd_drawButton(BUTTON_NEXT_FILE);
     lcd_drawButton(BUTTON_PREV_FILE);
     if (currentlyDrawingFromFile) 
@@ -575,6 +596,12 @@ void lcd_drawButtons()
     lcd_drawButton(BUTTON_ADJUST_POSITION_MENU);
     lcd_drawButton(BUTTON_ADJUST_SPEED_MENU);
     lcd_drawButton(BUTTON_ADJUST_PENSIZE_MENU);
+    lcd_drawButton(BUTTON_TOGGLE_ECHO);
+    lcd_drawButton(BUTTON_DONE);
+    lcd_drawButton(BUTTON_SETTINGS_MENU_2);
+  }
+  else if (currentMenu == MENU_SETTINGS_2)
+  {
     lcd_drawButton(BUTTON_DONE);
   }
 }
@@ -626,6 +653,18 @@ void lcd_drawButton(byte but)
       lcd.print("MOTORS", buttonCoords[coordsIndex][0]+(buttonSize/2)-22, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
       lcd.print("OFF", buttonCoords[coordsIndex][0]+(buttonSize/2)-10, buttonCoords[coordsIndex][1]+(buttonSize/2));
       break;
+    case BUTTON_TOGGLE_ECHO: // pos 1
+      coordsIndex=0;
+      lcd_drawButtonBackground(coordsIndex);
+      lcd.print("TOGGLE", buttonCoords[coordsIndex][0]+(buttonSize/2)-22, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+      lcd.print("COMMS", buttonCoords[coordsIndex][0]+(buttonSize/2)-14, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      break;
+//    case BUTTON_RESET_SD: // pos 1
+//      coordsIndex=0;
+//      lcd_drawButtonBackground(coordsIndex);
+//      lcd.print("RESET", buttonCoords[coordsIndex][0]+(buttonSize/2)-22, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+//      lcd.print("CARD", buttonCoords[coordsIndex][0]+(buttonSize/2)-12, buttonCoords[coordsIndex][1]+(buttonSize/2));
+//      break;
     case BUTTON_DRAW_FROM_SD: // pos 2
       coordsIndex=2;
       lcd_drawButtonBackground(coordsIndex);
@@ -703,6 +742,12 @@ void lcd_drawButton(byte but)
       lcd.print("FILE", buttonCoords[coordsIndex][0]+(buttonSize/2)-14, buttonCoords[coordsIndex][1]+(buttonSize/2)+6);
       break;
     case BUTTON_SETTINGS_MENU: // pos 2
+      coordsIndex=10;
+      lcd_drawButtonBackground(coordsIndex);
+      lcd.print("MORE", buttonCoords[coordsIndex][0]+(buttonSize/2)-14, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+      lcd.print("...", buttonCoords[coordsIndex][0]+(buttonSize/2)-10, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      break;
+    case BUTTON_SETTINGS_MENU_2: // pos 2
       coordsIndex=10;
       lcd_drawButtonBackground(coordsIndex);
       lcd.print("MORE", buttonCoords[coordsIndex][0]+(buttonSize/2)-14, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
@@ -906,7 +951,7 @@ String lcd_loadFilename(String selectedFilename, int direction)
   // deal with first showing
   if (selectedFilename == "") {
     File entry =  root.openNextFile();
-    if (entry) 
+    if (entry)
       selectedFilename = entry.name();
     entry.close();
   }
@@ -924,23 +969,28 @@ String lcd_loadFilename(String selectedFilename, int direction)
 }
 
 String lcd_getNextFile(String selectedFilename) {
-  while(true) {
+  boolean found = false;
+  while(!found) {
     File entry = root.openNextFile();
 //    Serial.println(entry.name());
     if (entry) {
       if (selectedFilename.equals(entry.name())) {
         Serial.println("Found file!");
+        found = true;
+        entry.close();
+
         // looking for next file
-        entry =  root.openNextFile();
+        entry = root.openNextFile();
         if (entry) {
           selectedFilename = entry.name();
-          entry.close();
-          break;
-        } 
-        else break;
+        }
+        entry.close();
       }
     } 
-    else break;
+    else {
+      found = true;
+    }
+    
     entry.close();
   }
   return selectedFilename;
@@ -953,7 +1003,6 @@ String lcd_getPreviousFile(String selectedFilename) {
   // see if it is the first one, and just return straight away if so
   File entry =  root.openNextFile();
   if (entry) {
-    Serial.println("ent1");
     if (selectedFilename.equals(entry.name())) {
       Serial.println("ent2");
       entry.close();
@@ -967,10 +1016,11 @@ String lcd_getPreviousFile(String selectedFilename) {
   Serial.println(prevFilename);
   
   while (true) {
+      entry.close();
       entry =  root.openNextFile();
       if (entry) {
-        Serial.print("next file: ");
-        Serial.println(entry.name());
+//        Serial.print("next file: ");
+//        Serial.println(entry.name());
         if (selectedFilename.equals(entry.name())) {
           selectedFilename = prevFilename;
           break;
@@ -1007,7 +1057,9 @@ byte lcd_getWhichButtonPressed(byte buttonNumber, byte menu)
         if (powerIsOn) return BUTTON_POWER_OFF;
         else return BUTTON_POWER_ON; 
         break;
-      case 2: return BUTTON_DRAW_FROM_SD; break;
+      case 2: 
+        if (cardInit) return BUTTON_DRAW_FROM_SD;
+        break;
       //case 3: return BUTTON_CALIBRATE; break;
       case 4:
         if (currentlyRunning) return BUTTON_PAUSE_RUNNING;
@@ -1071,10 +1123,19 @@ byte lcd_getWhichButtonPressed(byte buttonNumber, byte menu)
   {
     switch (buttonNumber)
     {
+      case 1: return BUTTON_TOGGLE_ECHO; break;
       case 2: return BUTTON_ADJUST_POSITION_MENU; break;
       case 3: return BUTTON_ADJUST_PENSIZE_MENU; break;
       case 4: return BUTTON_DONE; break;
       case 5: return BUTTON_ADJUST_SPEED_MENU; break;
+      case 6: return BUTTON_SETTINGS_MENU_2; break;
+    }
+  }
+  else if (currentMenu == MENU_SETTINGS_2)
+  {
+    switch (buttonNumber)
+    {
+      case 4: return BUTTON_DONE; break;
     }
   }
 }
