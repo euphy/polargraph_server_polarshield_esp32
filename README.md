@@ -1,10 +1,10 @@
 polargraph_server_polarshield
 =============================
 
-Polargraph Server for ATMEGA2560 based arduino boards using a Polarshield.  
+Polargraph Server for ATMEGA2560 based arduino boards, primarily targetting a Polarshield motor controller.
 
 A Polarshield is an add-on board for an Arduino MEGA that provides two stepper drivers, an SD card reader and 
-an LCD touchscreen.
+an LCD touchscreen. The firmware may also be configured at compile time to target RAMPS, though without SD reader and touchscreen (yet...).
 
 The program has a core part that consists of the following files that are common to all Polargraph Server versions:
 
