@@ -35,6 +35,14 @@ The UTouch library needs a couple of calibration values:
 
 Put them in libraries/UTouch/UTouchCD.h
 
+**/
+
+#include <SD.h>
+#include <AccelStepper.h>
+#include <Servo.h>
+#include <EEPROM.h>
+#include "EEPROMAnything.h"
+
 /*  ===========================================================  
          CONFIGURATION!!
     =========================================================== */    
@@ -47,21 +55,17 @@ Put them in libraries/UTouch/UTouchCD.h
 
 /*  ===========================================================  
          Define what kind of driver breakout you're using.
+         (By commenting out the one's you _haven't_ got.)
     =========================================================== */    
 #ifndef MOTHERBOARD
 #define MOTHERBOARD POLARSHIELD
 //#define MOTHERBOARD RAMPS14
 #endif
 
+
 #define POLARSHIELD 1
 #define RAMPS14 2
 
-#include <SD.h>
-
-#include <AccelStepper.h>
-#include <Servo.h>
-#include <EEPROM.h>
-#include "EEPROMAnything.h"
 
 /*  ===========================================================  
     These variables are common to all polargraph server builds
@@ -287,7 +291,7 @@ void setup()
   delay(500);
   outputAvailableMemory();
   
-  impl_engageMotors();
+//  impl_engageMotors();
 }
 
 void loop()
