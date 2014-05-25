@@ -26,14 +26,9 @@ that file contains alternative implementations of a few functions,
 where the changes to make it work on ATMEGA1280+ mean that code
 is _different_ to the basic implemenation.
 
-The UTouch library needs a couple of calibration values - these
-ones are the ones I use for the ITDB02-2.2 inch screen.
+The UTouch library needs a couple of calibration values:
 
-#define CAL_X 0x039281CCUL
-#define CAL_Y 0x03A2C1DEUL
-#define CAL_S 0x000AF0DBUL
-
-// and for the 2.4in screen
+// for the 2.4in screen that is current.
 #define CAL_X 0x03C34136UL
 #define CAL_Y 0x03C0018AUL
 #define CAL_S 0x000EF13FUL
@@ -49,6 +44,18 @@ Put them in libraries/UTouch/UTouchCD.h
 //Uncomment the following line to use a 2.2" panel
 //#define LCD_TYPE ITDB22
 
+
+/*  ===========================================================  
+         Define what kind of driver breakout you're using.
+    =========================================================== */    
+#ifndef MOTHERBOARD
+#define MOTHERBOARD POLARSHIELD
+//#define MOTHERBOARD RAMPS14
+#endif
+
+#define POLARSHIELD 1
+#define RAMPS14 2
+
 #include <SD.h>
 
 #include <AccelStepper.h>
@@ -60,7 +67,12 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.7.25";
+const String FIRMWARE_VERSION_NO = "1.8";
+#if MOTHERBOARD == RAMPS14
+  const String MB_NAME = "RAMPS14";
+#elif MOTHERBOARD == POLARSHIELD
+  const String MB_NAME = "POLARSHIELD";
+#endif
 
 // for working out CRCs
 static PROGMEM prog_uint32_t crc_table[16] = {
@@ -98,7 +110,13 @@ const int DEFAULT_UP_POSITION = 180;
 static int upPosition = DEFAULT_UP_POSITION; // defaults
 static int downPosition = DEFAULT_DOWN_POSITION;
 static int penLiftSpeed = 3; // ms between steps of moving motor
-int const PEN_HEIGHT_SERVO_PIN = 9;
+
+#if MOTHERBOARD == RAMPS14
+  #define PEN_HEIGHT_SERVO_PIN 4
+#elif MOTHERBOARD == POLARSHIELD
+  #define PEN_HEIGHT_SERVO_PIN 9
+#endif
+
 boolean isPenUp = false;
 
 int motorStepsPerRev = 400;
@@ -244,6 +262,12 @@ void setup()
   Serial.println(F("POLARGRAPH ON!"));
   Serial.print(F("v"));
   Serial.println(FIRMWARE_VERSION_NO);
+  Serial.print(F("Hardware: "));
+  Serial.println(MB_NAME);
+
+  Serial.print(F("Servo "));
+  Serial.println(PEN_HEIGHT_SERVO_PIN);
+
 
   configuration_motorSetup();
   eeprom_loadMachineSpecFromEeprom();
@@ -262,6 +286,8 @@ void setup()
   penlift_penUp();
   delay(500);
   outputAvailableMemory();
+  
+  impl_engageMotors();
 }
 
 void loop()

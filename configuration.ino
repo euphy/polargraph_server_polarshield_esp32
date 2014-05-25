@@ -55,31 +55,65 @@ Comment out the blocks of code you don't need.
 // 2. Polarshield motor driver board
 // This uses stepstick-format stepper drivers on arduino pins 3 to 8.
 
-const byte motoraEnablePin = 3;
-const byte motoraStepPin = 4;
-const byte motoraDirPin = 5;
+#if MOTHERBOARD == POLARSHIELD
+  #define MOTOR_A_ENABLE_PIN 3
+  #define MOTOR_A_STEP_PIN 4
+  #define MOTOR_A_DIR_PIN 5
+  
+  #define MOTOR_B_ENABLE_PIN 6
+  #define MOTOR_B_STEP_PIN 7
+  #define MOTOR_B_DIR_PIN 8
 
-const byte motorbEnablePin = 6;
-const byte motorbStepPin = 7;
-const byte motorbDirPin = 8;
+  #define MOTOR_C_ENABLE_PIN 30
+  #define MOTOR_C_STEP_PIN 31
+  #define MOTOR_C_DIR_PIN 32
+  
+#elif MOTHERBOARD == RAMPS14
 
-//const byte motorcEnablePin = 30;
-//const byte motorcStepPin = 31;
-//const byte motorcDirPin = 32;
+  // Uses E1 driver on RAMPS
+  #define MOTOR_A_ENABLE_PIN 30
+  #define MOTOR_A_STEP_PIN 36
+  #define MOTOR_A_DIR_PIN 34
 
-AccelStepper motorA(1,motoraStepPin, motoraDirPin); 
-AccelStepper motorB(1,motorbStepPin, motorbDirPin); 
-//AccelStepper motorC(1,motorcStepPin, motorcDirPin); 
+  // Uses Y motor driver on RAMPS
+  #define MOTOR_B_ENABLE_PIN 56
+  #define MOTOR_B_STEP_PIN 60
+  #define MOTOR_B_DIR_PIN 61
+  
+#endif
+
+
+
+AccelStepper motorA(1,MOTOR_A_STEP_PIN, MOTOR_A_DIR_PIN); 
+AccelStepper motorB(1,MOTOR_B_STEP_PIN, MOTOR_B_DIR_PIN); 
+//AccelStepper motorC(1,MOTOR_C_STEP_PIN, MOTOR_C_DIR_PIN); 
 
 void configuration_motorSetup()
 {
-  pinMode(motoraEnablePin, OUTPUT);
-  digitalWrite(motoraEnablePin, HIGH);
-  pinMode(motorbEnablePin, OUTPUT);
-  digitalWrite(motorbEnablePin, HIGH);
-  motorA.setEnablePin(motoraEnablePin);
+
+#ifdef DEBUG
+  Serial.print(F("A: En:"));
+  Serial.print(MOTOR_A_ENABLE_PIN);
+  Serial.print(F(", St:"));
+  Serial.print(MOTOR_A_STEP_PIN);
+  Serial.print(F(", Di:"));
+  Serial.println(MOTOR_A_DIR_PIN);
+
+  Serial.print(F("B: En:"));
+  Serial.print(MOTOR_B_ENABLE_PIN);
+  Serial.print(F(", St:"));
+  Serial.print(MOTOR_B_STEP_PIN);
+  Serial.print(F(", Di:"));
+  Serial.println(MOTOR_B_DIR_PIN);
+#endif
+  
+  pinMode(MOTOR_A_ENABLE_PIN, OUTPUT);
+  digitalWrite(MOTOR_A_ENABLE_PIN, HIGH);
+  pinMode(MOTOR_B_ENABLE_PIN, OUTPUT);
+  digitalWrite(MOTOR_B_ENABLE_PIN, HIGH);
+  motorA.setEnablePin(MOTOR_A_ENABLE_PIN);
   motorA.setPinsInverted(false, false, true);
-  motorB.setEnablePin(motorbEnablePin);
+  motorB.setEnablePin(MOTOR_B_ENABLE_PIN);
   motorB.setPinsInverted(true, false, true); // this one turns the opposite direction to A, hence inverted.
 }
 
