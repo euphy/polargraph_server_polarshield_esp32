@@ -224,7 +224,7 @@ const static String OUT_CMD_CARTESIAN = "CARTESIAN,";
 const static String OUT_CMD_SYNC = "SYNC,";
 
 static String readyString = READY;
-
+static boolean pixelDebug = true;
 
 static const byte ALONG_A_AXIS = 0;
 static const byte ALONG_B_AXIS = 1;
@@ -259,6 +259,7 @@ const static String CMD_SETMOTORSPEED = "C31";
 const static String CMD_SETMOTORACCEL = "C32";
 const static String CMD_SETMACHINESTEPMULTIPLIER = "C37";
 const static String CMD_SETPENLIFTRANGE = "C45";
+const static String CMD_PIXELDIAGNOSTIC = "C46";
 
 void setup() 
 {

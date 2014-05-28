@@ -38,7 +38,7 @@ void pixel_drawSquarePixel()
 
     if (globalDrawDirection == DIR_SE) 
     {
-//      Serial.println(F("d: SE"));
+      if (pixelDebug) { Serial.println(F("d: SE")); }
       startPointA = originA - halfSize;
       startPointA += offsetStart;
       startPointB = originB;
@@ -47,7 +47,7 @@ void pixel_drawSquarePixel()
     }
     else if (globalDrawDirection == DIR_SW)
     {
-//      Serial.println(F("d: SW"));
+      if (pixelDebug) { Serial.println(F("d: SW")); }
       startPointA = originA;
       startPointB = originB - halfSize;
       startPointB += offsetStart;
@@ -56,7 +56,7 @@ void pixel_drawSquarePixel()
     }
     else if (globalDrawDirection == DIR_NW)
     {
-//      Serial.println(F("d: NW"));
+      if (pixelDebug) { Serial.println(F("d: NW")); }
       startPointA = originA + halfSize;
       startPointA -= offsetStart;
       startPointB = originB;
@@ -65,7 +65,7 @@ void pixel_drawSquarePixel()
     }
     else //(drawDirection == DIR_NE)
     {
-//      Serial.println(F("d: NE"));
+      if (pixelDebug) { Serial.println(F("d: NE")); }
       startPointA = originA;
       startPointB = originB + halfSize;
       startPointB -= offsetStart;
@@ -74,15 +74,17 @@ void pixel_drawSquarePixel()
     }
 
     density = pixel_scaleDensity(density, 255, pixel_maxDensity(penWidth, size));
-//    Serial.print(F("Start point: "));
-//    Serial.print(startPointA);
-//    Serial.print(COMMA);
-//    Serial.print(startPointB);
-//    Serial.print(F(". end point: "));
-//    Serial.print(endPointA);
-//    Serial.print(COMMA);
-//    Serial.print(endPointB);
-//    Serial.println(F("."));
+    if (pixelDebug) {
+      Serial.print(F("Start point: "));
+      Serial.print(startPointA);
+      Serial.print(COMMA);
+      Serial.print(startPointB);
+      Serial.print(F(". end point: "));
+      Serial.print(endPointA);
+      Serial.print(COMMA);
+      Serial.print(endPointB);
+      Serial.println(F("."));
+    }
     
     changeLength(startPointA, startPointB);
     if (density > 1)
@@ -112,61 +114,62 @@ byte pixel_getAutoDrawDirection(long targetA, long targetB, long sourceA, long s
   
 //  Serial.print("bearing:");
 //  Serial.println(bearing);
-//  
-//  Serial.print(F("TargetA: "));
-//  Serial.print(targetA);
-//  Serial.print(F(", targetB: "));
-//  Serial.print(targetB);
-//  Serial.print(F(". SourceA: "));
-//  Serial.print(sourceA);
-//  Serial.print(F(", sourceB: "));
-//  Serial.print(sourceB);
-//  Serial.println(F("."));
-  
+//
+    if (pixelDebug) {
+      Serial.print(F("TargetA: "));
+      Serial.print(targetA);
+      Serial.print(F(", targetB: "));
+      Serial.print(targetB);
+      Serial.print(F(". SourceA: "));
+      Serial.print(sourceA);
+      Serial.print(F(", sourceB: "));
+      Serial.print(sourceB);
+      Serial.println(F("."));
+  }
   
   if (targetA<sourceA && targetB<sourceA)
   {
-//    Serial.println(F("calculated NW"));
+    if (pixelDebug) { Serial.println(F("calculated NW")); }
     dir = DIR_NW;
   }
   else if (targetA>sourceA && targetB>sourceB)
   {
-//    Serial.println(F("calculated SE"));
+    if (pixelDebug) { Serial.println(F("calculated SE")); }
     dir = DIR_SE;
   }
   else if (targetA<sourceA && targetB>sourceB)
   {
-//    Serial.println(F("calculated SW"));
+    if (pixelDebug) { Serial.println(F("calculated SW")); }
     dir = DIR_SW;
   }
   else if (targetA>sourceA && targetB<sourceB)
   {
-//    Serial.println(F("calculated NE"));
+    if (pixelDebug) { Serial.println(F("calculated NE")); }
     dir = DIR_NE;
   }
   else if (targetA==sourceA && targetB<sourceB)
   {
-//    Serial.println(F("calc NE"));
+    if (pixelDebug) { Serial.println(F("calc NE")); }
     dir = DIR_NE;
   }
   else if (targetA==sourceA && targetB>sourceB)
   {
-//    Serial.println(F("calc SW"));
+    if (pixelDebug) { Serial.println(F("calc SW")); }
     dir = DIR_SW;
   }
   else if (targetA<sourceA && targetB==sourceB)
   {
-//    Serial.println(F("calc NW"));
+    if (pixelDebug) { Serial.println(F("calc NW")); }
     dir = DIR_NW;
   }
   else if (targetA>sourceA && targetB==sourceB)
   {
-//    Serial.println(F("calc SE"));
+    if (pixelDebug) { Serial.println(F("calc SE")); }
     dir = DIR_SE;
   }
   else
   {
-//    Serial.println("Not calculated - default SE");
+    if (pixelDebug) { Serial.println("Not calculated - default SE"); }
   }
 
   return dir;
@@ -189,9 +192,10 @@ void pixel_drawScribblePixel()
 
 void pixel_drawScribblePixel(long originA, long originB, int size, int density) 
 {
-
-//  int originA = motorA.currentPosition();
-//  int originB = motorB.currentPosition();
+  if (pixelDebug) { 
+    int originA = motorA.currentPosition();
+    int originB = motorB.currentPosition();
+  }
   
   long lowLimitA = originA-(size/2);
   long highLimitA = lowLimitA+size;
@@ -222,13 +226,15 @@ int pixel_minSegmentSizeForPen(float penSize)
   int minSegSize = 1;
   if (penSizeInSteps >= 2.0)
     minSegSize = int(penSizeInSteps);
-    
-//  Serial.print(F("Min segment size for penSize "));
-//  Serial.print(penSize);
-//  Serial.print(F(": "));
-//  Serial.print(minSegSize);
-//  Serial.print(F(" steps."));
-//  Serial.println();
+
+  if (pixelDebug) {     
+    Serial.print(F("Min segment size for penSize "));
+    Serial.print(penSize);
+    Serial.print(F(": "));
+    Serial.print(minSegSize);
+    Serial.print(F(" steps."));
+    Serial.println();
+  }
   
   return minSegSize;
 }
@@ -236,27 +242,30 @@ int pixel_minSegmentSizeForPen(float penSize)
 int pixel_maxDensity(float penSize, int rowSize)
 {
   float rowSizeInMM = mmPerStep * rowSize;
-//  Serial.print(F("rowsize in mm: "));
-//  Serial.print(rowSizeInMM);
-//  Serial.print(F(", mmPerStep: "));
-//  Serial.print(mmPerStep);
-//  Serial.print(F(", rowsize: "));
-//  Serial.println(rowSize);
+
+  if (pixelDebug) {     
+    Serial.print(F("rowsize in mm: "));
+    Serial.print(rowSizeInMM);
+    Serial.print(F(", mmPerStep: "));
+    Serial.print(mmPerStep);
+    Serial.print(F(", rowsize: "));
+    Serial.println(rowSize);
+  }
   
   float numberOfSegments = rowSizeInMM / penSize;
   int maxDens = 1;
   if (numberOfSegments >= 2.0)
     maxDens = int(numberOfSegments);
-    
-//  Serial.print("num of segments float:");
-//  Serial.println(numberOfSegments);
-//
-//    
-//  Serial.print(F("Max density: penSize: "));
-//  Serial.print(penSize);
-//  Serial.print(F(", rowSize: "));
-//  Serial.print(rowSize);
-//  Serial.println(maxDens);
+
+  if (pixelDebug) {     
+    Serial.print("num of segments float:");
+    Serial.println(numberOfSegments);
+    Serial.print(F("Max density: penSize: "));
+    Serial.print(penSize);
+    Serial.print(F(", rowSize: "));
+    Serial.print(rowSize);
+    Serial.println(maxDens);
+  }
   
   return maxDens;
 }
@@ -265,14 +274,16 @@ int pixel_scaleDensity(int inDens, int inMax, int outMax)
 {
   float reducedDens = (float(inDens) / float(inMax)) * float(outMax);
   reducedDens = outMax-reducedDens;
-//  Serial.print(F("inDens:"));
-//  Serial.print(inDens);
-//  Serial.print(F(", inMax:"));
-//  Serial.print(inMax);
-//  Serial.print(F(", outMax:"));
-//  Serial.print(outMax);
-//  Serial.print(F(", reduced:"));
-//  Serial.println(reducedDens);
+  if (pixelDebug) {     
+    Serial.print(F("inDens:"));
+    Serial.print(inDens);
+    Serial.print(F(", inMax:"));
+    Serial.print(inMax);
+    Serial.print(F(", outMax:"));
+    Serial.print(outMax);
+    Serial.print(F(", reduced:"));
+    Serial.println(reducedDens);
+  }
   
   // round up if bigger than .5
   int result = int(reducedDens);
@@ -296,12 +307,14 @@ void pixel_drawWavePixel(int length, int width, int density, byte drawDirection,
     float totalRemainder = 0.0;
     int lengthSoFar = 0;
     
-//    Serial.print("Basic seg length:");
-//    Serial.print(basicSegLength);
-//    Serial.print(", basic seg remainder:");
-//    Serial.print(basicSegRemainder);
-//    Serial.print(", remainder per seg");
-//    Serial.println(remainderPerSegment);
+    if (pixelDebug) {     
+      Serial.print("Basic seg length:");
+      Serial.print(basicSegLength);
+      Serial.print(", basic seg remainder:");
+      Serial.print(basicSegRemainder);
+      Serial.print(", remainder per seg");
+      Serial.println(remainderPerSegment);
+    }
     
     for (int i = 0; i <= density; i++) 
     {
@@ -332,10 +345,6 @@ void pixel_drawWavePixel(int length, int width, int density, byte drawDirection,
         pixel_drawWaveAlongAxis(width, segmentLength, density, i, ALONG_B_AXIS, shape);
       }
       lengthSoFar += segmentLength;
-    //      Serial.print("distance so far:");
-    //      Serial.print(distanceSoFar);
-      
-      
       reportPosition();
     } // end of loop
   }
@@ -355,12 +364,14 @@ void pixel_drawSquarePixel(int length, int width, int density, byte drawDirectio
     float totalRemainder = 0.0;
     int lengthSoFar = 0;
     
-//    Serial.print("Basic seg length:");
-//    Serial.print(basicSegLength);
-//    Serial.print(", basic seg remainder:");
-//    Serial.print(basicSegRemainder);
-//    Serial.print(", remainder per seg");
-//    Serial.println(remainderPerSegment);
+    if (pixelDebug) {
+      Serial.print("Basic seg length:");
+      Serial.print(basicSegLength);
+      Serial.print(", basic seg remainder:");
+      Serial.print(basicSegRemainder);
+      Serial.print(", remainder per seg");
+      Serial.println(remainderPerSegment);
+    }
     
     for (int i = 0; i <= density; i++) 
     {
@@ -391,10 +402,6 @@ void pixel_drawSquarePixel(int length, int width, int density, byte drawDirectio
         pixel_drawWaveAlongAxis(width, segmentLength, density, i, ALONG_B_AXIS, SQUARE_SHAPE);
       }
       lengthSoFar += segmentLength;
-    //      Serial.print("distance so far:");
-    //      Serial.print(distanceSoFar);
-      
-      
       reportPosition();
     } // end of loop
   }
@@ -493,12 +500,14 @@ void pixel_flipWaveDirection()
       iterations++;
       penWidth = pw;
       int maxDens = pixel_maxDensity(penWidth, rowWidth);
-//      Serial.print(F("Penwidth test "));
-//      Serial.print(iterations);
-//      Serial.print(F(", pen width: "));
-//      Serial.print(penWidth);
-//      Serial.print(F(", max density: "));
-//      Serial.println(maxDens);
+      if (pixelDebug) {
+        Serial.print(F("Penwidth test "));
+        Serial.print(iterations);
+        Serial.print(F(", pen width: "));
+        Serial.print(penWidth);
+        Serial.print(F(", max density: "));
+        Serial.println(maxDens);
+      }
       pixel_drawSquarePixel(rowWidth, rowWidth, maxDens, DIR_SE);
     }
 
