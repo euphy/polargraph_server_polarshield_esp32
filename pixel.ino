@@ -17,6 +17,7 @@ the squarewave and scribble pixel styles.
 
 void pixel_drawSquarePixel() 
 {
+    if (pixelDebug) { Serial.println("In square pixel 1."); }
     long originA = multiplier(asLong(inParam1));
     long originB = multiplier(asLong(inParam2));
     int size = multiplier(asInt(inParam3));
@@ -73,7 +74,8 @@ void pixel_drawSquarePixel()
       endPointB = originB - halfSize;
     }
 
-    density = pixel_scaleDensity(density, 255, pixel_maxDensity(penWidth, size));
+    int maxWavesForGridAndPen = pixel_maxDensity(penWidth, size);
+    int noOfWaves = pixel_scaleDensity(density, 255, maxWavesForGridAndPen);
     if (pixelDebug) {
       Serial.print(F("Start point: "));
       Serial.print(startPointA);
@@ -84,12 +86,20 @@ void pixel_drawSquarePixel()
       Serial.print(COMMA);
       Serial.print(endPointB);
       Serial.println(F("."));
+
+      Serial.print(F("Max waves with this pen and gridsize: "));
+      Serial.print(maxWavesForGridAndPen);
+      Serial.print(F(", input density: "));
+      Serial.print(density);
+      Serial.print(F(", oOut number of waves: "));
+      Serial.println(noOfWaves);
+      
     }
     
     changeLength(startPointA, startPointB);
-    if (density > 1)
+    if (noOfWaves > 1)
     {
-      pixel_drawWavePixel(size, size, density, globalDrawDirection, SQUARE_SHAPE);
+      pixel_drawWavePixel(size, size, noOfWaves, globalDrawDirection, SQUARE_SHAPE);
     }
     changeLength(endPointA, endPointB);
     
@@ -248,7 +258,7 @@ int pixel_maxDensity(float penSize, int rowSize)
     Serial.print(rowSizeInMM);
     Serial.print(F(", mmPerStep: "));
     Serial.print(mmPerStep);
-    Serial.print(F(", rowsize: "));
+    Serial.print(F(", so rowsize in steps: "));
     Serial.println(rowSize);
   }
   
@@ -260,10 +270,11 @@ int pixel_maxDensity(float penSize, int rowSize)
   if (pixelDebug) {     
     Serial.print("num of segments float:");
     Serial.println(numberOfSegments);
-    Serial.print(F("Max density: penSize: "));
+    Serial.print(F("For penSize: "));
     Serial.print(penSize);
     Serial.print(F(", rowSize: "));
-    Serial.print(rowSize);
+    Serial.println(rowSize);
+    Serial.print(F("Max density: "));
     Serial.println(maxDens);
   }
   
