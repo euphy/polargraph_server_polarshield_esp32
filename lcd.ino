@@ -90,12 +90,12 @@ void lcd_updateDisplay()
    There's a lot of it, but it's mostly all the same.
    =============================================================================*/
 int buttonCoords[12][2];
-byte  gap = (LCD_TYPE == ITDB24E_8) ? 10 : 10;
+byte  gap = (LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 10 : 10;
 byte  buttonSize = 60;
 byte  grooveSize = 36;
-static int screenWidth = (LCD_TYPE == ITDB24E_8) ? 320 : 220;
-static int screenHeight = (LCD_TYPE == ITDB24E_8) ? 240 : 176;
-static int centreYPosition = (LCD_TYPE == ITDB24E_8) ? 112 : 80;
+static int screenWidth = (LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 320 : 220;
+static int screenHeight = (LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 240 : 176;
+static int centreYPosition = (LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 112 : 80;
 
 const byte MENU_INITIAL = 1;
 const byte MENU_RUNNING = 2;
@@ -431,8 +431,6 @@ void lcd_initLCD()
   lcd.InitLCD(LANDSCAPE);
   lcd.clrScr();
 
-  touch.InitTouch(LANDSCAPE);
-  touch.setPrecision(PREC_EXTREME);
   
   // output lcd size
 //  lcd.printNumI(lcd.getDisplayXSize(), 10, 40);
@@ -478,13 +476,18 @@ void lcd_initLCD()
   lcd.fillRect(0,buttonCoords[5][1], screenWidth,buttonCoords[5][1]+56);
   lcd.setBackColor(COL_LIGHT_R, COL_LIGHT_G, COL_LIGHT_B);
   lcd.setColor(COL_BRIGHT_R, COL_BRIGHT_G, COL_BRIGHT_B);
+
+  touch.InitTouch();
+  delay(1000);
+
   lcd.setFont(BigFont);
   lcd.print("Polargraph.", 17, buttonCoords[5][1]+10);
   lcd.setFont(SmallFont);
   lcd.print("Drawing with robots.", 20, buttonCoords[5][1]+32);
   lcd.setBackColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
   lcd.print("v"+FIRMWARE_VERSION_NO, 20, buttonCoords[5][1]+buttonCoords[5][1]+gap);
-//  delay(1000);
+  touch.setPrecision(PREC_EXTREME);
+  
 }
 
 void lcd_showSummary()

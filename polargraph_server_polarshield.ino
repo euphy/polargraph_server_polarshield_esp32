@@ -48,7 +48,10 @@ Put them in libraries/UTouch/UTouchCD.h
     =========================================================== */    
 
 //Uncomment the following line to use a 2.4" panel
-#define LCD_TYPE ITDB24E_8
+// This settings TOTALLY works for the v2.1 screens if the touch
+#define LCD_TYPE TFT01_24_8
+
+
 //Uncomment the following line to use a 2.2" panel
 //#define LCD_TYPE ITDB22
 
@@ -343,7 +346,7 @@ long motorBRestPoint = 0;
 extern uint8_t SmallFont[];
 extern uint8_t BigFont[];
 UTFT   lcd(LCD_TYPE, 38,39,40,41);
-UTouch touch(11,12,18,19,2);
+UTouch touch(11,12,18,19, 2);
 const int INTERRUPT_TOUCH_PIN = 0;
 volatile boolean displayTouched = false;
 volatile int touchX = 0;
