@@ -131,7 +131,7 @@ void configuration_setup()
   lcd_showSummary();
   delay(1000);
   pinMode(2, INPUT_PULLUP);
-  attachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, FALLING);
+  attachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, LOW);
   
   
   // calibration pins
