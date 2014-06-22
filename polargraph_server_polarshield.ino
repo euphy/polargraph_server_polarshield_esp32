@@ -63,12 +63,20 @@ Put them in libraries/UTouch/UTouchCD.h
 #ifndef MOTHERBOARD
 #define MOTHERBOARD POLARSHIELD
 //#define MOTHERBOARD RAMPS14
+//#define MOTHERBOARD TFTSHIELD
 #endif
 
 
 #define POLARSHIELD 1
 #define RAMPS14 2
+#define TFTSHIELD 3
 
+/*  ===========================================================  
+    Some debugging flags
+=========================================================== */    
+
+#define DEBUG_SD
+#define DEBUG_STATE
 
 /*  ===========================================================  
     These variables are common to all polargraph server builds
@@ -79,6 +87,8 @@ const String FIRMWARE_VERSION_NO = "1.8";
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
   const String MB_NAME = "POLARSHIELD";
+#elif MOTHERBOARD == TFTSHIELD
+  const String MB_NAME = "TFTSHIELD";
 #endif
 
 // for working out CRCs
@@ -120,8 +130,9 @@ static int penLiftSpeed = 3; // ms between steps of moving motor
 
 #if MOTHERBOARD == RAMPS14
   #define PEN_HEIGHT_SERVO_PIN 4
-#elif MOTHERBOARD == POLARSHIELD
+#else // MOTHERBOARD == POLARSHIELD
   #define PEN_HEIGHT_SERVO_PIN 9
+
 #endif
 
 boolean isPenUp = false;
@@ -296,6 +307,7 @@ void setup()
   outputAvailableMemory();
   
 //  impl_engageMotors();
+//  lcd_runStartScript()
 }
 
 void loop()
@@ -346,11 +358,16 @@ long motorBRestPoint = 0;
 extern uint8_t SmallFont[];
 extern uint8_t BigFont[];
 UTFT   lcd(LCD_TYPE, 38,39,40,41);
+
+#if MOTHERBOARD == TFTSHIELD
+UTouch touch(6, 5, 4, 3, 2); // pinouts for the TFT shield
+#else
 UTouch touch(11,12,18,19, 2);
+#endif
 const int INTERRUPT_TOUCH_PIN = 0;
-volatile boolean displayTouched = false;
-volatile int touchX = 0;
-volatile int touchY = 0;
+boolean displayTouched = false;
+int touchX = 0;
+int touchY = 0;
 
 // size and location of rove area
 long rove1x = 1000;

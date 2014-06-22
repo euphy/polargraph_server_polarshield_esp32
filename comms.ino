@@ -227,6 +227,16 @@ void comms_establishContact()
 void comms_ready()
 {
   Serial.println(READY);
+#ifdef DEBUG_STATE
+  Serial.print(F("Display touched:"));
+  Serial.println(displayTouched);
+  Serial.print(F("Pin2:"));
+  Serial.println(analogRead(2));
+  
+//  pinMode(2, INPUT_PULLUP);
+//  attachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, FALLING);
+  
+#endif
 }
 void comms_drawing()
 {

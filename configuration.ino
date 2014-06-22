@@ -79,6 +79,18 @@ Comment out the blocks of code you don't need.
   #define MOTOR_B_ENABLE_PIN 56
   #define MOTOR_B_STEP_PIN 60
   #define MOTOR_B_DIR_PIN 61
+
+#elif MOTHERBOARD == TFTSHIELD
+
+  // Uses E1 driver on RAMPS
+  #define MOTOR_A_ENABLE_PIN 21
+  #define MOTOR_A_STEP_PIN 20
+  #define MOTOR_A_DIR_PIN 19
+
+  // Uses Y motor driver on RAMPS
+  #define MOTOR_B_ENABLE_PIN 18
+  #define MOTOR_B_STEP_PIN 17
+  #define MOTOR_B_DIR_PIN 16
   
 #endif
 
@@ -131,7 +143,7 @@ void configuration_setup()
   lcd_showSummary();
   delay(1000);
   pinMode(2, INPUT_PULLUP);
-  attachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, LOW);
+//  attachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, FALLING);
   
   
   // calibration pins

@@ -152,8 +152,10 @@ void impl_exec_execFromStore(String inFilename)
     
     char filename[noBlanks.length()+1];
     noBlanks.toCharArray(filename, noBlanks.length()+1);
-//    Serial.print("Array to read from: ");
-//    Serial.println(filename);
+#ifdef DEBUG_SD    
+    Serial.print("Array to read from: ");
+    Serial.println(filename);
+#endif
     File readFile = SD.open(filename, FILE_READ);
     if (readFile)
     {
@@ -162,35 +164,47 @@ void impl_exec_execFromStore(String inFilename)
       String command = "";
       while (readFile.available() && currentlyDrawingFromFile)
       {
-//        Serial.println("Reading...");
+#ifdef DEBUG_SD        
+        Serial.println("Reading...");
         // poll for input
-        char ch = readFile.read();
-//        Serial.print(".");
-//        Serial.print(ch);
-//        Serial.print("-");
+#endif
+        int ch = readFile.read();
+#ifdef DEBUG_SD        
+        Serial.print(".");
+        Serial.print(ch);
+        Serial.print("-");
+#endif
         if (ch == 13 || ch == 10)
         {
-//          Serial.println("New line");
+#ifdef DEBUG_SD        
+          Serial.println("New line");
+#endif
           // execute the line
           command.trim();
           boolean commandParsed = comms_parseCommand(command);
           if (commandParsed)
           {
-//            Serial.println("Stored command parsed.");
+#ifdef DEBUG_SD        
+            Serial.println("Stored command parsed.");
+#endif
             Serial.print(F("Executing command:"));
             Serial.println(command);
             if (echoingStoredCommands) lcd_echoLastCommandToDisplay(command, inFilename+": ");
             impl_executeCommand(command);
           }
-//          else
-//            Serial.println("Stored command WAS NOT parsed.");
+#ifdef DEBUG_SD        
+          else Serial.println("Stored command WAS NOT parsed.");
+#endif            
           command = "";
           lcd_checkForInput();
         }
         else
           command += ch;
-//        Serial.print("Command building:");
-//        Serial.println(command);
+
+#ifdef DEBUG_SD        
+        Serial.print("Command building:");
+        Serial.println(command);
+#endif
       }
       Serial.println("Finished with the file.");
       currentlyDrawingFromFile = false;

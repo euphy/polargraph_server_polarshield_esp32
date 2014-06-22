@@ -26,14 +26,25 @@ void lcd_touchInput()
   // don't trigger if it's already in processing
   if (!displayTouched)
   {
-    touch.read();
-    int firstTouchX = touch.getX();
-    int firstTouchY = touch.getY();
-
-    touchX = firstTouchX;
-    touchY = firstTouchY;
-    displayTouched = true;
-    lastInteractionTime = millis();
+    while (touch.dataAvailable()) {
+      touch.read();
+      long x = touch.getX();
+      long y = touch.getY();
+      if ((x != -1) and (y != -1)) {
+        Serial.print("touch ok: ");
+        Serial.print(touchX);
+        Serial.print(",");
+        Serial.println(touchY);
+        touchX = x;
+        touchY = y;
+        displayTouched = true;
+        lastInteractionTime = millis();
+        break;
+      }
+    }
+  }
+  else {
+    Serial.println("Already touched.");
   }
 }
 
@@ -45,8 +56,15 @@ void lcd_touchInput()
 */
 void lcd_checkForInput()
 {
+  lcd_touchInput();
+  
   if (displayTouched)
   {
+    Serial.print("2: ");
+    Serial.print(touchX);
+    Serial.print(",");
+    Serial.println(touchY);
+    
     Serial.println("Check for input");
     lastOperationTime = millis();
     if (screenState == SCREEN_STATE_POWER_SAVE)
@@ -57,19 +75,26 @@ void lcd_checkForInput()
     }
     else
     {
+      Serial.println("Inputted!!");
       delay(20);
       lcd_processTouchCommand();
     }
+    Serial.print("DONE.");
     displayTouched = false;
   }
   else
   {
+//    Serial.print("2a: ");
+//    Serial.print(touchX);
+//    Serial.print(",");
+//    Serial.println(touchY);
+
     if (screenState == SCREEN_STATE_NORMAL
     && (millis() > (lastInteractionTime + screenSaveIdleTime)))
     {
       // put it to sleep
       screenState = SCREEN_STATE_POWER_SAVE;
-      lcd.clrScr();
+
     }
     else if (screenState == SCREEN_STATE_POWER_SAVE
       && (millis() < lastInteractionTime + screenSaveIdleTime))
@@ -80,6 +105,7 @@ void lcd_checkForInput()
     }
   }
 }
+
 void lcd_updateDisplay()
 {
 }
@@ -148,9 +174,13 @@ const byte BUTTON_RESET_SD = 38;
 const byte BUTTON_SETTINGS_MENU_2 = 39;
 
 
-const byte COL_LIGHT_R = 50;
-const byte COL_LIGHT_G = 180;
-const byte COL_LIGHT_B = 50;
+//const byte COL_LIGHT_R = 50;
+//const byte COL_LIGHT_G = 180;
+//const byte COL_LIGHT_B = 50;
+
+const byte COL_LIGHT_R = random(50, 180);
+const byte COL_LIGHT_G = random(50, 180);
+const byte COL_LIGHT_B = random(50, 180);
 
 const byte COL_DARK_R = 0;
 const byte COL_DARK_G = 0;
@@ -164,6 +194,10 @@ void lcd_processTouchCommand()
 {
   Serial.println("process touch.");
   // get control that is under the
+        Serial.print("3: ");
+        Serial.print(touchX);
+        Serial.print(",");
+        Serial.println(touchY);  
   byte buttonNumber = lcd_getButtonNumber(touchX, touchY);
   lcd_outlinePressedButton(buttonNumber,COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
 
@@ -395,6 +429,7 @@ void lcd_runStartScript()
   engageMotors();
   motorA.setCurrentPosition(startLengthStepsA);
   motorB.setCurrentPosition(startLengthStepsB);  
+  Serial.println("finished start.");
 }
 void lcd_runEndScript()
 {
@@ -478,7 +513,7 @@ void lcd_initLCD()
   lcd.setColor(COL_BRIGHT_R, COL_BRIGHT_G, COL_BRIGHT_B);
 
   touch.InitTouch();
-  delay(1000);
+  touch.setPrecision(PREC_MEDIUM);
 
   lcd.setFont(BigFont);
   lcd.print("Polargraph.", 17, buttonCoords[5][1]+10);
@@ -486,7 +521,6 @@ void lcd_initLCD()
   lcd.print("Drawing with robots.", 20, buttonCoords[5][1]+32);
   lcd.setBackColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
   lcd.print("v"+FIRMWARE_VERSION_NO, 20, buttonCoords[5][1]+buttonCoords[5][1]+gap);
-  touch.setPrecision(PREC_EXTREME);
   
 }
 
@@ -621,6 +655,7 @@ void lcd_drawButtonBackground(byte coordsIndex)
 }
 void lcd_outlinePressedButton(byte pressedButton, byte r, byte g, byte b)
 {
+  Serial.println("Outlining.");
   if (pressedButton >= 1 && pressedButton <=6)
   {
     byte coordsIndex = (pressedButton * 2)-2;
@@ -632,6 +667,7 @@ void lcd_outlinePressedButton(byte pressedButton, byte r, byte g, byte b)
     lcd.setBackColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
     lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
   }
+  Serial.println("Outlined!");
 }
 void lcd_drawButton(byte but)
 {
