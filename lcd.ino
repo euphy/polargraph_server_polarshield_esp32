@@ -174,17 +174,17 @@ const byte BUTTON_RESET_SD = 38;
 const byte BUTTON_SETTINGS_MENU_2 = 39;
 
 
-//const byte COL_LIGHT_R = 50;
-//const byte COL_LIGHT_G = 180;
-//const byte COL_LIGHT_B = 50;
+//const byte COL_LIGHT_R = 80;
+//const byte COL_LIGHT_G = 255;
+//const byte COL_LIGHT_B = 80;
 
-const byte COL_LIGHT_R = random(50, 180);
-const byte COL_LIGHT_G = random(50, 180);
-const byte COL_LIGHT_B = random(50, 180);
+const byte COL_LIGHT_R = random(50, 255);
+const byte COL_LIGHT_G = random(50, 255);
+const byte COL_LIGHT_B = random(50, 255);
 
-const byte COL_DARK_R = 0;
-const byte COL_DARK_G = 0;
-const byte COL_DARK_B = 0;
+const byte COL_DARK_R = 5;
+const byte COL_DARK_G = 5;
+const byte COL_DARK_B = 5;
 
 const byte COL_BRIGHT_R = 255;
 const byte COL_BRIGHT_G = 255;
