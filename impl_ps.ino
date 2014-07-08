@@ -168,7 +168,7 @@ void impl_exec_execFromStore(String inFilename)
         Serial.println("Reading...");
         // poll for input
 #endif
-        int ch = readFile.read();
+        char ch = readFile.read();
 #ifdef DEBUG_SD        
         Serial.print(".");
         Serial.print(ch);

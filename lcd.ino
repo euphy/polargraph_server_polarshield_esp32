@@ -301,6 +301,7 @@ void lcd_processTouchCommand()
         lcd_drawButton(BUTTON_STOP_FILE);
         displayTouched = false;      
         impl_exec_execFromStore(commandFilename);
+        lcd_drawButton(pressedButton);
       }
       else
       {
@@ -535,6 +536,7 @@ void lcd_showSummary()
     if (cardInit) {
       lcd.setColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
       lcd.fillRect(0, buttonCoords[5][1]+buttonCoords[5][1]-gap, screenWidth, buttonCoords[5][1]+buttonCoords[5][1]-gap+17);
+      delay(500);
       lcd.setColor(COL_BRIGHT_R, COL_BRIGHT_G, COL_BRIGHT_B);
       lcd.print("Card loaded.", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
     }
@@ -995,10 +997,12 @@ String lcd_loadFilename(String selectedFilename, int direction)
     entry.close();
   }
   else {
-    if (direction > 0) 
+    if (direction > 0) {
       selectedFilename = lcd_getNextFile(selectedFilename);
-    else if (direction < 0)
+    }
+    else if (direction < 0) {
       selectedFilename = lcd_getPreviousFile(selectedFilename);
+    }
   }
 
   Serial.print("Now command filename: ");
