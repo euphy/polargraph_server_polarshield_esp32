@@ -82,7 +82,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.8";
+const String FIRMWARE_VERSION_NO = "1.9";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
@@ -402,7 +402,7 @@ boolean sdCardInit = false;
 File root;
 boolean cardPresent = false;
 boolean cardInit = false;
-boolean echoingStoredCommands = true;
+boolean echoingStoredCommands = false;
 
 // the file itself
 File pbmFile;
@@ -423,6 +423,8 @@ boolean currentlyDrawingFromFile = false;
 String currentlyDrawingFilename = "";
 boolean powerIsOn = false;
 boolean isCalibrated = false;
+
+
 
 
 

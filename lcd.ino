@@ -89,12 +89,21 @@ void lcd_checkForInput()
 //    Serial.print(",");
 //    Serial.println(touchY);
 
+//    Serial.print("Screen state: ");
+//    Serial.print(screenState);
+//    Serial.print(", lastInteractionTime: ");
+//    Serial.print(lastInteractionTime);
+//    Serial.print(" plus idle: ");
+//    Serial.print(lastInteractionTime + screenSaveIdleTime);
+//    Serial.print(", millis: ");
+//    Serial.println(millis());
+    
     if (screenState == SCREEN_STATE_NORMAL
     && (millis() > (lastInteractionTime + screenSaveIdleTime)))
     {
       // put it to sleep
       screenState = SCREEN_STATE_POWER_SAVE;
-
+      lcd.clrScr();
     }
     else if (screenState == SCREEN_STATE_POWER_SAVE
       && (millis() < lastInteractionTime + screenSaveIdleTime))
@@ -131,6 +140,7 @@ const byte MENU_ADJUST_POSITION = 5;
 const byte MENU_ADJUST_SPEED = 6;
 const byte MENU_SETTINGS = 7;
 const byte MENU_SETTINGS_2 = 8;
+const byte MENU_ADJUST_PENLIFT = 9;
 volatile byte currentMenu = MENU_INITIAL;
 
 byte numberOfMenuButtons = 3;
@@ -173,6 +183,12 @@ const byte BUTTON_TOGGLE_ECHO = 37;
 const byte BUTTON_RESET_SD = 38;
 const byte BUTTON_SETTINGS_MENU_2 = 39;
 
+const byte BUTTON_INC_PENLIFT_UP = 40;
+const byte BUTTON_DEC_PENLIFT_UP = 41;
+const byte BUTTON_INC_PENLIFT_DOWN = 42;
+const byte BUTTON_DEC_PENLIFT_DOWN = 43;
+const byte BUTTON_ADJUST_PENLIFT = 44;
+const byte BUTTON_PENLIFT_SAVE_TO_EEPROM = 45;
 
 //const byte COL_LIGHT_R = 80;
 //const byte COL_LIGHT_G = 255;
@@ -290,6 +306,7 @@ void lcd_processTouchCommand()
       break;
     case BUTTON_TOGGLE_ECHO:
       echoingStoredCommands = !echoingStoredCommands;
+      delay(500);
       lcd_drawButton(pressedButton);
       break;
     case BUTTON_DRAW_THIS_FILE:
@@ -402,6 +419,69 @@ void lcd_processTouchCommand()
       break;
     case BUTTON_CALIBRATE:
       calibrate_doCalibration();
+      lcd_drawButton(pressedButton);
+      break;
+      
+    case BUTTON_ADJUST_PENLIFT:
+      currentMenu = MENU_ADJUST_PENLIFT;
+      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.clrScr();
+      lcd_drawButtons();
+      break;
+    case BUTTON_INC_PENLIFT_UP:
+      if (upPosition < 300) {
+        upPosition += 1;
+        if (isPenUp)
+          penlift_movePen(upPosition-15, upPosition, penLiftSpeed);
+        else
+          penlift_movePen(downPosition, upPosition, penLiftSpeed);
+        isPenUp = true;
+      }
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, upPosition);
+      lcd_drawButton(pressedButton);
+      break;
+    case BUTTON_DEC_PENLIFT_UP:
+      if (upPosition > 0) {
+        upPosition -= 1;
+        if (isPenUp)
+          penlift_movePen(upPosition+15, upPosition, penLiftSpeed);
+        else
+          penlift_movePen(downPosition, upPosition, penLiftSpeed);
+        isPenUp = true;
+      }
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, upPosition);
+      lcd_drawButton(pressedButton);
+      break;
+    case BUTTON_INC_PENLIFT_DOWN:
+      if (downPosition < 300) {
+        downPosition += 1;
+        if (isPenUp)
+          penlift_movePen(upPosition, downPosition, penLiftSpeed);
+        else
+          penlift_movePen(downPosition-15, downPosition, penLiftSpeed);
+        isPenUp = false;
+      }
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, downPosition);
+      lcd_drawButton(pressedButton);
+      break;
+    case BUTTON_DEC_PENLIFT_DOWN:
+      if (downPosition > 0) {
+        downPosition -= 1;
+        if (isPenUp)
+          penlift_movePen(upPosition, downPosition, penLiftSpeed);
+        else
+          penlift_movePen(downPosition+15, downPosition, penLiftSpeed);
+        isPenUp = false;
+      }
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, downPosition);
+      lcd_drawButton(pressedButton);
+      break;
+    case BUTTON_PENLIFT_SAVE_TO_EEPROM:
+      Serial.println("HJey");
+      EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, downPosition);
+      EEPROM_writeAnything(EEPROM_PENLIFT_UP, upPosition);
+      eeprom_loadPenLiftRange();
+      delay(1000);
       lcd_drawButton(pressedButton);
       break;
   }
@@ -633,15 +713,27 @@ void lcd_drawButtons()
   else if (currentMenu == MENU_SETTINGS)
   {
     lcd_drawButton(BUTTON_ADJUST_POSITION_MENU);
+    lcd_drawButton(BUTTON_DONE);
     lcd_drawButton(BUTTON_ADJUST_SPEED_MENU);
     lcd_drawButton(BUTTON_ADJUST_PENSIZE_MENU);
     lcd_drawButton(BUTTON_TOGGLE_ECHO);
-    lcd_drawButton(BUTTON_DONE);
     lcd_drawButton(BUTTON_SETTINGS_MENU_2);
   }
   else if (currentMenu == MENU_SETTINGS_2)
   {
+    lcd_drawButton(BUTTON_ADJUST_PENLIFT);
     lcd_drawButton(BUTTON_DONE);
+  }
+  else if (currentMenu == MENU_ADJUST_PENLIFT)
+  {
+    lcd_drawButton(BUTTON_INC_PENLIFT_UP);
+    lcd_drawButton(BUTTON_DEC_PENLIFT_UP);
+    lcd_drawButton(BUTTON_INC_PENLIFT_DOWN);
+    lcd_drawButton(BUTTON_DEC_PENLIFT_DOWN);
+    lcd_drawButton(BUTTON_PENLIFT_SAVE_TO_EEPROM);
+    lcd_drawButton(BUTTON_DONE);
+    lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, downPosition);
+    lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, upPosition);
   }
 }
 
@@ -698,7 +790,14 @@ void lcd_drawButton(byte but)
       coordsIndex=0;
       lcd_drawButtonBackground(coordsIndex);
       lcd.print("TOGGLE", buttonCoords[coordsIndex][0]+(buttonSize/2)-22, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
-      lcd.print("COMMS", buttonCoords[coordsIndex][0]+(buttonSize/2)-14, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      lcd.print("COMMS", buttonCoords[coordsIndex][0]+(buttonSize/2)-16, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      break;
+      
+    case BUTTON_ADJUST_PENLIFT: // pos 1
+      coordsIndex=0;
+      lcd_drawButtonBackground(coordsIndex);
+      lcd.print("ADJUST", buttonCoords[coordsIndex][0]+(buttonSize/2)-22, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+      lcd.print("PENLIFT", buttonCoords[coordsIndex][0]+(buttonSize/2)-24, buttonCoords[coordsIndex][1]+(buttonSize/2));
       break;
 //    case BUTTON_RESET_SD: // pos 1
 //      coordsIndex=0;
@@ -893,6 +992,39 @@ void lcd_drawButton(byte but)
       lcd.print("INC", buttonCoords[coordsIndex][0]+(buttonSize/2)-10, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
       lcd.print(" B ", buttonCoords[coordsIndex][0]+(buttonSize/2)-10, buttonCoords[coordsIndex][1]+(buttonSize/2));
       break;
+
+
+    case BUTTON_DEC_PENLIFT_DOWN: // button 2
+      coordsIndex=2;
+      lcd_drawButtonBackground(coordsIndex);
+      lcd.print("DEC", buttonCoords[coordsIndex][0]+(buttonSize/2)-10, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+      lcd.print("PEN DOWN", buttonCoords[coordsIndex][0]+(buttonSize/2)-26, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      break;
+    case BUTTON_INC_PENLIFT_DOWN: // button 5
+      coordsIndex=8;
+      lcd_drawButtonBackground(coordsIndex);
+      lcd.print("INC", buttonCoords[coordsIndex][0]+(buttonSize/2)-10, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+      lcd.print("PEN DOWN", buttonCoords[coordsIndex][0]+(buttonSize/2)-26, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      break;
+    case BUTTON_DEC_PENLIFT_UP: // pos 3
+      coordsIndex=4;
+      lcd_drawButtonBackground(coordsIndex);
+      lcd.print("DEC", buttonCoords[coordsIndex][0]+(buttonSize/2)-10, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+      lcd.print("PEN UP", buttonCoords[coordsIndex][0]+(buttonSize/2)-22, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      break;
+    case BUTTON_INC_PENLIFT_UP: // pos 6
+      coordsIndex=10;
+      lcd_drawButtonBackground(coordsIndex);
+      lcd.print("INC", buttonCoords[coordsIndex][0]+(buttonSize/2)-10, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+      lcd.print("PEN UP", buttonCoords[coordsIndex][0]+(buttonSize/2)-22, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      break;
+    case BUTTON_PENLIFT_SAVE_TO_EEPROM: // pos 1
+      coordsIndex=0;
+      lcd_drawButtonBackground(coordsIndex);
+      lcd.print("SAVE TO", buttonCoords[coordsIndex][0]+(buttonSize/2)-24, buttonCoords[coordsIndex][1]+(buttonSize/2)-12);
+      lcd.print("EEPROM", buttonCoords[coordsIndex][0]+(buttonSize/2)-22, buttonCoords[coordsIndex][1]+(buttonSize/2));
+      break;
+
   }
 }
 
@@ -1149,6 +1281,18 @@ byte lcd_getWhichButtonPressed(byte buttonNumber, byte menu)
       case 6: return BUTTON_MOVE_INC_B; break;
     }
   }
+  else if (currentMenu == MENU_ADJUST_PENLIFT)
+  {
+    switch (buttonNumber)
+    {
+      case 1: return BUTTON_PENLIFT_SAVE_TO_EEPROM; break;
+      case 2: return BUTTON_DEC_PENLIFT_DOWN; break;
+      case 3: return BUTTON_DEC_PENLIFT_UP; break;
+      case 4: return BUTTON_DONE; break;
+      case 5: return BUTTON_INC_PENLIFT_DOWN; break;
+      case 6: return BUTTON_INC_PENLIFT_UP; break;
+    }
+  }
   else if (currentMenu == MENU_CHOOSE_FILE)
   {
     switch (buttonNumber)
@@ -1178,6 +1322,7 @@ byte lcd_getWhichButtonPressed(byte buttonNumber, byte menu)
   {
     switch (buttonNumber)
     {
+      case 1: return BUTTON_ADJUST_PENLIFT; break;
       case 4: return BUTTON_DONE; break;
     }
   }
