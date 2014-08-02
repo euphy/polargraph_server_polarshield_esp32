@@ -237,6 +237,11 @@ const String DRAWING = "DRAWING";
 const static String OUT_CMD_CARTESIAN = "CARTESIAN,";
 const static String OUT_CMD_SYNC = "SYNC,";
 
+const String MSG = "MSG,";
+const String MSG_ERROR = "E,";
+const String MSG_INFO = "I,";
+const String MSG_DEBUG = "D,";
+
 static String readyString = READY;
 static boolean pixelDebug = true;
 

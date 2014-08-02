@@ -248,9 +248,9 @@ void comms_requestResend()
 }
 void comms_unrecognisedCommand(String &com)
 {
-  Serial.print(F("Sorry, "));
+  Serial.print(F("ERR,E,"));
   Serial.print(com);
-  Serial.println(F(" isn't a command I recognise."));
+  Serial.println(F(" not recognised."));
 }  
 
 
