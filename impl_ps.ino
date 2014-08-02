@@ -100,8 +100,10 @@ the screen.
 */
 void impl_runBackgroundProcesses()
 {
+#ifdef USE_LCD  
   lcd_checkForInput();
   lcd_updateDisplay();
+#endif
       
   long motorCutoffTime = millis() - lastOperationTime;
   if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))

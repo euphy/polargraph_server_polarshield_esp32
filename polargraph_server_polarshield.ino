@@ -72,6 +72,12 @@ Put them in libraries/UTouch/UTouchCD.h
 #define TFTSHIELD 3
 
 /*  ===========================================================  
+    Control whether to look for touch input or update LCD
+    Comment this out if you don't have an LCD connected
+=========================================================== */    
+//#define USE_LCD
+
+/*  ===========================================================  
     Some debugging flags
 =========================================================== */    
 

@@ -267,17 +267,17 @@ int pixel_maxDensity(float penSize, int rowSize)
   if (numberOfSegments >= 2.0)
     maxDens = int(numberOfSegments);
 
-  if (maxDens <= 2 || pixelDebug)
+  if (maxDens <= 2)
   {
-    Serial.print(F("MSG,I,Max density for penSize: "));
+    Serial.print(F("MSG,I,Max waves for penSize: "));
     Serial.print(penSize);
-    Serial.print(F(", rowSize: "));
+    Serial.print(F(", grid: "));
     Serial.print(rowSize);
     Serial.print(F(" max waves is "));
     Serial.println(maxDens);
     Serial.print(MSG);
     Serial.print(MSG_INFO);
-    Serial.println(F("Not possible to express any detail in this."));
+    Serial.println(F("Not possible to express any detail."));
   }  
   
   return maxDens;

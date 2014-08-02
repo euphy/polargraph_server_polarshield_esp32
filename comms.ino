@@ -107,9 +107,9 @@ String comms_readCommand()
     }
     else
     {
-      Serial.print(F("I got "));
-      Serial.println(inString);
-      Serial.print(F("Checksum not matched!:"));
+      Serial.print("MSG,E,I got ");
+      Serial.print(inString);
+      Serial.print(F(", checksum not matched!:"));
       Serial.println(calcCrc);
       commandConfirmed = false;
     }
@@ -137,7 +137,7 @@ void comms_parseAndExecuteCommand(String &in)
   }
   else
   {
-    Serial.print(F("Command ("));
+    Serial.print(F("MSG,E,Command ("));
     Serial.print(in);
     Serial.println(F(") not parsed."));
   }
@@ -228,9 +228,9 @@ void comms_ready()
 {
   Serial.println(READY);
 #ifdef DEBUG_STATE
-  Serial.print(F("Display touched:"));
+  Serial.print(F("MSG,D,Display touched:"));
   Serial.println(displayTouched);
-  Serial.print(F("Pin2:"));
+  Serial.print(F("MSG,D,Pin2:"));
   Serial.println(analogRead(2));
   
 //  pinMode(2, INPUT_PULLUP);
@@ -248,7 +248,7 @@ void comms_requestResend()
 }
 void comms_unrecognisedCommand(String &com)
 {
-  Serial.print(F("ERR,E,"));
+  Serial.print("MSG,E,");
   Serial.print(com);
   Serial.println(F(" not recognised."));
 }  
