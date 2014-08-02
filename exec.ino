@@ -243,10 +243,13 @@ void exec_setMotorAcceleration(float accel)
 void exec_changePenWidth()
 {
   penWidth = asFloat(inParam1);
+  Serial.print(MSG);
+  Serial.print(MSG_INFO);
   Serial.print(F("Changed Pen width to "));
   Serial.print(penWidth);
   Serial.print(F("mm"));
   Serial.println();
+  msg_reportMinimumGridSizeForPen();
 }
 
 void exec_setPosition()

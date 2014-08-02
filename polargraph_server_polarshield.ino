@@ -75,7 +75,7 @@ Put them in libraries/UTouch/UTouchCD.h
     Control whether to look for touch input or update LCD
     Comment this out if you don't have an LCD connected
 =========================================================== */    
-//#define USE_LCD
+#define USE_LCD
 
 /*  ===========================================================  
     Some debugging flags
@@ -88,7 +88,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.9";
+const String FIRMWARE_VERSION_NO = "1.10";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
