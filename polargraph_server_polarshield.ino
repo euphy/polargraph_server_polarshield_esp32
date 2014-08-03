@@ -56,9 +56,9 @@ Put them in libraries/UTouch/UTouchCD.h
 //Uncomment the following line to use a 2.4" panel
 //#define LCD_TYPE TFT01_24_8
 //Uncomment the following line to use a 2.4" panel
-//#define LCD_TYPE ITDB24E_8
+#define LCD_TYPE ITDB24E_8
 //Uncomment the following line to use a 2.2" panel
-#define LCD_TYPE ITDB22
+//#define LCD_TYPE ITDB22
 
 
 /*  ===========================================================  
