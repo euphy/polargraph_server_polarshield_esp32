@@ -28,6 +28,12 @@ is _different_ to the basic implemenation.
 
 The UTouch library needs a couple of calibration values:
 
+The UTouch library needs a couple of calibration values - these
+ones are the ones I use for the ITDB02-2.2 inch screen.
+#define CAL_X 0x039281CCUL
+#define CAL_Y 0x03A2C1DEUL
+#define CAL_S 0x000AF0DBUL
+
 // for the 2.4in screen that is current.
 #define CAL_X 0x03C34136UL
 #define CAL_Y 0x03C0018AUL
@@ -48,12 +54,11 @@ Put them in libraries/UTouch/UTouchCD.h
     =========================================================== */    
 
 //Uncomment the following line to use a 2.4" panel
-// This settings TOTALLY works for the v2.1 screens if the touch
-#define LCD_TYPE TFT01_24_8
-
-
+//#define LCD_TYPE TFT01_24_8
+//Uncomment the following line to use a 2.4" panel
+//#define LCD_TYPE ITDB24E_8
 //Uncomment the following line to use a 2.2" panel
-//#define LCD_TYPE ITDB22
+#define LCD_TYPE ITDB22
 
 
 /*  ===========================================================  
