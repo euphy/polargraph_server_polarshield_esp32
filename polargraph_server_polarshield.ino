@@ -55,9 +55,9 @@ Put them in libraries/UTouch/UTouchCD.h
          CONFIGURATION!!
     =========================================================== */    
 
-//Uncomment the following line to use a 2.4" panel
+//Uncomment the following line to use a 2.4" panel, August 2014 and later
 #define LCD_TYPE TFT01_24_8
-//Uncomment the following line to use a 2.4" panel
+//Uncomment the following line to use an older 2.4" panel, prior to August 2014.
 //#define LCD_TYPE ITDB24E_8
 //Uncomment the following line to use a 2.2" panel
 //#define LCD_TYPE ITDB22
@@ -80,7 +80,7 @@ Put them in libraries/UTouch/UTouchCD.h
 
 /*  ===========================================================  
     Control whether to look for touch input or update LCD
-    Comment this out if you don't have an LCD connected
+    Comment this out if you DON'T have an LCD connected
 =========================================================== */    
 #define USE_LCD
 
