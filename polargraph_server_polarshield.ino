@@ -43,7 +43,7 @@ Put them in libraries/UTouch/UTouchCD.h
 
 **/
 
-http://forum.arduino.cc/index.php?topic=173584.0
+//http://forum.arduino.cc/index.php?topic=173584.0
 #include <SPI.h>
 #include <SD.h>
 #include <AccelStepper.h>
