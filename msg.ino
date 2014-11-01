@@ -1,5 +1,9 @@
 /**
-This file some helpful message
+*  Polargraph Server. - CORE
+*  Written by Sandy Noble
+*  Released under GNU License version 3.
+*  http://www.polargraph.co.uk
+*  https://github.com/euphy/polargraph_server_polarshield
 */
 void msg_reportMinimumGridSizeForPen()
 {
