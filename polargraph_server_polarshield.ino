@@ -95,7 +95,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.10";
+const String FIRMWARE_VERSION_NO = "1.11";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
@@ -320,6 +320,7 @@ void setup()
   readyString = READY;
   comms_establishContact();
 
+  pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   penlift_penUp();
   delay(500);
   outputAvailableMemory();

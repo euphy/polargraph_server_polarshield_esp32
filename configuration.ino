@@ -143,6 +143,8 @@ void configuration_setup()
   lcd_showSummary();
   delay(1000);
   pinMode(2, INPUT);
+  touch.InitTouch();
+  touch.setPrecision(PREC_MEDIUM);  
 //  attachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, FALLING);
   
   
