@@ -379,7 +379,6 @@ int availableMemory() {
 
 
 
-
 /*
 Calculating CRCs.  Incoming commands have these appended as a way
 to check quality.
@@ -394,6 +393,7 @@ unsigned long crc_update(unsigned long crc, byte data)
     crc = pgm_read_dword_near(crc_table + (tbl_idx & 0x0f)) ^ (crc >> 4);
     return crc;
 }
+
 
 unsigned long crc_string(String s)
 {

@@ -82,7 +82,7 @@ Put them in libraries/UTouch/UTouchCD.h
     Control whether to look for touch input or update LCD
     Comment this out if you DON'T have an LCD connected
 =========================================================== */    
-#define USE_LCD
+//#define USE_LCD
 
 /*  ===========================================================  
     Some debugging flags
@@ -105,7 +105,7 @@ const String FIRMWARE_VERSION_NO = "1.10";
 #endif
 
 // for working out CRCs
-static PROGMEM prog_uint32_t crc_table[16] = {
+const uint32_t PROGMEM crc_table[16] = {
     0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac,
     0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
     0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c,
@@ -320,8 +320,8 @@ void setup()
   readyString = READY;
   comms_establishContact();
 
-  penlift_penUp();
   delay(500);
+  penlift_penUp();
   outputAvailableMemory();
   
 //  impl_engageMotors();
@@ -359,6 +359,7 @@ const static String CMD_SWIRLING = "C41";
 const static String CMD_DRAW_RANDOM_SPRITE = "C42";
 const static String CMD_DRAW_NORWEGIAN = "C43";
 const static String CMD_DRAW_NORWEGIAN_OUTLINE = "C44";
+const static String CMD_AUTO_CALIBRATE = "C48";
 
 /*  End stop pin definitions  */
 const int ENDSTOP_X_MAX = 17;

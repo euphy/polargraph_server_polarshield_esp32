@@ -25,6 +25,8 @@ void calibrate_doCalibration()
   penlift_penUp();
   // turn motors off
   releaseMotors();
+  delay(1000);
+  int trundleSpeed = 100;
   // energise motora
   motorA.enableOutputs();
   motorA.setCurrentPosition(0);
@@ -41,8 +43,9 @@ void calibrate_doCalibration()
     while (endStopSignal == 0)
     {
       motorA.move(stepMultiplier);
+      motorA.setSpeed(trundleSpeed);
       while (motorA.distanceToGo() != 0)
-        motorA.run();
+        motorA.runSpeed();
       endStopSignal = digitalRead(ENDSTOP_X_MIN);
       Serial.println(endStopSignal);
     }
@@ -56,9 +59,10 @@ void calibrate_doCalibration()
   // so wind backwards until hitting the stop.
   while (endStopSignal != 0)
   {
-    motorA.move(-1);
+    motorA.move(-stepMultiplier);
+    motorA.setSpeed(-trundleSpeed);
     while (motorA.distanceToGo() != 0)
-      motorA.run();
+      motorA.runSpeed();
     endStopSignal = digitalRead(ENDSTOP_X_MIN);
   }
   Serial.println("A End stop signalled");
@@ -85,8 +89,9 @@ void calibrate_doCalibration()
     while (endStopSignal == 0)
     {
       motorB.move(stepMultiplier);
+      motorB.setSpeed(trundleSpeed);
       while (motorB.distanceToGo() != 0)
-        motorB.run();
+        motorB.runSpeed();
       endStopSignal = digitalRead(ENDSTOP_Y_MIN);
     }
     // then jump a bit more - one rev
@@ -98,10 +103,13 @@ void calibrate_doCalibration()
   delay(400);
   while (endStopSignal != 0)
   {
-    motorB.move(-1);
+    motorB.move(-stepMultiplier);
+    motorB.setSpeed(-trundleSpeed);
     while (motorB.distanceToGo() != 0)
-      motorB.run();
+      motorB.runSpeed();
     endStopSignal = digitalRead(ENDSTOP_Y_MIN);
+    Serial.print("Endstop signal: ");
+    Serial.println(endStopSignal);
   }
   Serial.println("B End stop signalled");
   motorBRestPoint = abs(motorB.currentPosition()) + (ENDSTOP_Y_MIN_POSITION * stepsPerMM);

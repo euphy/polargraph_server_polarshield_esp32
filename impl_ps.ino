@@ -87,6 +87,8 @@ void impl_executeCommand(String &com)
     rove_drawNorwegianFromFile();
   else if (com.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE))
     rove_drawRoveAreaFittedToImage();
+  else if (com.startsWith(CMD_AUTO_CALIBRATE))
+    calibrate_doCalibration();
   else
   {
     comms_unrecognisedCommand(com);
