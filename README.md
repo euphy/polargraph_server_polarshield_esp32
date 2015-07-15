@@ -8,9 +8,10 @@ an LCD touchscreen. The firmware may also be configured at compile time to targe
 
 There are a couple of precompiled binary hex files you can use if you don't want to compile from source.
 
-- polargraph_server_polarshield_22.cpp.hex  Is for versions of the Polarshield or PolargraphSD that shipped with 2.2 inch screens.
-- polargraph_server_polarshield_v1.x_2.4.cpp.hex  Is for versions of the Polarshield or PolargraphSD that shipped with a 2.4 inch screen, prior to August 2014.
+- polargraph_server_polarshield_v1.x_2.4.cpp.hex  Is for ye olde versions of the Polarshield or PolargraphSD that shipped with a 2.4 inch screen, prior to August 2014.
 - polargraph_server_polarshield_v2_2.4.cpp.hex is for versions of the Polarshield or PolargraphSD that shipped after August 2014.
+
+If you have a 2.2 inch screen, then you need to compile the firmware yourself.
 
 The program has a core part that consists of the following files that are common to all Polargraph Server versions:
 
