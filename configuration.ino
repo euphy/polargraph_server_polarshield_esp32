@@ -154,12 +154,12 @@ void configuration_setup()
   pinMode(ENDSTOP_X_MAX, INPUT_PULLUP);
   pinMode(ENDSTOP_Y_MAX, INPUT_PULLUP);
   
-  while ((digitalRead(ENDSTOP_X_MIN) != 0) && (digitalRead(ENDSTOP_Y_MIN) != 0)) {
-    Serial.print("X: ");
-    Serial.print(digitalRead(ENDSTOP_X_MIN));
-    Serial.print(", Y: ");
-    Serial.println(digitalRead(ENDSTOP_Y_MIN));
-  }
+//  while ((digitalRead(ENDSTOP_X_MIN) != 0) && (digitalRead(ENDSTOP_Y_MIN) != 0)) {
+//    Serial.print("X: ");
+//    Serial.print(digitalRead(ENDSTOP_X_MIN));
+//    Serial.print(", Y: ");
+//    Serial.println(digitalRead(ENDSTOP_Y_MIN));
+//  }
   
   lcd_displayFirstMenu();
   
