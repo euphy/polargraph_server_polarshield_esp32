@@ -82,7 +82,7 @@ Put them in libraries/UTouch/UTouchCD.h
     Control whether to look for touch input or update LCD
     Comment this out if you DON'T have an LCD connected
 =========================================================== */    
-//#define USE_LCD
+#define USE_LCD
 
 /*  ===========================================================  
     Some debugging flags
