@@ -152,10 +152,6 @@ void eeprom_loadMachineSpecFromEeprom()
   // load penwidth
   float pWidth;
   EEPROM_readAnything(EEPROM_MACHINE_PEN_WIDTH, pWidth);
-  Serial.print("penWidth: ");
-  Serial.println(penWidth);
-  Serial.print("pWidth: ");
-  Serial.println(pWidth);
 
   if (!isnan(pWidth)) {
     penWidth = pWidth;

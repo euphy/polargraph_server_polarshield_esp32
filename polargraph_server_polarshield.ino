@@ -444,8 +444,7 @@ String currentlyDrawingFilename = "";
 boolean powerIsOn = false;
 boolean isCalibrated = false;
 
-
-
+boolean canCalibrate = false;
 
 
 

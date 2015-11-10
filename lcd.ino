@@ -643,6 +643,8 @@ void lcd_drawButtons()
     
     if (cardInit)
       lcd_drawButton(BUTTON_DRAW_FROM_SD);
+      
+    if (canCalibrate)  
       lcd_drawButton(BUTTON_CALIBRATE);
       
     if (isPenUp)
@@ -1235,7 +1237,7 @@ byte lcd_getWhichButtonPressed(byte buttonNumber, byte menu)
       case 2: 
         if (cardInit) return BUTTON_DRAW_FROM_SD;
         break;
-      case 3: return BUTTON_CALIBRATE; break;
+      case 3: if (canCalibrate) { return BUTTON_CALIBRATE; } break;
       case 4:
         if (currentlyRunning) return BUTTON_PAUSE_RUNNING;
         else return BUTTON_RESUME_RUNNING;
