@@ -95,7 +95,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.2.1";
+const String FIRMWARE_VERSION_NO = "1.2.2";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
@@ -150,7 +150,7 @@ static int penLiftSpeed = 3; // ms between steps of moving motor
 
 boolean isPenUp = false;
 
-int motorStepsPerRev = 400;
+int motorStepsPerRev = 200;
 float mmPerRev = 95;
 int stepMultiplier = 8;
 
@@ -167,7 +167,7 @@ static int sqtest = 0;
 static int defaultMachineWidth = 650;
 static int defaultMachineHeight = 650;
 static int defaultMmPerRev = 95;
-static int defaultStepsPerRev = 400;
+static int defaultStepsPerRev = 200;
 static int defaultStepMultiplier = 8;
 
 static long startLengthStepsA = 8000;
@@ -196,7 +196,7 @@ static int SRAM_SIZE = 2048;
 const String FREE_MEMORY_STRING = "MEMORY,";
 int availMem = 0;
 
-static float penWidth = 0.8; // line width in mm
+float penWidth = 0.8f; // line width in mm
 
 boolean reportingPosition = true;
 boolean acceleration = true;

@@ -150,9 +150,19 @@ void eeprom_loadMachineSpecFromEeprom()
   eeprom_loadSpeed();
 
   // load penwidth
-  EEPROM_readAnything(EEPROM_MACHINE_PEN_WIDTH, penWidth);
-  if (penWidth < 0.0001)
-    penWidth = 0.8;
+  float pWidth;
+  EEPROM_readAnything(EEPROM_MACHINE_PEN_WIDTH, pWidth);
+  Serial.print("penWidth: ");
+  Serial.println(penWidth);
+  Serial.print("pWidth: ");
+  Serial.println(pWidth);
+
+  if (!isnan(pWidth)) {
+    penWidth = pWidth;
+  }
+
+  Serial.print("penWidth: ");
+  Serial.println(penWidth);
 
   mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
   stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
