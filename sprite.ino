@@ -14,7 +14,7 @@ Methods that handle drawing and processing vector sprites.
 
 void sprite_drawSprite()
 {
-  int spriteScale = asInt(inParam1);
+  int spriteScale = atoi(inParam1);
   String spriteFilename = inParam2;
 
   // flip just B axis to orientate for SE drawing  

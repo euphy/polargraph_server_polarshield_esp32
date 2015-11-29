@@ -18,10 +18,10 @@ the squarewave and scribble pixel styles.
 void pixel_drawSquarePixel() 
 {
     if (pixelDebug) { Serial.println("In square pixel 1."); }
-    long originA = multiplier(asLong(inParam1));
-    long originB = multiplier(asLong(inParam2));
-    int size = multiplier(asInt(inParam3));
-    int density = asInt(inParam4);
+    long originA = multiplier(atol(inParam1));
+    long originB = multiplier(atol(inParam2));
+    int size = multiplier(atoi(inParam3));
+    int density = atoi(inParam4);
 
     int halfSize = size / 2;
     
@@ -102,8 +102,6 @@ void pixel_drawSquarePixel()
       pixel_drawWavePixel(size, size, noOfWaves, globalDrawDirection, SQUARE_SHAPE);
     }
     changeLength(endPointA, endPointB);
-    
-    //outputAvailableMemory(); 
 }
 
 byte pixel_getRandomDrawDirection()
@@ -187,17 +185,16 @@ byte pixel_getAutoDrawDirection(long targetA, long targetB, long sourceA, long s
 
 void pixel_drawScribblePixel() 
 {
-    long originA = multiplier(asLong(inParam1));
-    long originB = multiplier(asLong(inParam2));
-    int size = multiplier(asInt(inParam3));
-    int density = asInt(inParam4);
+    long originA = multiplier(atol(inParam1));
+    long originB = multiplier(atol(inParam2));
+    int size = multiplier(atoi(inParam3));
+    int density = atoi(inParam4);
     
     int maxDens = pixel_maxDensity(penWidth, size);
 
     density = pixel_scaleDensity(density, 255, maxDens);
     pixel_drawScribblePixel(originA, originB, size*1.1, density);
     
-    outputAvailableMemory(); 
 }
 
 void pixel_drawScribblePixel(long originA, long originB, int size, int density) 
@@ -253,8 +250,9 @@ int pixel_maxDensity(float penSize, int rowSize)
 {
   float rowSizeInMM = mmPerStep * rowSize;
 
-  if (pixelDebug) {     
-    Serial.print(F("MSG,D,rowsize in mm: "));
+  if (pixelDebug) {
+    Serial.print(MSG_D_STR);
+    Serial.print(F("G,D,rowsize in mm: "));
     Serial.print(rowSizeInMM);
     Serial.print(F(", mmPerStep: "));
     Serial.print(mmPerStep);
@@ -269,14 +267,14 @@ int pixel_maxDensity(float penSize, int rowSize)
 
   if (maxDens <= 1)
   {
-    Serial.print(F("MSG,I,Max waves for penSize: "));
+    Serial.print(MSG_I_STR);
+    Serial.print(F("Max waves for penSize: "));
     Serial.print(penSize);
     Serial.print(F(", grid: "));
     Serial.print(rowSize);
     Serial.print(F(" is "));
     Serial.println(maxDens);
-    Serial.print(MSG);
-    Serial.print(MSG_INFO);
+    Serial.print(MSG_I_STR);
     Serial.println(F("Not possible to express any detail."));
   }  
   
@@ -498,10 +496,10 @@ void pixel_flipWaveDirection()
 
   void pixel_testPenWidth()
   {
-    int rowWidth = multiplier(asInt(inParam1));
-    float startWidth = asFloat(inParam2);
-    float endWidth = asFloat(inParam3); 
-    float incSize = asFloat(inParam4);
+    int rowWidth = multiplier(atoi(inParam1));
+    float startWidth = atof(inParam2);
+    float endWidth = atof(inParam3); 
+    float incSize = atof(inParam4);
 
     int tempDirectionMode = globalDrawDirectionMode;
     globalDrawDirectionMode = DIR_MODE_PRESET;

@@ -22,7 +22,7 @@ then the global "up" position variable is updated, and the servo is moved to tha
 even if it already is "up".  Because naturally, if the up position has changed, even if it
 is already up, there's a good chance it won't be up enough.
 
-The same goes for the 
+The same goes for the down.
 
 */
 
@@ -35,7 +35,6 @@ void penlift_movePen(int start, int end, int delay_ms)
     {
       penHeight.write(i);
       delay(delay_ms);
-//      Serial.println(i);
     }
   }
   else
@@ -56,7 +55,7 @@ void penlift_penUp()
   {
     //Serial.print("Penup with params");
     int positionToMoveFrom = isPenUp ? upPosition : downPosition;
-    upPosition = asInt(inParam1);
+    upPosition = atoi(inParam1);
     penlift_movePen(positionToMoveFrom, upPosition, penLiftSpeed);
   }
   else
@@ -76,7 +75,7 @@ void penlift_penDown()
   if (inNoOfParams > 1)
   {
     int positionToMoveFrom = isPenUp ? upPosition : downPosition;
-    downPosition = asInt(inParam1);
+    downPosition = atoi(inParam1);
     penlift_movePen(positionToMoveFrom, downPosition, penLiftSpeed);
   }
   else

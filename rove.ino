@@ -15,10 +15,10 @@ the rove area heavily.
 
 void rove_setRoveArea()
 {
-  rove1x = stepsPerMM * asLong(inParam1);
-  rove1y = stepsPerMM * asLong(inParam2);
-  roveWidth = stepsPerMM * asLong(inParam3);
-  roveHeight = stepsPerMM * asLong(inParam4);
+  rove1x = stepsPerMM * atol(inParam1);
+  rove1y = stepsPerMM * atol(inParam2);
+  roveWidth = stepsPerMM * atol(inParam3);
+  roveHeight = stepsPerMM * atol(inParam4);
   
   if (rove1x > pageWidth)
     rove1x = pageWidth / 2;
@@ -64,8 +64,8 @@ void rove_startText()
 {
   if (useRoveArea)
   {
-    long tA = multiplier(asLong(inParam1));
-    long tB = multiplier(asLong(inParam2));
+    long tA = multiplier(atol(inParam1));
+    long tB = multiplier(atol(inParam2));
     inNoOfParams = 0;
     
     if (rove_inRoveArea(tA, tB))
@@ -73,9 +73,9 @@ void rove_startText()
       Serial.println("Target position is in rove area.");
       penlift_penUp();
       changeLength(tA, tB);
-      textRowSize = multiplier(asInt(inParam3));
+      textRowSize = multiplier(atoi(inParam3));
       textCharSize = textRowSize * 0.8;
-      globalDrawDirection = asInt(inParam4);
+      globalDrawDirection = atoi(inParam4);
       Serial.println("Text started.");
     }
     else
@@ -210,8 +210,8 @@ void rove_drawNorwegianFromFile()
   {
     // get parameters
     String filename = inParam1;
-    int maxAmplitude = multiplier(asInt(inParam2));
-    int wavelength = multiplier(asInt(inParam3));
+    int maxAmplitude = multiplier(atoi(inParam2));
+    int wavelength = multiplier(atoi(inParam3));
     inNoOfParams = 0;
     
     // Look up file and open it
@@ -574,7 +574,7 @@ void rove_swirl()
 
 void rove_controlSwirling()
 {
-  if (asInt(inParam1) == 0)
+  if (atoi(inParam1) == 0)
   {
     swirling = false;
   }

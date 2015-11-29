@@ -95,7 +95,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.2.2";
+const String FIRMWARE_VERSION_NO = "1.3";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
@@ -103,16 +103,6 @@ const String FIRMWARE_VERSION_NO = "1.2.2";
 #elif MOTHERBOARD == TFTSHIELD
   const String MB_NAME = "TFTSHIELD";
 #endif
-
-// for working out CRCs
-const uint32_t PROGMEM crc_table[16] = {
-    0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac,
-    0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
-    0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c,
-    0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c
-};
-
-boolean usingCrc = false;
 
 //  EEPROM addresses
 const int EEPROM_MACHINE_WIDTH = 0;
@@ -180,21 +170,17 @@ float currentMaxSpeed = 2000.0;
 float currentAcceleration = 2000.0;
 boolean usingAcceleration = true;
 
-float mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
-float stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
+float mmPerStep = 0.0F;
+float stepsPerMM = 0.0F;
 
 long pageWidth = machineWidth * stepsPerMM;
 long pageHeight = machineHeight * stepsPerMM;
 long maxLength = 0;
 
-static String rowAxis = "A";
-const int INLENGTH = 70;
+//static char rowAxis = 'A';
+const int INLENGTH = 50;
 const char INTERMINATOR = 10;
-
-const String DIRECTION_STRING_LTR = "LTR";
-static int SRAM_SIZE = 2048;
-const String FREE_MEMORY_STRING = "MEMORY,";
-int availMem = 0;
+const char SEMICOLON = ';';
 
 float penWidth = 0.8f; // line width in mm
 
@@ -206,13 +192,16 @@ extern AccelStepper motorB;
 
 volatile boolean currentlyRunning = true;
 
-static String inCmd = "                                                  ";
-static String inParam1 = "              ";
-static String inParam2 = "              ";
-static String inParam3 = "              ";
-static String inParam4 = "              ";
+static char inCmd[10];
+static char inParam1[14];
+static char inParam2[14];
+static char inParam3[14];
+static char inParam4[14];
 
-int inNoOfParams;
+static byte inNoOfParams;
+
+char lastCommand[INLENGTH+1];
+boolean commandConfirmed = false;
 
 int rebroadcastReadyInterval = 5000L;
 volatile long lastOperationTime = 0L;
@@ -244,18 +233,16 @@ static int globalDrawDirectionMode = DIR_MODE_AUTO;
 
 static int currentRow = 0;
 
-const String READY = "READY_200";
-const String RESEND = "RESEND";
-const String DRAWING = "DRAWING";
-const static String OUT_CMD_CARTESIAN = "CARTESIAN,";
-const static String OUT_CMD_SYNC = "SYNC,";
+const String READY_STR = "READY_200";
+const String RESEND_STR = "RESEND";
+const String DRAWING_STR = "DRAWING";
+const static String OUT_CMD_CARTESIAN_STR = "CARTESIAN,";
+const static String OUT_CMD_SYNC_STR = "SYNC,";
 
-const String MSG = "MSG,";
-const String MSG_ERROR = "E,";
-const String MSG_INFO = "I,";
-const String MSG_DEBUG = "D,";
+char MSG_E_STR[] = "MSG,E,";
+char MSG_I_STR[] = "MSG,I,";
+char MSG_D_STR[] = "MSG,D,";
 
-static String readyString = READY;
 static boolean pixelDebug = true;
 
 static const byte ALONG_A_AXIS = 0;
@@ -263,11 +250,8 @@ static const byte ALONG_B_AXIS = 1;
 static const byte SQUARE_SHAPE = 0;
 static const byte SAW_SHAPE = 1;
 
-String lastCommand = "";
-boolean commandConfirmed = false;
-
-const static String COMMA = ",";
-const static String CMD_END = ",END";
+const static char COMMA[] = ",";
+const static char CMD_END[] = ",END";
 const static String CMD_CHANGELENGTH = "C01";
 const static String CMD_CHANGEPENWIDTH = "C02";
 const static String CMD_CHANGEMOTORSPEED = "C03";
@@ -305,7 +289,6 @@ void setup()
   Serial.print(F("Servo "));
   Serial.println(PEN_HEIGHT_SERVO_PIN);
 
-
   configuration_motorSetup();
   eeprom_loadMachineSpecFromEeprom();
   configuration_setup();
@@ -317,13 +300,14 @@ void setup()
   
   motorA.setCurrentPosition(startLengthStepsA);
   motorB.setCurrentPosition(startLengthStepsB);
-  readyString = READY;
-  comms_establishContact();
+  for (int i = 0; i<INLENGTH; i++) {
+    lastCommand[i] = 0;
+  }    
+  comms_ready();
 
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(500);
   penlift_penUp();
-  outputAvailableMemory();
   
 //  impl_engageMotors();
 //  lcd_runStartScript()
@@ -331,8 +315,15 @@ void setup()
 
 void loop()
 {
-  lastCommand = comms_waitForNextCommand();
-  comms_parseAndExecuteCommand(lastCommand);
+  if (comms_waitForNextCommand(lastCommand)) 
+  {
+#ifdef DEBUG_COMMS    
+    Serial.print(F("Last comm: "));
+    Serial.print(lastCommand);
+    Serial.println(F("..."));
+#endif
+    comms_parseAndExecuteCommand(lastCommand);
+  }
 }
 
 

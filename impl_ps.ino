@@ -178,14 +178,15 @@ void impl_exec_execFromStore(String inFilename)
         Serial.print(ch);
         Serial.print("-");
 #endif
-        if (ch == 13 || ch == 10)
+        if (ch == INTERMINATOR || ch == SEMICOLON)
         {
 #ifdef DEBUG_SD        
           Serial.println("New line");
 #endif
           // execute the line
           command.trim();
-          boolean commandParsed = comms_parseCommand(command);
+          command.toCharArray(lastCommand, INLENGTH+1);
+          boolean commandParsed = comms_parseCommand(lastCommand);
           if (commandParsed)
           {
 #ifdef DEBUG_SD        
@@ -269,10 +270,10 @@ void impl_exec_changeToLiveCommandMode()
 
 void impl_pixel_testPenWidthScribble()
 {
-  int rowWidth = multiplier(asInt(inParam1));
-  float startWidth = asFloat(inParam2);
-  float endWidth = asFloat(inParam3); 
-  float incSize = asFloat(inParam4);
+  int rowWidth = multiplier(atoi(inParam1));
+  float startWidth = atof(inParam2);
+  float endWidth = atof(inParam3); 
+  float incSize = atof(inParam4);
   
   boolean ltr = true;
   
@@ -380,8 +381,8 @@ void drawRandom()
 
 void impl_exec_drawTestDirectionSquare()
 {
-  int rowWidth = multiplier(asInt(inParam1));
-  int segments = asInt(inParam2);
+  int rowWidth = multiplier(atoi(inParam1));
+  int segments = atoi(inParam2);
   pixel_drawSquarePixel(rowWidth, rowWidth, segments, DIR_SE);
   moveA(rowWidth*2);
   
@@ -398,10 +399,10 @@ void impl_exec_drawTestDirectionSquare()
 
 void impl_pixel_drawSawtoothPixel()
 {
-    long originA = multiplier(asLong(inParam1));
-    long originB = multiplier(asLong(inParam2));
-    int size = multiplier(asInt(inParam3));
-    int density = asInt(inParam4);
+    long originA = multiplier(atol(inParam1));
+    long originB = multiplier(atol(inParam2));
+    int size = multiplier(atoi(inParam3));
+    int density = atoi(inParam4);
 
     int halfSize = size / 2;
     
@@ -463,5 +464,4 @@ void impl_pixel_drawSawtoothPixel()
     }
     changeLength(endPointA, endPointB);
     
-    //outputAvailableMemory();   
 }

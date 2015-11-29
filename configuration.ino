@@ -12,48 +12,12 @@ It sets up the motor objects (AccelSteppers), and has default
 values for the motor, sprocket and microstepping combinations used
 by polargraphs so far.
 
-Comment out the blocks of code you don't need.
-
 */
-// motor configurations for the various electrical schemes
 
 // =================================================================
-// 1. Adafruit motorshield
-
-//#include <AFMotor.h>
-//const int stepType = INTERLEAVE;
-//
-//AF_Stepper afMotorA(motorStepsPerRev, 1);
-//AF_Stepper afMotorB(motorStepsPerRev, 2);
-//
-//void forwarda() { afMotorA.onestep(FORWARD, stepType); }
-//void backwarda() { afMotorA.onestep(BACKWARD, stepType); }
-//AccelStepper motorA(forwarda, backwarda);
-//
-//void forwardb() { afMotorB.onestep(FORWARD, stepType); }
-//void backwardb() { afMotorB.onestep(BACKWARD, stepType); }
-//AccelStepper motorB(forwardb, backwardb);
-//
-//void configuration_motorSetup()
-//{
-//  // no initial setup for these kinds of motor drivers
-//}
-//void configuration_setup()
-//{
-//  defaultMachineWidth = 650;
-//  defaultMachineHeight = 650;
-//  defaultMmPerRev = 95;
-//  defaultStepsPerRev = 400;
-//  defaultStepMultiplier = 1;
-//  delay(500);
-//}
-// end of Adafruit motorshield definition
-// =================================================================
-
-
-// =================================================================
-// 2. Polarshield motor driver board
+// Polarshield motor driver board
 // This uses stepstick-format stepper drivers on arduino pins 3 to 8.
+// Motor C has never been used!
 
 #if MOTHERBOARD == POLARSHIELD
   #define MOTOR_A_ENABLE_PIN 3
@@ -131,12 +95,9 @@ void configuration_motorSetup()
 
 void configuration_setup()
 {
-  defaultMachineWidth = 650;
-  defaultMachineHeight = 650;
-  defaultMmPerRev = 95;
-  defaultStepsPerRev = 400;
-  defaultStepMultiplier = 8;
-
+  mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
+  stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
+  
   // init SD card
   sd_initSD();
   lcd_initLCD();
@@ -145,8 +106,6 @@ void configuration_setup()
   pinMode(2, INPUT);
   touch.InitTouch();
   touch.setPrecision(PREC_MEDIUM);  
-//  attachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, FALLING);
-  
   
   // calibration pins
   pinMode(ENDSTOP_X_MIN, INPUT_PULLUP);
@@ -154,15 +113,7 @@ void configuration_setup()
   pinMode(ENDSTOP_X_MAX, INPUT_PULLUP);
   pinMode(ENDSTOP_Y_MAX, INPUT_PULLUP);
   
-//  while ((digitalRead(ENDSTOP_X_MIN) != 0) && (digitalRead(ENDSTOP_Y_MIN) != 0)) {
-//    Serial.print("X: ");
-//    Serial.print(digitalRead(ENDSTOP_X_MIN));
-//    Serial.print(", Y: ");
-//    Serial.println(digitalRead(ENDSTOP_Y_MIN));
-//  }
-  
   lcd_displayFirstMenu();
-  
   releaseMotors();
 }
 

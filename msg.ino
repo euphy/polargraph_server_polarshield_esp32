@@ -10,8 +10,7 @@ void msg_reportMinimumGridSizeForPen()
   
   int segSize = pixel_minSegmentSizeForPen(penWidth);
   
-  Serial.print(MSG);
-  Serial.print(MSG_INFO);
+  Serial.print(MSG_I_STR);
   Serial.print("Minimum grid size is ");
   segSize = segSize * 2;
   Serial.print(segSize);

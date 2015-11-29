@@ -18,10 +18,10 @@ implementation of the spiral pixel.
 
 void curves_pixel_drawCircularPixel() 
 {
-    long originA = multiplier(asLong(inParam1));
-    long originB = multiplier(asLong(inParam2));
-    int size = multiplier(asInt(inParam3));
-    int density = asInt(inParam4);
+    long originA = multiplier(atol(inParam1));
+    long originB = multiplier(atol(inParam2));
+    int size = multiplier(atoi(inParam3));
+    int density = atoi(inParam4);
 
     int radius = size / 2;
 
@@ -49,7 +49,6 @@ void curves_pixel_drawCircularPixel()
       curves_drawSpiral(originA, originB, radius, increment, density);
     }
     
-    outputAvailableMemory(); 
 }
 
 

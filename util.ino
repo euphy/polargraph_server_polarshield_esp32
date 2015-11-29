@@ -18,11 +18,13 @@ long multiplier(int in)
 {
   return multiplier(long(in));
 }
+
 long multiplier(long in)
 {
   return in * long(stepMultiplier);
 }
-float multiplier(float in)
+
+float multiplier(double in)
 {
 //  Serial.print("float multiplier in: ");
 //  Serial.println(in);
@@ -36,11 +38,11 @@ float multiplier(float in)
 //  Serial.println(out);
   return out;
 }
+
 long divider(long in)
 {
   return in / float(stepMultiplier);
 }
-
 
 void transform(float &tA, float &tB)
 {
@@ -251,7 +253,7 @@ void reportPosition()
 {
   if (reportingPosition)
   {
-    Serial.print(OUT_CMD_SYNC);
+    Serial.print(OUT_CMD_SYNC_STR);
     Serial.print(divider(motorA.currentPosition()));
     Serial.print(COMMA);
     Serial.print(divider(motorB.currentPosition()));
@@ -264,8 +266,7 @@ void reportPosition()
   //  Serial.print(COMMA);
   //  Serial.print(cY*mmPerStep);
   //  Serial.println(CMD_END);
-  //
-    //outputAvailableMemory();
+
   }
 }
 
@@ -355,55 +356,5 @@ long getCartesianY(long cX, float aPos) {
 }
 
 
-void outputAvailableMemory()
-{
-  int avMem = availableMemory();
-  if (avMem != availMem)
-  {
-    availMem = avMem;
-    Serial.print(FREE_MEMORY_STRING);
-    Serial.print(availMem);
-    Serial.println(CMD_END);
-  }
-}
-
-//from http://www.arduino.cc/playground/Code/AvailableMemory
-int availableMemory() {
-  uint8_t * heapptr, * stackptr;
-  stackptr = (uint8_t *)malloc(4);
-  heapptr = stackptr;
-  free(stackptr);               
-  stackptr = (uint8_t *)(SP);
-  return stackptr - heapptr;
-} 
-
-
-
-/*
-Calculating CRCs.  Incoming commands have these appended as a way
-to check quality.
-http://www.excamera.com/sphinx/article-crc.html
-*/
-unsigned long crc_update(unsigned long crc, byte data)
-{
-    byte tbl_idx;
-    tbl_idx = crc ^ (data >> (0 * 4));
-    crc = pgm_read_dword_near(crc_table + (tbl_idx & 0x0f)) ^ (crc >> 4);
-    tbl_idx = crc ^ (data >> (1 * 4));
-    crc = pgm_read_dword_near(crc_table + (tbl_idx & 0x0f)) ^ (crc >> 4);
-    return crc;
-}
-
-
-unsigned long crc_string(String s)
-{
-  unsigned long crc = ~0L;
-  for (int i = 0; i < s.length(); i++)
-  {
-    crc = crc_update(crc, s.charAt(i));
-  }
-  crc = ~crc;
-  return crc;
-}
 
 
