@@ -183,15 +183,18 @@ void exec_setPenLiftRange()
   Serial.println(down);
   Serial.print(F("Up: "));
   Serial.println(up);
+//
+//  Serial.print("inNoOfParams: " );
+//  Serial.println(inNoOfParams);
   
-  if (inNoOfParams == 4) 
+  if (inNoOfParams == 3) 
   {
     // 4 params (C45,<downpos>,<uppos>,1,END) means save values to EEPROM
     EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
     EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
     eeprom_loadPenLiftRange();
   }
-  else if (inNoOfParams == 3)
+  else if (inNoOfParams == 2)
   {
     // 3 params (C45,<downpos>,<uppos>,END) means just do a range test
     penlift_movePen(up, down, penLiftSpeed);

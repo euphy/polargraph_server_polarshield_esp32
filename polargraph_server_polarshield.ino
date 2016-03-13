@@ -90,12 +90,13 @@ Put them in libraries/UTouch/UTouchCD.h
 
 //#define DEBUG_SD
 //#define DEBUG_STATE
+//#define DEBUG_COMMS
 
 /*  ===========================================================  
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.3";
+const String FIRMWARE_VERSION_NO = "1.3.1";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
