@@ -6,10 +6,9 @@ Polargraph Server for ATMEGA2560 based arduino boards, primarily targetting a Po
 A Polarshield is an add-on board for an Arduino MEGA that provides two stepper drivers, an SD card reader and 
 an LCD touchscreen. The firmware may also be configured at compile time to target RAMPS, though without SD reader and touchscreen (yet...).
 
-There are a couple of precompiled binary hex files you can use if you don't want to compile from source.
+There is a precompiled binary hex file you can use if you don't want to compile from source.
 
-- polargraph_server_polarshield_v1.x_2.4.cpp.hex  Is for ye olde versions of the Polarshield or PolargraphSD that shipped with a 2.4 inch screen, prior to August 2014.
-- polargraph_server_polarshield_v2_2.4.cpp.hex is for versions of the Polarshield or PolargraphSD that shipped after August 2014.
+- polargraph_server_polarshield.ino.hex is for versions of the Polarshield or PolargraphSD that shipped after August 2014.
 
 If you have a 2.2 inch screen, then you need to compile the firmware yourself.
 
