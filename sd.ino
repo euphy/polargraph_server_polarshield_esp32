@@ -339,14 +339,15 @@ boolean sd_pbmReadHeader()
 
 void sd_autorunSD() {
   if (cardPresent && cardInit && useAutoStartFromSD) {
-    if (autoStartFilename != null && autoStartFilename != "") {
+    if (autoStartFilename != "") {
       // attempt to open the file 
       Serial.print("Auto executing:");
       Serial.println(autoStartFilename);
 
-      File readFile = SD.open(filename, FILE_READ);
+      File readFile = SD.open(autoStartFilename, FILE_READ);
       if (readFile)
       {
+        readFile.close();
         impl_exec_execFromStore(autoStartFilename);
       }
       else {
