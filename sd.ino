@@ -336,3 +336,23 @@ boolean sd_pbmReadHeader()
 
   return true;
 }
+
+void sd_autorunSD() {
+  if (cardPresent && cardInit && useAutoStartFromSD) {
+    if (autoStartFilename != null && autoStartFilename != "") {
+      // attempt to open the file 
+      Serial.print("Auto executing:");
+      Serial.println(autoStartFilename);
+
+      File readFile = SD.open(filename, FILE_READ);
+      if (readFile)
+      {
+        impl_exec_execFromStore(autoStartFilename);
+      }
+      else {
+        Serial.println("Couldn't find that file.");
+      }
+    }
+  }
+}
+

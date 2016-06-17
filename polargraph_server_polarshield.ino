@@ -96,7 +96,7 @@ Put them in libraries/UTouch/UTouchCD.h
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.3.1";
+const String FIRMWARE_VERSION_NO = "1.4";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
@@ -303,15 +303,12 @@ void setup()
   motorB.setCurrentPosition(startLengthStepsB);
   for (int i = 0; i<INLENGTH; i++) {
     lastCommand[i] = 0;
-  }    
-  comms_ready();
-
+  }
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(500);
   penlift_penUp();
-  
-//  impl_engageMotors();
-//  lcd_runStartScript()
+
+  sd_autorunSD();
 }
 
 void loop()
@@ -437,6 +434,9 @@ boolean powerIsOn = false;
 boolean isCalibrated = false;
 
 boolean canCalibrate = false;
+
+boolean useAutoStartFromSD = true;
+String autoStartFilename = "autorun.g";
 
 
 

@@ -190,21 +190,17 @@ const byte BUTTON_DEC_PENLIFT_DOWN = 43;
 const byte BUTTON_ADJUST_PENLIFT = 44;
 const byte BUTTON_PENLIFT_SAVE_TO_EEPROM = 45;
 
-//const byte COL_LIGHT_R = 80;
-//const byte COL_LIGHT_G = 255;
-//const byte COL_LIGHT_B = 80;
+byte colorLightRed = random(50, 255);
+byte colorLightGreen = random(50, 255);
+byte colorLightBlue = random(50, 255);
 
-const byte COL_LIGHT_R = random(50, 255);
-const byte COL_LIGHT_G = random(50, 255);
-const byte COL_LIGHT_B = random(50, 255);
+byte colorDarkRed = 5;
+byte colorDarkGreen = 5;
+byte colorDarkBlue = 5;
 
-const byte COL_DARK_R = 5;
-const byte COL_DARK_G = 5;
-const byte COL_DARK_B = 5;
-
-const byte COL_BRIGHT_R = 255;
-const byte COL_BRIGHT_G = 255;
-const byte COL_BRIGHT_B = 255;
+byte colorBrightRed = 255;
+byte colorBrightGreen = 255;
+byte colorBrightBlue = 255;
 
 void lcd_processTouchCommand()
 {
@@ -215,7 +211,7 @@ void lcd_processTouchCommand()
         Serial.print(",");
         Serial.println(touchY);  
   byte buttonNumber = lcd_getButtonNumber(touchX, touchY);
-  lcd_outlinePressedButton(buttonNumber,COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
+  lcd_outlinePressedButton(buttonNumber,colorBrightRed,colorBrightGreen,colorBrightBlue);
 
   byte pressedButton = lcd_getWhichButtonPressed(buttonNumber, currentMenu);
   Serial.print("button:");
@@ -349,43 +345,43 @@ void lcd_processTouchCommand()
       // return to main menu
       commandFilename = "";
       currentMenu = MENU_INITIAL;
-      lcd.setColor(180,180,180);
+      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
       lcd.clrScr();
       lcd_drawButtons();
       break;
     case BUTTON_ADJUST_PENSIZE_MENU:
       currentMenu = MENU_ADJUST_PENSIZE;
-      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
       lcd.clrScr();
       lcd_drawButtons();
       break;
     case BUTTON_ADJUST_SPEED_MENU:
       currentMenu = MENU_ADJUST_SPEED;
-      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
       lcd.clrScr();
       lcd_drawButtons();
       break;
     case BUTTON_ADJUST_POSITION_MENU:
       currentMenu = MENU_ADJUST_POSITION;
-      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
       lcd.clrScr();
       lcd_drawButtons();
       break;
     case BUTTON_SETTINGS_MENU:
       currentMenu = MENU_SETTINGS;
-      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
       lcd.clrScr();
       lcd_drawButtons();
       break;
     case BUTTON_SETTINGS_MENU_2:
       currentMenu = MENU_SETTINGS_2;
-      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
       lcd.clrScr();
       lcd_drawButtons();
       break;
     case BUTTON_DONE:
       currentMenu = MENU_INITIAL;
-      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
       lcd.clrScr();
       lcd_drawButtons();
       break;
@@ -424,7 +420,7 @@ void lcd_processTouchCommand()
       
     case BUTTON_ADJUST_PENLIFT:
       currentMenu = MENU_ADJUST_PENLIFT;
-      lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
       lcd.clrScr();
       lcd_drawButtons();
       break;
@@ -490,18 +486,18 @@ void lcd_processTouchCommand()
 
 void lcd_drawNumberWithBackground(int x, int y, long value)
 {
-  lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   lcd.fillRect(x, y, x+buttonSize, y+20);
-  lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
-  lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorBrightRed,colorBrightGreen,colorBrightBlue);
+  lcd.setBackColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   lcd.printNumI(value, x, y);
 }
 void lcd_drawFloatWithBackground(int x, int y, float value)
 {
-  lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   lcd.fillRect(x, y, x+buttonSize, y+20);
-  lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
-  lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorBrightRed,colorBrightGreen,colorBrightBlue);
+  lcd.setBackColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   lcd.printNumF(value, 2, x, y);
 }
 
@@ -525,7 +521,7 @@ void lcd_setCurrentMenu(byte menu)
 
 void lcd_displayFirstMenu()
 {
-  lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+  lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
   lcd.clrScr();
   lcd_setCurrentMenu(MENU_INITIAL);
   lcd_drawButtons();
@@ -533,7 +529,7 @@ void lcd_displayFirstMenu()
 
 void lcd_drawStoreContentsMenu()
 {
-  lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+  lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
   lcd.clrScr();
   lcd_setCurrentMenu(MENU_CHOOSE_FILE);
   lcd_drawButtons();
@@ -587,11 +583,11 @@ void lcd_initLCD()
   buttonCoords[11][0] = gap+buttonSize+gap+buttonSize+gap+buttonSize;
   buttonCoords[11][1] = gap+buttonSize+buttonSize+grooveSize;
 
-  lcd.setBackColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
-  lcd.setColor(COL_LIGHT_R, COL_LIGHT_G, COL_LIGHT_B);
+  lcd.setBackColor(colorDarkRed, colorDarkGreen, colorDarkBlue);
+  lcd.setColor(colorLightRed, colorLightGreen, colorLightBlue);
   lcd.fillRect(0,buttonCoords[5][1], screenWidth,buttonCoords[5][1]+56);
-  lcd.setBackColor(COL_LIGHT_R, COL_LIGHT_G, COL_LIGHT_B);
-  lcd.setColor(COL_BRIGHT_R, COL_BRIGHT_G, COL_BRIGHT_B);
+  lcd.setBackColor(colorLightRed, colorLightGreen, colorLightBlue);
+  lcd.setColor(colorBrightRed, colorBrightGreen, colorBrightBlue);
 
   touch.InitTouch();
   touch.setPrecision(PREC_MEDIUM);
@@ -600,7 +596,7 @@ void lcd_initLCD()
   lcd.print("Polargraph.", 17, buttonCoords[5][1]+10);
   lcd.setFont(SmallFont);
   lcd.print("Drawing with robots.", 20, buttonCoords[5][1]+32);
-  lcd.setBackColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
+  lcd.setBackColor(colorDarkRed, colorDarkGreen, colorDarkBlue);
   lcd.print("v"+FIRMWARE_VERSION_NO, 20, buttonCoords[5][1]+buttonCoords[5][1]+gap);
   
 }
@@ -614,10 +610,10 @@ void lcd_showSummary()
     lcd.print("SD card present", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
     delay(500);
     if (cardInit) {
-      lcd.setColor(COL_DARK_R, COL_DARK_G, COL_DARK_B);
+      lcd.setColor(colorDarkRed, colorDarkGreen, colorDarkBlue);
       lcd.fillRect(0, buttonCoords[5][1]+buttonCoords[5][1]-gap, screenWidth, buttonCoords[5][1]+buttonCoords[5][1]-gap+17);
       delay(500);
-      lcd.setColor(COL_BRIGHT_R, COL_BRIGHT_G, COL_BRIGHT_B);
+      lcd.setColor(colorBrightRed, colorBrightGreen, colorBrightBlue);
       lcd.print("Card loaded.", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
     }
     else
@@ -631,8 +627,8 @@ void lcd_showSummary()
 
 void lcd_drawButtons()
 {
-  lcd.setBackColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
-  lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setBackColor(colorLightRed,colorLightGreen,colorLightBlue);
+  lcd.setColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
 
   if (currentMenu == MENU_INITIAL)
   {
@@ -741,13 +737,13 @@ void lcd_drawButtons()
 
 void lcd_drawButtonBackground(byte coordsIndex)
 {
-  lcd.setColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
+  lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
   lcd.fillRect(buttonCoords[coordsIndex][0], buttonCoords[coordsIndex][1], 
     buttonCoords[coordsIndex+1][0], buttonCoords[coordsIndex+1][1]);
     
   // set the colours to write the text
-  lcd.setBackColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
-  lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
+  lcd.setBackColor(colorLightRed,colorLightGreen,colorLightBlue);
+  lcd.setColor(colorBrightRed,colorBrightGreen,colorBrightBlue);
 }
 void lcd_outlinePressedButton(byte pressedButton, byte r, byte g, byte b)
 {
@@ -760,8 +756,8 @@ void lcd_outlinePressedButton(byte pressedButton, byte r, byte g, byte b)
       buttonCoords[coordsIndex+1][0], buttonCoords[coordsIndex+1][1]-1);
     lcd.drawRect(buttonCoords[coordsIndex][0]+1, buttonCoords[coordsIndex][1]+1, 
       buttonCoords[coordsIndex+1][0]-1, buttonCoords[coordsIndex+1][1]-2);
-    lcd.setBackColor(COL_LIGHT_R,COL_LIGHT_G,COL_LIGHT_B);
-    lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+    lcd.setBackColor(colorLightRed,colorLightGreen,colorLightBlue);
+    lcd.setColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   }
   Serial.println("Outlined!");
 }
@@ -1033,11 +1029,11 @@ void lcd_drawButton(byte but)
 
 void lcd_displayMachineSpec()
 {
-  lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   lcd.clrScr();
   lcd.fillRect(10, 10, 210, 166);
-  lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
-  lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
+  lcd.setBackColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
+  lcd.setColor(colorBrightRed,colorBrightGreen,colorBrightBlue);
   
   const int ROW_HEIGHT = 12;
   int currentRow = 30;
@@ -1090,10 +1086,10 @@ void lcd_displayMachineSpec()
 void lcd_drawCurrentSelectedFilename()
 {
   // erase the previous stuff
-  lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24);
-  lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
-  lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorBrightRed,colorBrightGreen,colorBrightBlue);
+  lcd.setBackColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
 
   // see if there's one already found
   String msg = "No card found";
@@ -1217,10 +1213,10 @@ void lcd_echoLastCommandToDisplay(String com, String prefix)
 {
   if (currentMenu != MENU_INITIAL) return;
   
-  lcd.setColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24);
-  lcd.setColor(COL_BRIGHT_R,COL_BRIGHT_G,COL_BRIGHT_B);
-  lcd.setBackColor(COL_DARK_R,COL_DARK_G,COL_DARK_B);
+  lcd.setColor(colorBrightRed,colorBrightGreen,colorBrightBlue);
+  lcd.setBackColor(colorDarkRed,colorDarkGreen,colorDarkBlue);
   lcd.print(prefix + com, buttonCoords[0][0],buttonCoords[1][1]+10);
 }
 
