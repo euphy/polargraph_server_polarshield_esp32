@@ -614,7 +614,20 @@ void lcd_showSummary()
       lcd.fillRect(0, buttonCoords[5][1]+buttonCoords[5][1]-gap, screenWidth, buttonCoords[5][1]+buttonCoords[5][1]-gap+17);
       delay(500);
       lcd.setColor(colorBrightRed, colorBrightGreen, colorBrightBlue);
-      lcd.print("Card loaded.", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
+      String msg;
+      lcd.print("Card loaded - ", 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
+      if (useAutoStartFromSD) {
+        if (autoStartFileFound) {
+          msg = "Card loaded, running: " + autoStartFilename;
+        }
+        else {
+          msg = "Card loaded, no " + autoStartFilename;
+        }
+      } 
+      else {
+        msg = "Card loaded.";
+      }
+      lcd.print(msg, 20, buttonCoords[5][1]+buttonCoords[5][1]-gap);
     }
     else
       lcd.print("Card init failed!", 10, row+=rowHeight);

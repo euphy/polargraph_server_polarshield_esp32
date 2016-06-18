@@ -88,7 +88,7 @@ Put them in libraries/UTouch/UTouchCD.h
     Some debugging flags
 =========================================================== */    
 
-//#define DEBUG_SD
+#define DEBUG_SD
 //#define DEBUG_STATE
 //#define DEBUG_COMMS
 
@@ -436,7 +436,8 @@ boolean isCalibrated = false;
 boolean canCalibrate = false;
 
 boolean useAutoStartFromSD = true;
-String autoStartFilename = "autorun.g";
+String autoStartFilename = "AUTORUN.TXT";
+boolean autoStartFileFound = false;
 
 
 

@@ -158,20 +158,30 @@ void exec_setMachineNameFromCommand()
 
 void exec_setMachineMmPerRevFromCommand()
 {
-  float mmPerRev = atof(inParam1);
-  EEPROM_writeAnything(EEPROM_MACHINE_MM_PER_REV, mmPerRev);
+  float newMmPerRev = atof(inParam1);
   eeprom_loadMachineSpecFromEeprom();
+  if (mmPerRev != newMmPerRev) {
+    EEPROM_writeAnything(EEPROM_MACHINE_MM_PER_REV, newMmPerRev);
+    eeprom_loadMachineSpecFromEeprom();
+  } 
 }
 void exec_setMachineStepsPerRevFromCommand()
 {
-  int stepsPerRev = atoi(inParam1);
-  EEPROM_writeAnything(EEPROM_MACHINE_STEPS_PER_REV, stepsPerRev);
+  int newStepsPerRev = atoi(inParam1);
   eeprom_loadMachineSpecFromEeprom();
+  if (motorStepsPerRev != newStepsPerRev) {
+    EEPROM_writeAnything(EEPROM_MACHINE_STEPS_PER_REV, newStepsPerRev);
+    eeprom_loadMachineSpecFromEeprom();
+  }
 }
 void exec_setMachineStepMultiplierFromCommand()
 {
-  EEPROM_writeAnything(EEPROM_MACHINE_STEP_MULTIPLIER, atoi(inParam1));
+  int newStepMultiplier = atoi(inParam1);
   eeprom_loadMachineSpecFromEeprom();
+  if (stepMultiplier != newStepMultiplier) {
+    EEPROM_writeAnything(EEPROM_MACHINE_STEP_MULTIPLIER, newStepMultiplier);
+    eeprom_loadMachineSpecFromEeprom();
+  }
 }
 
 void exec_setPenLiftRange()
@@ -183,9 +193,6 @@ void exec_setPenLiftRange()
   Serial.println(down);
   Serial.print(F("Up: "));
   Serial.println(up);
-//
-//  Serial.print("inNoOfParams: " );
-//  Serial.println(inNoOfParams);
   
   if (inNoOfParams == 3) 
   {
