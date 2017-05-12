@@ -90,13 +90,13 @@ Put them in libraries/UTouch/UTouchCD.h
 
 //#define DEBUG_SD
 //#define DEBUG_STATE
-//#define DEBUG_COMMS
+#define DEBUG_COMMS
 
 /*  ===========================================================  
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.4";
+const String FIRMWARE_VERSION_NO = "1.4.2";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == POLARSHIELD
@@ -139,6 +139,7 @@ static int penLiftSpeed = 3; // ms between steps of moving motor
 
 #endif
 
+boolean debugComms = true;
 boolean isPenUp = false;
 
 int motorStepsPerRev = 200;
@@ -157,7 +158,7 @@ static int sqtest = 0;
 
 static int defaultMachineWidth = 650;
 static int defaultMachineHeight = 650;
-static int defaultMmPerRev = 95;
+static float defaultMmPerRev = 95.0;
 static int defaultStepsPerRev = 200;
 static int defaultStepMultiplier = 8;
 
@@ -277,6 +278,7 @@ const static String CMD_SETMOTORACCEL = "C32";
 const static String CMD_SETMACHINESTEPMULTIPLIER = "C37";
 const static String CMD_SETPENLIFTRANGE = "C45";
 const static String CMD_PIXELDIAGNOSTIC = "C46";
+const static String CMD_SET_DEBUGCOMMS = "C47";
 
 void setup() 
 {

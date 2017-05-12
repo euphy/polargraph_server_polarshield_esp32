@@ -89,6 +89,8 @@ void impl_executeCommand(String &com)
     rove_drawRoveAreaFittedToImage();
   else if (com.startsWith(CMD_AUTO_CALIBRATE))
     calibrate_doCalibration();
+  else if (com.startsWith(CMD_SET_DEBUGCOMMS))
+    impl_setDebugComms();
   else
   {
     comms_unrecognisedCommand(com);
@@ -465,3 +467,12 @@ void impl_pixel_drawSawtoothPixel()
     changeLength(endPointA, endPointB);
     
 }
+
+void impl_setDebugComms() {
+  int debugCommsValue = atoi(inParam1);
+  switch (debugCommsValue) {
+    case 0: debugComms = false; break;
+    case 1: debugComms = true; break;
+  }
+}
+
