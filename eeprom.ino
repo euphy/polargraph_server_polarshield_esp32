@@ -19,7 +19,7 @@ whenever a value is written to the EEPROM.
 
 void eeprom_resetEeprom()
 {
-  for (int i = 0; i <50; i++)
+  for (int i = 0; i < (EEPROM_PENLIFT_UP +2); i++)
   {
     EEPROM.write(i, 0);
   }

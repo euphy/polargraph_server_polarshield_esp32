@@ -26,6 +26,7 @@ void sd_initSD()
   
 //  sd_alternativeInit();
   sd_simpleInit();
+  sd_initAutoStartFile();
 }
 
 void sd_simpleInit() {
@@ -337,23 +338,27 @@ boolean sd_pbmReadHeader()
   return true;
 }
 
-void sd_autorunSD() {
-  if (cardPresent && cardInit && useAutoStartFromSD) {
-    if (autoStartFilename != "") {
-      // attempt to open the file 
-      Serial.print("Auto executing:");
-      Serial.println(autoStartFilename);
-
-      File readFile = SD.open(autoStartFilename, FILE_READ);
-      if (readFile)
-      {
-        readFile.close();
-        impl_exec_execFromStore(autoStartFilename);
-      }
-      else {
-        Serial.println("Couldn't find that file.");
-      }
+void sd_initAutoStartFile() {
+  if (useAutoStartFromSD) {
+    File readFile = SD.open(autoStartFilename, FILE_READ);
+    if (readFile)
+    {
+      readFile.close();
+      autoStartFileFound = true;
+    } else {
+      Serial.println("Autostart file couldn't be opened: " + autoStartFilename);
     }
+  }
+}
+
+void sd_autorunSD() {
+  if (autoStartFileFound) {
+    // attempt to open the file 
+    Serial.print("Auto executing:");
+    Serial.println(autoStartFilename);
+    delay(4000);
+    currentlyDrawingFromFile = true;
+    impl_exec_execFromStore(autoStartFilename);
   }
 }
 

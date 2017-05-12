@@ -438,7 +438,8 @@ boolean isCalibrated = false;
 boolean canCalibrate = false;
 
 boolean useAutoStartFromSD = true;
-String autoStartFilename = "autorun.g";
+String autoStartFilename = "AUTORUN.TXT";
+boolean autoStartFileFound = false;
 
 
 
