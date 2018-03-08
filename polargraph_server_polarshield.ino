@@ -44,10 +44,17 @@ Put them in libraries/UTouch/UTouchCD.h
 **/
 
 //http://forum.arduino.cc/index.php?topic=173584.0
+//#include <SPI.h>
+//#include <SD.h>
+
+#include "FS.h"
+#include "SPIFFS.h"
 #include <SPI.h>
-#include <SD.h>
+#include <TFT_eSPI.h> // Hardware-specific library
+//#include "Fonts/FreeSans9pt7b.h";
+
 #include <AccelStepper.h>
-#include <Servo.h>
+#include <ESP32_Servo.h>
 #include <EEPROM.h>
 #include "EEPROMAnything.h"
 
@@ -68,7 +75,8 @@ Put them in libraries/UTouch/UTouchCD.h
          (By commenting out the one's you _haven't_ got.)
     =========================================================== */    
 #ifndef MOTHERBOARD
-#define MOTHERBOARD POLARSHIELD
+#define MOTHERBOARD NODEMCU32S
+//#define MOTHERBOARD POLARSHIELD
 //#define MOTHERBOARD RAMPS14
 //#define MOTHERBOARD TFTSHIELD
 #endif
@@ -77,6 +85,7 @@ Put them in libraries/UTouch/UTouchCD.h
 #define POLARSHIELD 1
 #define RAMPS14 2
 #define TFTSHIELD 3
+#define NODEMCU32S 4
 
 /*  ===========================================================  
     Control whether to look for touch input or update LCD
@@ -89,40 +98,24 @@ Put them in libraries/UTouch/UTouchCD.h
 =========================================================== */    
 
 //#define DEBUG_SD
-//#define DEBUG_STATE
+#define DEBUG_STATE
 #define DEBUG_COMMS
+boolean debugComms = false;
 
 /*  ===========================================================  
     These variables are common to all polargraph server builds
 =========================================================== */    
 
-const String FIRMWARE_VERSION_NO = "1.4.3";
+const String FIRMWARE_VERSION_NO = "1.5";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
+#elif MOTHERBOARD == NODEMCU32S
+  const String MB_NAME = "NODEMCU32S";
 #elif MOTHERBOARD == POLARSHIELD
   const String MB_NAME = "POLARSHIELD";
 #elif MOTHERBOARD == TFTSHIELD
   const String MB_NAME = "TFTSHIELD";
 #endif
-
-//  EEPROM addresses
-const int EEPROM_MACHINE_WIDTH = 0;
-const int EEPROM_MACHINE_HEIGHT = 2;
-const int EEPROM_MACHINE_NAME = 4;
-const int EEPROM_MACHINE_MM_PER_REV = 14; // 4 bytes (float)
-const int EEPROM_MACHINE_STEPS_PER_REV = 18;
-const int EEPROM_MACHINE_STEP_MULTIPLIER = 20;
-
-
-const int EEPROM_MACHINE_MOTOR_SPEED = 22; // 4 bytes float
-const int EEPROM_MACHINE_MOTOR_ACCEL = 26; // 4 bytes float
-const int EEPROM_MACHINE_PEN_WIDTH = 30; // 4 bytes float
-
-const long EEPROM_MACHINE_HOME_A = 34; // 4 bytes
-const long EEPROM_MACHINE_HOME_B = 38; // 4 bytes
-
-const int EEPROM_PENLIFT_DOWN = 42; // 2 bytes
-const int EEPROM_PENLIFT_UP = 44; // 2 bytes
 
 // Pen raising servo
 Servo penHeight;
@@ -131,29 +124,24 @@ const int DEFAULT_UP_POSITION = 180;
 static int upPosition = DEFAULT_UP_POSITION; // defaults
 static int downPosition = DEFAULT_DOWN_POSITION;
 static int penLiftSpeed = 3; // ms between steps of moving motor
-
 #if MOTHERBOARD == RAMPS14
   #define PEN_HEIGHT_SERVO_PIN 4
-#else // MOTHERBOARD == POLARSHIELD
+#elif MOTHERBOARD == POLARSHIELD
   #define PEN_HEIGHT_SERVO_PIN 9
-
+#elif MOTHERBOARD == NODEMCU32S
+  #define PEN_HEIGHT_SERVO_PIN 22
 #endif
-
-boolean debugComms = false;
 boolean isPenUp = false;
 
-int motorStepsPerRev = 200;
-float mmPerRev = 95;
-int stepMultiplier = 8;
-
-static float translateX = 0.0;
-static float translateY = 0.0;
-static float scaleX = 1.0;
-static float scaleY = 1.0;
-static int rotateTransform = 0;
-
+// working machine specification
+static int motorStepsPerRev = 200;
+static float mmPerRev = 95;
+static int stepMultiplier = 8;
 static int machineWidth = 650;
 static int machineHeight = 800;
+
+
+
 static int sqtest = 0;
 
 static int defaultMachineWidth = 650;
@@ -212,6 +200,18 @@ boolean automaticPowerDown = true;
 
 volatile long lastInteractionTime = 0L;
 
+#define READY_STR "READY_200"
+#define RESEND_STR "RESEND"
+#define DRAWING_STR "DRAWING"
+#define OUT_CMD_SYNC_STR "SYNC,"
+
+char MSG_E_STR[] = "MSG,E,";
+char MSG_I_STR[] = "MSG,I,";
+char MSG_D_STR[] = "MSG,D,";
+
+
+// Pixel drawing
+static boolean pixelDebug = true;
 static boolean lastWaveWasTop = true;
 static boolean lastMotorBiasWasA = true;
 
@@ -225,6 +225,7 @@ const static byte DIR_N = 5;
 const static byte DIR_E = 6;
 const static byte DIR_S = 7;
 const static byte DIR_W = 8;
+
 static int globalDrawDirection = DIR_NW;
 
 const static byte DIR_MODE_AUTO = 1;
@@ -232,26 +233,15 @@ const static byte DIR_MODE_PRESET = 2;
 const static byte DIR_MODE_RANDOM = 3;
 static int globalDrawDirectionMode = DIR_MODE_AUTO;
 
-
 static int currentRow = 0;
-
-const String READY_STR = "READY_200";
-const String RESEND_STR = "RESEND";
-const String DRAWING_STR = "DRAWING";
-const static String OUT_CMD_CARTESIAN_STR = "CARTESIAN,";
-const static String OUT_CMD_SYNC_STR = "SYNC,";
-
-char MSG_E_STR[] = "MSG,E,";
-char MSG_I_STR[] = "MSG,I,";
-char MSG_D_STR[] = "MSG,D,";
-
-static boolean pixelDebug = true;
 
 static const byte ALONG_A_AXIS = 0;
 static const byte ALONG_B_AXIS = 1;
 static const byte SQUARE_SHAPE = 0;
 static const byte SAW_SHAPE = 1;
 
+
+// Command names
 const static char COMMA[] = ",";
 const static char CMD_END[] = ",END";
 const static String CMD_CHANGELENGTH = "C01";
@@ -296,6 +286,8 @@ void setup()
   eeprom_loadMachineSpecFromEeprom();
   configuration_setup();
 
+  penlift_penUp();
+
   motorA.setMaxSpeed(currentMaxSpeed);
   motorA.setAcceleration(currentAcceleration);  
   motorB.setMaxSpeed(currentMaxSpeed);
@@ -303,14 +295,15 @@ void setup()
   
   motorA.setCurrentPosition(startLengthStepsA);
   motorB.setCurrentPosition(startLengthStepsB);
-  for (int i = 0; i<INLENGTH; i++) {
-    lastCommand[i] = 0;
-  }
+
+  comms_flushCommandStr(lastCommand, INLENGTH);
+  comms_flushCommandAndParams();
+  comms_ready();
+  
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(500);
-  penlift_penUp();
 
-  sd_autorunSD();
+//  sd_autorunSD();
 }
 
 void loop()
@@ -330,8 +323,8 @@ void loop()
 /*===========================================================  
     These variables are for the polarshield / mega
 =========================================================== */    
-#include <UTFT.h>
-#include <UTouch.h>
+//#include <UTFT.h>
+//#include <URTouch.h>
 
 
 
@@ -365,16 +358,30 @@ long ENDSTOP_Y_MIN_POSITION = 130;
 long motorARestPoint = 0;
 long motorBRestPoint = 0;
 
-/* Stuff for display */
-extern uint8_t SmallFont[];
-extern uint8_t BigFont[];
-UTFT   lcd(LCD_TYPE, 38,39,40,41);
 
-#if MOTHERBOARD == TFTSHIELD
-UTouch touch(6, 5, 4, 3, 2); // pinouts for the TFT shield
-#else
-UTouch touch(11,12,18,19, 2);
-#endif
+TFT_eSPI lcd = TFT_eSPI();       // Invoke custom library
+
+// This is the file name used to store the touch coordinate
+// calibration data. Cahnge the name to start a new calibration.
+#define CALIBRATION_FILE "/TouchCalData3"
+
+// Set REPEAT_CAL to true instead of false to run calibration
+// again, otherwise it will only be done once.
+// Repeat calibration if you change the screen rotation.
+#define REPEAT_CAL true
+
+//boolean SwitchOn = false;
+//UTFT   lcd(LCD_TYPE, 38,39,40,41);
+//
+//#if MOTHERBOARD == TFTSHIELD
+//URTouch touch(6, 5, 4, 3, 2); // pinouts for the TFT shield
+//#elif MOTHERBOARD == NODEMCU32S
+//URTouch touch(6, 5, 4, 3, 2);
+//#else
+//URTouch touch(11,12,18,19, 2);
+//#endif
+
+
 const int INTERRUPT_TOUCH_PIN = 0;
 boolean displayTouched = false;
 int touchX = 0;
@@ -396,34 +403,29 @@ boolean useRoveArea = false;
 int commandNo = 0;
 int errorInjection = 0;
 
-long screenSaveIdleTime = 1200000L;
-const static byte SCREEN_STATE_NORMAL = 0;
-const static byte SCREEN_STATE_POWER_SAVE = 1;
-byte screenState = SCREEN_STATE_NORMAL;
-
 boolean storeCommands = false;
 boolean drawFromStore = false;
 String commandFilename = "";
 
-// sd card stuff
-const int chipSelect = 53;
-boolean sdCardInit = false;
+//sd card stuff
+ const int chipSelect = 53;
+ boolean sdCardInit = false;
 
-// set up variables using the SD utility library functions:
-File root;
-boolean cardPresent = false;
-boolean cardInit = false;
-boolean echoingStoredCommands = false;
+////set up variables using the SD utility library functions:
+// File root;
+ boolean cardPresent = false;
+ boolean cardInit = false;
+ boolean echoingStoredCommands = false;
 
-// the file itself
-File pbmFile;
+////the file itself
+// File pbmFile;
 
-// information we extract about the bitmap file
-long pbmWidth, pbmHeight;
-float pbmScaling = 1.0;
-int pbmDepth, pbmImageoffset;
-long pbmFileLength = 0;
-float pbmAspectRatio = 1.0;
+////information we extract about the bitmap file
+// long pbmWidth, pbmHeight;
+// float pbmScaling = 1.0;
+// int pbmDepth, pbmImageoffset;
+// long pbmFileLength = 0;
+// float pbmAspectRatio = 1.0;
 
 volatile int speedChangeIncrement = 100;
 volatile int accelChangeIncrement = 100;
@@ -432,9 +434,21 @@ volatile int moveIncrement = 400;
 
 boolean currentlyDrawingFromFile = false;
 String currentlyDrawingFilename = "";
+
+static float translateX = 0.0;
+static float translateY = 0.0;
+static float scaleX = 1.0;
+static float scaleY = 1.0;
+static int rotateTransform = 0;
+
+
+long screenSaveIdleTime = 1200000L;
+const static byte SCREEN_STATE_NORMAL = 0;
+const static byte SCREEN_STATE_POWER_SAVE = 1;
+byte screenState = SCREEN_STATE_NORMAL;
+
 boolean powerIsOn = false;
 boolean isCalibrated = false;
-
 boolean canCalibrate = false;
 
 boolean useAutoStartFromSD = true;

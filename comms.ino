@@ -21,7 +21,7 @@ boolean comms_waitForNextCommand(char *buf)
   int bufPos = 0;
   for (int i = 0; i<INLENGTH; i++) {
     buf[i] = 0;
-  }
+  }  
   long lastRxTime = 0L;
 
   // loop while there's there isn't a terminated command.
@@ -31,9 +31,7 @@ boolean comms_waitForNextCommand(char *buf)
   while (!terminated)
   {
 #ifdef DEBUG_COMMS    
-    if (debugComms) {
-      Serial.print(F("."));
-    }
+//    Serial.print(F("."));
 #endif    
     long timeSince = millis() - lastRxTime;
     
@@ -42,10 +40,8 @@ boolean comms_waitForNextCommand(char *buf)
     if (bufPos != 0 && timeSince > 100)
     {
 #ifdef DEBUG_COMMS
-    if (debugComms) {
       Serial.print(F("Timed out:"));
       Serial.println(timeSince);
-    }
 #endif
       // Clear the buffer and reset the position if it took too long
       for (int i = 0; i<INLENGTH; i++) {
@@ -55,15 +51,13 @@ boolean comms_waitForNextCommand(char *buf)
     }
     
     // idle time is mostly spent in this loop.
-    impl_runBackgroundProcesses();
+//    impl_runBackgroundProcesses();
     timeSince = millis() - idleTime;
     if (timeSince > rebroadcastReadyInterval)
     {
       // issue a READY every 5000ms of idling
 #ifdef DEBUG_COMMS      
-    if (debugComms) {
       Serial.println("");
-    }
 #endif
       comms_ready();
       idleTime = millis();
@@ -75,10 +69,8 @@ boolean comms_waitForNextCommand(char *buf)
       // Get the char
       char ch = Serial.read();
 #ifdef DEBUG_COMMS
-    if (debugComms) {
       Serial.print(F("ch: "));
       Serial.println(ch);
-    }
 #endif
       
       // look at it, if it's a terminator, then lets terminate the string
@@ -86,9 +78,7 @@ boolean comms_waitForNextCommand(char *buf)
         buf[bufPos] = 0; // null terminate the string
         terminated = true;
 #ifdef DEBUG_COMMS
-    if (debugComms) {
         Serial.println(F("Term'd"));
-    }
 #endif
         for (int i = bufPos; i<INLENGTH-1; i++) {
           buf[i] = 0;
@@ -100,12 +90,10 @@ boolean comms_waitForNextCommand(char *buf)
         bufPos++;
       }
 #ifdef DEBUG_COMMS
-      if (debugComms) {
-        Serial.print(F("buf: "));
-        Serial.println(buf);
-        Serial.print(F("Bufpos: "));
-        Serial.println(bufPos);
-      }
+      Serial.print(F("buf: "));
+      Serial.println(buf);
+      Serial.print(F("Bufpos: "));
+      Serial.println(bufPos);
 #endif
       lastRxTime = millis();
     }
@@ -115,10 +103,8 @@ boolean comms_waitForNextCommand(char *buf)
   lastOperationTime = millis();
   lastInteractionTime = lastOperationTime;
 #ifdef DEBUG_COMMS
-  if (debugComms) {
-    Serial.print(F("xbuf: "));
-    Serial.println(buf);
-  }
+  Serial.print(F("xbuf: "));
+  Serial.println(buf);
 #endif
   return true;
 }
@@ -126,17 +112,12 @@ boolean comms_waitForNextCommand(char *buf)
 void comms_parseAndExecuteCommand(char *inS)
 {
 #ifdef DEBUG_COMMS
-  if (debugComms) {
-    Serial.print("3inS: ");
-    Serial.println(inS);
-  }
+  Serial.print("3inS: ");
+  Serial.println(inS);
 #endif
-
-  boolean commandParsed = comms_parseCommand(inS);
-  if (commandParsed)
+  if (comms_parseCommand(inS))
   {
     impl_processCommand(lastCommand);
-    for (int i = 0; i<INLENGTH; i++) { inS[i] = 0; }  
     commandConfirmed = false;
     comms_ready();
   }
@@ -147,66 +128,65 @@ void comms_parseAndExecuteCommand(char *inS)
     Serial.print(inS);
     Serial.println(F(") not parsed."));
   }
-  inNoOfParams = 0;
   
+  comms_flushCommandStr(inS, INLENGTH);
+  comms_flushCommandAndParams();
 }
 
-boolean comms_parseCommand(char *inS)
-{
-#ifdef DEBUG_COMMS
-  if (debugComms) {
-    Serial.print(F("1inS: "));
-    Serial.println(inS);
+void comms_flushCommandStr(char *inS, int len) {
+  for (int i = 0; i<len; i++) {
+    inS[i] = 0;
   }
+}
+
+void comms_flushCommandAndParams() {
+  inParam1[0] = 0;
+  inParam2[0] = 0;
+  inParam3[0] = 0;
+  inParam4[0] = 0;
+  inCmd[0] = 0;
+  inNoOfParams = 0;
+}
+
+boolean comms_isCommandFormatAcceptable(char *inS) {
+#ifdef DEBUG_COMMS
+  Serial.print(F("1inS: "));
+  Serial.println(inS);
 #endif
   // strstr returns a pointer to the location of ",END" in the incoming string (inS).
   char* sub = strstr(inS, CMD_END);
+  if (!sub) {
 #ifdef DEBUG_COMMS
-  if (debugComms) {
-    Serial.print(F("2inS: "));
-    Serial.println(inS);
-  }
+    Serial.println(",END isn't in this string.");
 #endif
-  sub[strlen(CMD_END)] = 0; // null terminate it directly after the ",END"
-#ifdef DEBUG_COMMS
-  if (debugComms) {
-    Serial.print(F("4inS: "));
-    Serial.println(inS);
-    Serial.print(F("2Sub: "));
-    Serial.println(sub);
-    Serial.println(strcmp(sub, CMD_END));
-  }
-#endif
-  if (strcmp(sub, CMD_END) == 0) 
-  {
-    comms_extractParams(inS);
-    return true;
-  }
-  else
     return false;
+  }
+  sub[strlen(CMD_END)] = 0; // null terminate it directly after the ",END"
+
+}
+
+boolean comms_parseCommand(char *inS) {
+  boolean commandWasParsed = false;
+  if (comms_isCommandFormatAcceptable(inS)) {
+    commandWasParsed = comms_extractParams(inS);
+  }
+  return commandWasParsed;
 }  
 
-void comms_extractParams(char* inS) 
-{
+boolean comms_extractParams(char* inS) {
+  comms_flushCommandAndParams();
   char in[strlen(inS)];
   strcpy(in, inS);
   char * param;
   
 #ifdef DEBUG_COMMS
-  if (debugComms) {
-    Serial.print(F("In: "));
-    Serial.print(in);
-    Serial.println("...");
-  }
+  Serial.print(F("In: "));
+  Serial.print(in);
+  Serial.println("...");
 #endif  
   byte paramNumber = 0;
   param = strtok(in, COMMA);
-  
-  inParam1[0] = 0;
-  inParam2[0] = 0;
-  inParam3[0] = 0;
-  inParam4[0] = 0;
-  
+ 
   for (byte i=0; i<6; i++) {
       if (i == 0) {
         strcpy(inCmd, param);
@@ -239,58 +219,52 @@ void comms_extractParams(char* inS)
         }
       }
 #ifdef DEBUG_COMMS
-      if (debugComms) {
-        Serial.print(F("P: "));
-        Serial.print(i);
-        Serial.print(F("-"));
-        Serial.print(paramNumber);
-        Serial.print(F(":"));
-        Serial.println(param);
-      }
+      Serial.print(F("P: "));
+      Serial.print(i);
+      Serial.print(F("-"));
+      Serial.print(paramNumber);
+      Serial.print(F(":"));
+      Serial.println(param);
 #endif
   }
 
   inNoOfParams = paramNumber;
 
 #ifdef DEBUG_COMMS
-    if (debugComms) {
-      Serial.print(F("Command:"));
-      Serial.print(inCmd);
-      Serial.print(F(", p1:"));
-      Serial.print(inParam1);
-      Serial.print(F(", p2:"));
-      Serial.print(inParam2);
-      Serial.print(F(", p3:"));
-      Serial.print(inParam3);
-      Serial.print(F(", p4:"));
-      Serial.println(inParam4);
-      Serial.print(F("Params:"));
-      Serial.println(inNoOfParams);  
-    }
+    Serial.print(F("Command:"));
+    Serial.print(inCmd);
+    Serial.print(F(", p1:"));
+    Serial.print(inParam1);
+    Serial.print(F(", p2:"));
+    Serial.print(inParam2);
+    Serial.print(F(", p3:"));
+    Serial.print(inParam3);
+    Serial.print(F(", p4:"));
+    Serial.println(inParam4);
+    Serial.print(F("Params:"));
+    Serial.println(inNoOfParams);  
 #endif
+
+  if (inCmd) {
+    return true;
+  } else {
+    comms_flushCommandAndParams();
+    return false;
+  }
 }
 
 
 void comms_ready()
 {
-  Serial.println(READY_STR);
-#ifdef DEBUG_STATE
-  Serial.print(MSG_D_STR);
-  Serial.print(F("Display touched:"));
-  Serial.println(displayTouched);
-  Serial.print(MSG_D_STR);
-  Serial.print(F("Pin2:"));
-  Serial.println(analogRead(2));
-#endif
+  Serial.println(F(READY_STR));
 }
-
 void comms_drawing()
 {
-  Serial.println(DRAWING_STR);
+  Serial.println(F(DRAWING_STR));
 }
 void comms_requestResend()
 {
-  Serial.println(RESEND_STR);
+  Serial.println(F(RESEND_STR));
 }
 void comms_unrecognisedCommand(String &com)
 {
@@ -298,7 +272,5 @@ void comms_unrecognisedCommand(String &com)
   Serial.print(com);
   Serial.println(F(" not recognised."));
 }  
-
-
 
 

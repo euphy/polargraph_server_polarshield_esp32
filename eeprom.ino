@@ -17,6 +17,27 @@ whenever a value is written to the EEPROM.
 
 */
 
+//  EEPROM offsets
+const byte EEPROM_START_POSITION = 32;
+
+const int EEPROM_MACHINE_WIDTH = 0;
+const int EEPROM_MACHINE_HEIGHT = 2;
+const int EEPROM_MACHINE_MM_PER_REV = 14; // 4 bytes (float)
+const int EEPROM_MACHINE_STEPS_PER_REV = 18;
+const int EEPROM_MACHINE_STEP_MULTIPLIER = 20;
+
+const int EEPROM_MACHINE_MOTOR_SPEED = 22; // 4 bytes float
+const int EEPROM_MACHINE_MOTOR_ACCEL = 26; // 4 bytes float
+const int EEPROM_MACHINE_PEN_WIDTH = 30; // 4 bytes float
+
+const long EEPROM_MACHINE_HOME_A = 34; // 4 bytes
+const long EEPROM_MACHINE_HOME_B = 38; // 4 bytes
+
+const int EEPROM_PENLIFT_DOWN = 42; // 2 bytes
+const int EEPROM_PENLIFT_UP = 44; // 2 bytes
+
+
+
 void eeprom_resetEeprom()
 {
   for (int i = 0; i < (EEPROM_PENLIFT_UP +2); i++)
@@ -82,7 +103,7 @@ void eeprom_loadSpoolSpec()
 void eeprom_loadPenLiftRange()
 {
   EEPROM_readAnything(EEPROM_PENLIFT_DOWN, downPosition);
-  if (downPosition < 0)
+  if ((downPosition < 0) || (downPosition > 360))
   {
     downPosition = DEFAULT_DOWN_POSITION;
   }
@@ -90,7 +111,7 @@ void eeprom_loadPenLiftRange()
   Serial.println(downPosition);
 
   EEPROM_readAnything(EEPROM_PENLIFT_UP, upPosition);
-  if (upPosition < 0)
+  if ((upPosition < 0) || (upPosition > 360))
   {
     upPosition = DEFAULT_UP_POSITION;
   }
@@ -98,22 +119,6 @@ void eeprom_loadPenLiftRange()
   Serial.println(upPosition);
 }  
 
-void eeprom_loadMachineName()
-{
-  String name = "";
-  for (int i = 0; i < 8; i++)
-  {
-    char b = EEPROM.read(EEPROM_MACHINE_NAME+i);
-    name = name + b;
-  }
-  
-  if (name[0] == 0)
-    name = DEFAULT_MACHINE_NAME;
-  maxLength = 0;
-  machineName = name;
-  Serial.print(F("Loaded machine name:"));
-  Serial.println(machineName);
-}
 
 void eeprom_loadStepMultiplier()
 {
@@ -151,12 +156,13 @@ void eeprom_loadMachineSpecFromEeprom()
   eeprom_loadMachineSize();
   eeprom_loadSpoolSpec();
   eeprom_loadStepMultiplier();
-  eeprom_loadMachineName();
   eeprom_loadPenLiftRange();
   eeprom_loadSpeed();
 
-  Serial.print("Didn't load penWidth: ");
-  Serial.println(penWidth);
+  // load penwidth
+  EEPROM_readAnything(EEPROM_MACHINE_PEN_WIDTH, penWidth);
+  if (penWidth < 0.0001)
+    penWidth = 0.8;
 
   mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
   stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;

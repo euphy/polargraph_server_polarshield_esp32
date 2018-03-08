@@ -26,16 +26,7 @@ long multiplier(long in)
 
 float multiplier(double in)
 {
-//  Serial.print("float multiplier in: ");
-//  Serial.println(in);
-//  Serial.print("Step multiplier: ");
-//  Serial.print(stepMultiplier);
-//  Serial.print(", fl: ");
-//  Serial.println((float) stepMultiplier);
-  
   float out = in * (float) stepMultiplier;
-//  Serial.print("out: ");
-//  Serial.println(out);
   return out;
 }
 
@@ -46,10 +37,6 @@ long divider(long in)
 
 void transform(float &tA, float &tB)
 {
-//  Serial.print("In tA:");
-//  Serial.println(tA);
-//  Serial.print("In tB:");
-//  Serial.println(tB);
 
   tA = tA * scaleX;
   tB = tB * scaleY;

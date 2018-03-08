@@ -19,9 +19,15 @@ void impl_processCommand(String com)
 {
   lcd_echoLastCommandToDisplay(com, "usb:");
   
-  // check for change mode commands
-  if (com.startsWith(CMD_MODE_STORE_COMMANDS)
-  || com.startsWith(CMD_MODE_LIVE))
+  // The MEGA can change from LIVE to STORING modes
+  // LIVE is where it acts on the commands, 
+  // STORING is where the commands are pushed into a file on an SD card.
+
+  // If the command is to switch between these modes, then these are ALWAYS
+  // executed as if LIVE. 
+  // You can't store a mode-change command to SD.
+  if (com.startsWith(CMD_MODE_STORE_COMMANDS) 
+   || com.startsWith(CMD_MODE_LIVE))
   {
     Serial.println("Changing mode.");
     impl_executeCommand(com);
@@ -31,7 +37,7 @@ void impl_processCommand(String com)
   {
     Serial.print(F("Storing command:"));
     Serial.println(com);
-    sd_storeCommand(com);
+//    sd_storeCommand(com);
   }
   else
   {
@@ -51,12 +57,13 @@ void impl_executeCommand(String &com)
   if (exec_executeBasicCommand(com))
   {
     // that's nice, it worked
-    //Serial.println("Executed basic.");
+#ifdef DEBUG
+	
+    Serial.println("Executed basic.");
+#endif
   }
   else if (com.startsWith(CMD_DRAWCIRCLEPIXEL))
     curves_pixel_drawCircularPixel();
-//  else if (com.startsWith(CMD_TESTPATTERN))
-//    testPattern();
   else if (com.startsWith(CMD_TESTPENWIDTHSCRIBBLE))
     impl_pixel_testPenWidthScribble();
   else if (com.startsWith(CMD_DRAWSAWPIXEL))
@@ -69,24 +76,24 @@ void impl_executeCommand(String &com)
     impl_exec_changeToLiveCommandMode();
   else if (com.startsWith(CMD_MODE_EXEC_FROM_STORE))
     impl_exec_execFromStore();
-  else if (com.startsWith(CMD_RANDOM_DRAW))
-    drawRandom();
-  else if (com.startsWith(CMD_SET_ROVE_AREA))
-    rove_setRoveArea();
-  else if (com.startsWith(CMD_START_TEXT))
-    rove_startText();
-  else if (com.startsWith(CMD_DRAW_SPRITE))
-    sprite_drawSprite();
-  else if (com.startsWith(CMD_DRAW_RANDOM_SPRITE))
-    sprite_drawRandomPositionedSprite();
+//  else if (com.startsWith(CMD_RANDOM_DRAW))
+//    drawRandom();
+//  else if (com.startsWith(CMD_SET_ROVE_AREA))
+//    rove_setRoveArea();
+//  else if (com.startsWith(CMD_START_TEXT))
+//    rove_startText();
+//  else if (com.startsWith(CMD_DRAW_SPRITE))
+//    sprite_drawSprite();
+//  else if (com.startsWith(CMD_DRAW_RANDOM_SPRITE))
+//    sprite_drawRandomPositionedSprite();
   else if (com.startsWith(CMD_CHANGELENGTH_RELATIVE))
     exec_changeLength();
-  else if (com.startsWith(CMD_SWIRLING))
-    rove_controlSwirling();
-  else if (com.startsWith(CMD_DRAW_NORWEGIAN))
-    rove_drawNorwegianFromFile();
-  else if (com.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE))
-    rove_drawRoveAreaFittedToImage();
+//  else if (com.startsWith(CMD_SWIRLING))
+//    rove_controlSwirling();
+//  else if (com.startsWith(CMD_DRAW_NORWEGIAN))
+//    rove_drawNorwegianFromFile();
+//  else if (com.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE))
+//    rove_drawRoveAreaFittedToImage();
   else if (com.startsWith(CMD_AUTO_CALIBRATE))
     calibrate_doCalibration();
   else if (com.startsWith(CMD_SET_DEBUGCOMMS))
@@ -96,7 +103,6 @@ void impl_executeCommand(String &com)
     comms_unrecognisedCommand(com);
     comms_ready();
   }
-  inNoOfParams = 0;
 }
 
 /** Polarshield implementation of runBackgroundProcesses. This is basically stuff to do with 
@@ -104,26 +110,25 @@ the screen.
 */
 void impl_runBackgroundProcesses()
 {
-#ifdef USE_LCD  
-  lcd_checkForInput();
-  lcd_updateDisplay();
-#endif
+// #ifdef USE_LCD  
+  // lcd_checkForInput();
+  // lcd_updateDisplay();
+// #endif
       
-  long motorCutoffTime = millis() - lastOperationTime;
-  if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
-  {
-    Serial.println("Powering down because of inactivity.");
-    lcd_runEndScript();
-    lcd_updateDisplay();
-  }
+  // long motorCutoffTime = millis() - lastOperationTime;
+  // if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
+  // {
+    // Serial.println("Powering down because of inactivity.");
+    // lcd_runEndScript();
+    // lcd_updateDisplay();
+  // }
   
-  if (swirling)
-    rove_swirl();
+  // if (swirling)
+    // rove_swirl();
 }
 
 void impl_loadMachineSpecFromEeprom()
-{
-}
+{}
 
 void impl_exec_execFromStore()
 {
@@ -141,12 +146,11 @@ void impl_exec_execFromStore()
   {
     Serial.println("No filename supplied to read from.");
   }
-  
 }
 
 void impl_exec_execFromStore(String inFilename)
 {
-  if (inFilename != "")
+ /*  if (inFilename != "")
   {
     String noBlanks = "";
     // remove blanks
@@ -228,12 +232,12 @@ void impl_exec_execFromStore(String inFilename)
     Serial.println("No filename supplied to read from.");
     currentlyDrawingFromFile = false;
   }
-  
+   */
 }
 
 void impl_exec_changeToStoreCommandMode()
 {
-  String newfilename = inParam1;
+  /* String newfilename = inParam1;
   String newFile = inParam2;
   if (newfilename != "")
   {
@@ -261,7 +265,7 @@ void impl_exec_changeToStoreCommandMode()
   else
   {
     Serial.println("No filename supplied to write to.");
-  }
+  } */
 }
 
 void impl_exec_changeToLiveCommandMode()
@@ -332,10 +336,11 @@ void impl_engageMotors()
   motorA.enableOutputs();
   motorB.enableOutputs();
   powerIsOn = true;
-  motorA.runToNewPosition(motorA.currentPosition()+32);
-  motorB.runToNewPosition(motorB.currentPosition()+32);
-  motorA.runToNewPosition(motorA.currentPosition()-32);
-  motorB.runToNewPosition(motorB.currentPosition()-32);
+  
+  motorA.runToNewPosition(motorA.currentPosition()+multiplier(8));
+  motorB.runToNewPosition(motorB.currentPosition()+multiplier(8));
+  motorA.runToNewPosition(motorA.currentPosition()-multiplier(8));
+  motorB.runToNewPosition(motorB.currentPosition()-multiplier(8));
   Serial.println("Engaged motors.");
 }
 

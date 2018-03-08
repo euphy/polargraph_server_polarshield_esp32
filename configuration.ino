@@ -17,7 +17,7 @@ by polargraphs so far.
 // =================================================================
 // Polarshield motor driver board
 // This uses stepstick-format stepper drivers on arduino pins 3 to 8.
-// Motor C has never been used!
+
 
 #if MOTHERBOARD == POLARSHIELD
   #define MOTOR_A_ENABLE_PIN 3
@@ -55,7 +55,18 @@ by polargraphs so far.
   #define MOTOR_B_ENABLE_PIN 18
   #define MOTOR_B_STEP_PIN 17
   #define MOTOR_B_DIR_PIN 16
+
+#elif MOTHERBOARD == NODEMCU32S
+
+  #define MOTOR_A_ENABLE_PIN 27
+  #define MOTOR_A_STEP_PIN 14
+  #define MOTOR_A_DIR_PIN 12
   
+  #define MOTOR_B_ENABLE_PIN 13
+  #define MOTOR_B_STEP_PIN 4
+  #define MOTOR_B_DIR_PIN 15
+
+
 #endif
 
 
@@ -99,13 +110,11 @@ void configuration_setup()
   stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
   
   // init SD card
-  sd_initSD();
+//  sd_initSD();
   lcd_initLCD();
-  lcd_showSummary();
+//  lcd_showSummary();
   delay(1000);
   pinMode(2, INPUT);
-  touch.InitTouch();
-  touch.setPrecision(PREC_MEDIUM);  
   
   // calibration pins
   pinMode(ENDSTOP_X_MIN, INPUT_PULLUP);

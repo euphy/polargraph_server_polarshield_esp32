@@ -23,32 +23,30 @@ boolean exec_executeBasicCommand(String &com)
   boolean executed = true;
   if (com.startsWith(CMD_CHANGELENGTH))
     exec_changeLength();
-  else if (com.startsWith(CMD_CHANGELENGTHDIRECT))
-    exec_changeLengthDirect();
+  // else if (com.startsWith(CMD_CHANGELENGTHDIRECT))
+    // exec_changeLengthDirect();
   else if (com.startsWith(CMD_CHANGEPENWIDTH))
     exec_changePenWidth();
   else if (com.startsWith(CMD_SETMOTORSPEED))
     exec_setMotorSpeed();
   else if (com.startsWith(CMD_SETMOTORACCEL))
     exec_setMotorAcceleration();
-  else if (com.startsWith(CMD_DRAWPIXEL))
-    pixel_drawSquarePixel();
-  else if (com.startsWith(CMD_DRAWSCRIBBLEPIXEL))
-    pixel_drawScribblePixel();
-  else if (com.startsWith(CMD_CHANGEDRAWINGDIRECTION))
-    exec_changeDrawingDirection();
+  // else if (com.startsWith(CMD_DRAWPIXEL))
+    // pixel_drawSquarePixel();
+  // else if (com.startsWith(CMD_DRAWSCRIBBLEPIXEL))
+    // pixel_drawScribblePixel();
+  // else if (com.startsWith(CMD_CHANGEDRAWINGDIRECTION))
+    // exec_changeDrawingDirection();
   else if (com.startsWith(CMD_SETPOSITION))
     exec_setPosition();
-  else if (com.startsWith(CMD_TESTPENWIDTHSQUARE))
-    pixel_testPenWidth();
+  // else if (com.startsWith(CMD_TESTPENWIDTHSQUARE))
+    // pixel_testPenWidth();
   else if (com.startsWith(CMD_PENDOWN))
     penlift_penDown();
   else if (com.startsWith(CMD_PENUP))
     penlift_penUp();
   else if (com.startsWith(CMD_SETMACHINESIZE))
     exec_setMachineSizeFromCommand();
-  else if (com.startsWith(CMD_SETMACHINENAME))
-    exec_setMachineNameFromCommand();
   else if (com.startsWith(CMD_SETMACHINEMMPERREV))
     exec_setMachineMmPerRevFromCommand();
   else if (com.startsWith(CMD_SETMACHINESTEPSPERREV))
@@ -81,9 +79,6 @@ void exec_changeDrawingDirection()
 void exec_reportMachineSpec()
 {
   eeprom_dumpEeprom();
-  Serial.print(F("PGNAME,"));
-  Serial.print(machineName);
-  Serial.println(CMD_END);
   
   Serial.print(F("PGSIZE,"));
   Serial.print(machineWidth);
@@ -142,20 +137,6 @@ void exec_setMachineSizeFromCommand()
   eeprom_loadMachineSize();
 }
 
-
-void exec_setMachineNameFromCommand()
-{
-  String name = inParam1;
-  if (name != DEFAULT_MACHINE_NAME)
-  {
-    for (int i = 0; i < 8; i++)
-    {
-      EEPROM.write(EEPROM_MACHINE_NAME+i, name[i]);
-    }
-  }
-  eeprom_loadMachineSpecFromEeprom();
-}
-
 void exec_setMachineMmPerRevFromCommand()
 {
   float newMmPerRev = atof(inParam1);
@@ -165,6 +146,7 @@ void exec_setMachineMmPerRevFromCommand()
     eeprom_loadMachineSpecFromEeprom();
   } 
 }
+
 void exec_setMachineStepsPerRevFromCommand()
 {
   int newStepsPerRev = atoi(inParam1);
@@ -237,8 +219,8 @@ void exec_setMotorSpeed(float speed)
 */
 void exec_setMotorAcceleration()
 {
-  exec_setMotorAcceleration(atof(inParam1));
-  if (inNoOfParams == 3 && atoi(inParam2) == 1)
+  exec_setMotorAcceleration((float)atof(inParam1));
+  if (inNoOfParams == 2 && atoi(inParam2) == 1)
     EEPROM_writeAnything(EEPROM_MACHINE_MOTOR_ACCEL, currentAcceleration);
 }
 void exec_setMotorAcceleration(float accel)
