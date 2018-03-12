@@ -18,10 +18,10 @@ The program has a core part that consists of the following files:
 and the first portion of this main file, probably called
 something like polargraph_server_polarshield.ino.
 
-This version which is for the polarshield has a 
+This version which is for the polarshield has a
 bunch of other files too, providing extra functions.
 
-The file called impl_ps perhaps deserves a special mention, and 
+The file called impl_ps perhaps deserves a special mention, and
 that file contains alternative implementations of a few functions,
 where the changes to make it work on ATMEGA1280+ mean that code
 is _different_ to the basic implemenation.
@@ -58,9 +58,25 @@ Put them in libraries/UTouch/UTouchCD.h
 #include <EEPROM.h>
 #include "EEPROMAnything.h"
 
-/*  ===========================================================  
+
+typedef int (*button_Action) (int buttonId);
+
+typedef struct {
+  char id;
+  const char *labelText;
+  button_Action action;
+  char nextButton;
+} ButtonSpec;
+
+typedef struct {
+  int x;
+  int y;
+} Coord2D;
+
+
+/*  ===========================================================
          CONFIGURATION!!
-    =========================================================== */    
+    =========================================================== */
 
 //Uncomment the following line to use a 2.4" panel, August 2014 and later
 #define LCD_TYPE TFT01_24_8
@@ -70,10 +86,10 @@ Put them in libraries/UTouch/UTouchCD.h
 //#define LCD_TYPE ITDB22
 
 
-/*  ===========================================================  
+/*  ===========================================================
          Define what kind of driver breakout you're using.
          (By commenting out the one's you _haven't_ got.)
-    =========================================================== */    
+    =========================================================== */
 #ifndef MOTHERBOARD
 #define MOTHERBOARD NODEMCU32S
 //#define MOTHERBOARD POLARSHIELD
@@ -87,24 +103,24 @@ Put them in libraries/UTouch/UTouchCD.h
 #define TFTSHIELD 3
 #define NODEMCU32S 4
 
-/*  ===========================================================  
+/*  ===========================================================
     Control whether to look for touch input or update LCD
     Comment this out if you DON'T have an LCD connected
-=========================================================== */    
+=========================================================== */
 #define USE_LCD
 
-/*  ===========================================================  
+/*  ===========================================================
     Some debugging flags
-=========================================================== */    
+=========================================================== */
 
 //#define DEBUG_SD
 #define DEBUG_STATE
 #define DEBUG_COMMS
 boolean debugComms = false;
 
-/*  ===========================================================  
+/*  ===========================================================
     These variables are common to all polargraph server builds
-=========================================================== */    
+=========================================================== */
 
 const String FIRMWARE_VERSION_NO = "1.5";
 #if MOTHERBOARD == RAMPS14
@@ -177,8 +193,8 @@ float penWidth = 0.8f; // line width in mm
 boolean reportingPosition = true;
 boolean acceleration = true;
 
-extern AccelStepper motorA; 
-extern AccelStepper motorB; 
+extern AccelStepper motorA;
+extern AccelStepper motorB;
 
 volatile boolean currentlyRunning = true;
 
@@ -270,7 +286,7 @@ const static String CMD_SETPENLIFTRANGE = "C45";
 const static String CMD_PIXELDIAGNOSTIC = "C46";
 const static String CMD_SET_DEBUGCOMMS = "C47";
 
-void setup() 
+void setup()
 {
   Serial.begin(57600);           // set up Serial library at 57600 bps
   Serial.println(F("POLARGRAPH ON!"));
@@ -289,17 +305,17 @@ void setup()
   penlift_penUp();
 
   motorA.setMaxSpeed(currentMaxSpeed);
-  motorA.setAcceleration(currentAcceleration);  
+  motorA.setAcceleration(currentAcceleration);
   motorB.setMaxSpeed(currentMaxSpeed);
   motorB.setAcceleration(currentAcceleration);
-  
+
   motorA.setCurrentPosition(startLengthStepsA);
   motorB.setCurrentPosition(startLengthStepsB);
 
   comms_flushCommandStr(lastCommand, INLENGTH);
   comms_flushCommandAndParams();
   comms_ready();
-  
+
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(500);
 
@@ -308,9 +324,9 @@ void setup()
 
 void loop()
 {
-  if (comms_waitForNextCommand(lastCommand)) 
+  if (comms_waitForNextCommand(lastCommand))
   {
-#ifdef DEBUG_COMMS    
+#ifdef DEBUG_COMMS
     Serial.print(F("Last comm: "));
     Serial.print(lastCommand);
     Serial.println(F("..."));
@@ -320,9 +336,9 @@ void loop()
 }
 
 
-/*===========================================================  
+/*===========================================================
     These variables are for the polarshield / mega
-=========================================================== */    
+=========================================================== */
 //#include <UTFT.h>
 //#include <URTouch.h>
 
@@ -454,18 +470,3 @@ boolean canCalibrate = false;
 boolean useAutoStartFromSD = true;
 String autoStartFilename = "AUTORUN.TXT";
 boolean autoStartFileFound = false;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

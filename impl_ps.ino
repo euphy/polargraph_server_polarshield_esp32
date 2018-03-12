@@ -119,7 +119,7 @@ void impl_runBackgroundProcesses()
   // if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
   // {
     // Serial.println("Powering down because of inactivity.");
-    // lcd_runEndScript();
+    // buttons_actions_motorsOff();
     // lcd_updateDisplay();
   // }
   

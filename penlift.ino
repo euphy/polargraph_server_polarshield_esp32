@@ -7,14 +7,14 @@
 
 Penlift.
 
-This is one of the core files for the polargraph server program.  
+This is one of the core files for the polargraph server program.
 This file contains the servo calls that raise or lower the pen from
 the page.
 
 The behaviour of the pen lift is this:
 
 If a simple "pen up", or "pen lift" command is received ("C14,END"), then the machine will
-not try to lift the pen if it thinks it is already up.  It checks the value of the 
+not try to lift the pen if it thinks it is already up.  It checks the value of the
 global boolean variable "isPenUp" to decide this.
 
 If a qualified "pen up" is received, that is one that includes a pen position (eg "C14,150,END"),
@@ -31,7 +31,7 @@ void penlift_movePen(int start, int end, int delay_ms)
   penHeight.attach(PEN_HEIGHT_SERVO_PIN);
   if(start < end)
   {
-    for (int i=start; i<=end; i++) 
+    for (int i=start; i<=end; i++)
     {
       penHeight.write(i);
       delay(delay_ms);
@@ -39,7 +39,7 @@ void penlift_movePen(int start, int end, int delay_ms)
   }
   else
   {
-    for (int i=start; i>=end; i--) 
+    for (int i=start; i>=end; i--)
     {
       penHeight.write(i);
       delay(delay_ms);
@@ -90,5 +90,5 @@ void penlift_penDown()
 
 void penlift_testRange()
 {
-  
+
 }
