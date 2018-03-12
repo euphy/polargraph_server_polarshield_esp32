@@ -4,7 +4,7 @@
 
 void lcd_drawNumberWithBackground(int x, int y, long value)
 {
-  lcd.fillRect(x, y, x+buttonSize, y+20, TFT_BLACK);
+  lcd.fillRect(x, y, buttonSize, 20, TFT_BLACK);
   lcd.setTextColor(TFT_WHITE);
   lcd.setCursor(x, y);
   lcd.print(value);
@@ -12,7 +12,7 @@ void lcd_drawNumberWithBackground(int x, int y, long value)
 
 void lcd_drawFloatWithBackground(int x, int y, float value)
 {
-  lcd.fillRect(x, y, x+buttonSize, y+20, TFT_BLACK);
+  lcd.fillRect(x, y, buttonSize, 20, TFT_BLACK);
   lcd.setTextColor(TFT_WHITE);
   lcd.setCursor(x, y);
   lcd.print(value);
@@ -80,7 +80,7 @@ void lcd_drawStoreContentsMenu()
  */
 byte lcd_getCoordsIndexFromButtonPosition(byte menuSlotNumber)
 {
-  return (byte)(menuSlotNumber * 2)-2;
+  return (byte)(menuSlotNumber * 2);
 }
 
 Coord2D * lcd_getCoordsForButtonPosition(byte buttonPosition)
@@ -97,36 +97,37 @@ Coord2D * lcd_getCoordsForButtonPosition(byte buttonPosition)
 void lcd_drawButtonBackground(byte buttonPosition)
 {
   Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
-  lcd.fillRect(coords[0].x, coords[0].y, coords[1].x, coords[1].y, TFT_RED);
+  lcd.fillRect(coords[0].x, coords[0].y, coords[1].x-coords[0].x, coords[1].y-coords[0].y, TFT_RED);
 }
 
-void lcd_setCursorForButtonLabel(byte buttonPosition, byte rowNumber, byte totalRows, String rowText)
+void lcd_drawButtonLabelTextLine(byte buttonPosition, byte rowNumber, byte totalRows, char *textOfRow)
 {
-  int x, y;
-  byte lineSpacing = 2;
+  byte lineSpace = 4;
+  byte lineHeight = 10;
+  byte halfLineHeight = lineHeight/2;
 
-  // get the size of the text
-  int16_t  x1, y1;
-  uint16_t w, h;
-  // lcd.getTextBounds(rowText, 0, 0, &x1, &y1, &w, &h);
-  // x = (buttonSize/2) - (w/2); // centred x
-  //
-  // // total label height
-  // int totalHeight = (h * totalRows) + (lineSpacing * (totalRows-1));
-  //
-  // // place it vertically
-  // y = (buttonSize/2) - (totalHeight/2); // centre the block
-  // y = y + (rowNumber-1) + (lineSpacing * (totalRows-1)); // and offset this row
-  //
-  // // Ue x and y as offsets on the main button coordinates
-  // x = x + buttonCoords[(buttonPosition * 2)-2][0];
-  // y = y + buttonCoords[(buttonPosition * 2)-2][1];
-  //
-  // lcd.setCursor(x, y);
+  // total label height
+  int totalHeight = (lineHeight*totalRows) + (lineSpace * (totalRows-1));
+
+  // This is the distance from the top edge of the button to the centre
+  // of the first line.
+  int datumDistanceFromTopEdge = (buttonSize/2) - (totalHeight/2) + halfLineHeight;
+  int datumOfThisLine = datumDistanceFromTopEdge + (rowNumber * (lineHeight+lineSpace));
+
+  Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
+  int x = (buttonSize/2) + coords->x;
+  int y = datumOfThisLine + coords->y;
+
+  lcd.setTextColor(TFT_WHITE);
+  lcd.setTextDatum(CC_DATUM);
+  lcd.drawString(textOfRow, x, y, 2);
+
+
 }
 
-void lcd_drawButton(byte buttonPosition) {
-
+void lcd_drawButton(byte buttonPosition)
+{
+  // plain background
   lcd_drawButtonBackground(buttonPosition);
 
   // get the screen coords of the button
@@ -136,31 +137,27 @@ void lcd_drawButton(byte buttonPosition) {
   byte buttonIndex = menus[currentMenu][buttonPosition]; // is button ID
   ButtonSpec button = buttons[buttonIndex];
 
-  // plain background
+  // process the labelText to figure out how to put the text onto the button
+  // split up by spaces
+  char label[strlen(button.labelText)];
+  strcpy(label, button.labelText); // make a copy because we'll chop it up
 
-//
-//     // process the labelText to figure out how to put the text onto the button
-//     // split up by spaces
-//     char *label;
-//     strcpy(label, button.labelSpec); // make a copy because we'll chop it up
-//
-//     // count the spaces
-//     int count = 0;
-//     for (int i=0; i<strlen(label); i++) {
-//       if(label[i] == ' ') {
-//         count++;
-//       }
-//     }
-//
-//     char *piece = strtok(label, " ");
-//     lcd.setTextColor(TFT_WHITE);
-//     for (int i=0; i<count; i++) {
-//       // i becomes the row number, and count is the total rows
-//       lcd_setCursorForButtonLabel(buttonPosition, i, count, piece);
-//       lcd.print(piece);
-//       piece = strtok(NULL, " ");
-//     }
-//   }
+  // count the spaces
+  int count = 1;
+  for (int i=0; i<strlen(label); i++) {
+    if(label[i] == ' ') {
+      count++;
+    }
+  }
+
+  // Then break it up into pieces and write out each piece
+  char *piece = strtok(label, " ");
+  for (int i=0; i<count; i++) {
+    // i becomes the row number, and count is the total rows
+    lcd_drawButtonLabelTextLine(buttonPosition, i, count, piece);
+    piece = strtok(NULL, " ");
+  }
+
 //
 //   // Here's some special decoration on some menus
 //   if (currentMenu == MENU_CHOOSE_FILE)
@@ -192,7 +189,9 @@ void lcd_drawButton(byte buttonPosition) {
 void lcd_drawCurrentMenu() {
   // Draw up six buttons
   for (byte buttonPosition = 0; buttonPosition<BUTTONS_PER_MENU; buttonPosition++) {
-    lcd_drawButton(buttonPosition);
+    if (menus[currentMenu][buttonPosition]) {
+      lcd_drawButton(buttonPosition);
+    }
   }
 }
 

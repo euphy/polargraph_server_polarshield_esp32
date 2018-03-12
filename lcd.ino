@@ -71,7 +71,7 @@ byte lcd_getButtonPosition(int x, int y)
      && y >= buttonCoords[0][1] && y <= buttonCoords[1][1])
     return 1;
   else if (x >= buttonCoords[2][0] && x <= buttonCoords[3][0]
-     && y >= buttonCoords[2][1] && y <= buttonCoords[1][1])
+     && y >= buttonCoords[2][1] && y <= buttonCoords[3][1])
     return 2;
   else if (x >= buttonCoords[4][0] && x <= buttonCoords[5][0]
      && y >= buttonCoords[4][1] && y <= buttonCoords[5][1])
@@ -121,8 +121,10 @@ int lcd_requiresRedrawing() {
 }
 
 
-void lcd_setCurrentMenu(byte menu)
+void lcd_setCurrentMenu(int menu)
 {
+  Serial.print("Setting currentMenu to ");
+  Serial.println(menu);
   currentMenu = menu;
 }
 
@@ -226,6 +228,26 @@ void lcd_checkForInput()
   }
 }
 
+void lcd_drawSplashScreen()
+{
+  lcd.fillScreen(TFT_BLACK);
+  int barTop = 80;
+  int barHeight = 100;
+
+  lcd.fillRect(
+    0, barTop,
+    screenWidth, barHeight, TFT_RED);
+
+  lcd.setTextColor(TFT_WHITE);
+  lcd.setTextSize(1);
+  lcd.drawString("Polargraph.", 25, barTop+24, 4);
+  lcd.drawString("Polargraph.", 26, barTop+24, 4);
+  lcd.setTextSize(1);
+  lcd.drawString("An open source art project", 25, barTop+24+(9*3), 1);
+
+  lcd.setTextDatum(BR_DATUM);
+  lcd.drawString("v"+FIRMWARE_VERSION_NO, 310, 230, 1);
+}
 /*
 This intialises the LCD itself, builds the map of the
 button corner coordinates and the buttons and menus.
@@ -234,26 +256,12 @@ void lcd_initLCD()
 {
   lcd.init();
   lcd.setRotation(1);
+  lcd.setTextDatum(TL_DATUM);
 //  touch_calibrate();
-
-  lcd.fillScreen(TFT_BLACK);
 
   button_setup_generateButtonCoords();
   button_setup_loadButtons();
   //button_setup_loadMenus(); // this is initialised at declaration
 
-  lcd.fillRect(0,buttonCoords[5][1], screenWidth,buttonCoords[5][1]+56, TFT_RED);
-
-  lcd.setCursor(17, buttonCoords[5][1]+10);
-  lcd.setTextColor(TFT_WHITE);
-  lcd.setTextSize(3);
-  lcd.print("Polargraph");
-
-  lcd.setCursor(20, buttonCoords[5][1]+32);
-  lcd.setTextSize(1);
-  lcd.print("An open source art project");
-
-  lcd.setCursor(20, buttonCoords[5][1]+buttonCoords[5][1]+BUTTON_GAP);
-  lcd.print("v"+FIRMWARE_VERSION_NO);
-
+  lcd_drawSplashScreen();
 }

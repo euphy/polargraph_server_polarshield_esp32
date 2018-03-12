@@ -51,7 +51,7 @@ Put them in libraries/UTouch/UTouchCD.h
 #include "SPIFFS.h"
 #include <SPI.h>
 #include <TFT_eSPI.h> // Hardware-specific library
-//#include "Fonts/FreeSans9pt7b.h";
+// #include "Fonts/FreeSans9pt7b.h";
 
 #include <AccelStepper.h>
 #include <ESP32_Servo.h>
@@ -59,8 +59,15 @@ Put them in libraries/UTouch/UTouchCD.h
 #include "EEPROMAnything.h"
 
 
+
+/* definition of a function that can be attached to a Button Specification
+and will get executed when the button is pushed..
+*/
 typedef int (*button_Action) (int buttonId);
 
+/*
+This struct holds details about a button that can be displayed on the LCD.
+*/
 typedef struct {
   char id;
   const char *labelText;
@@ -68,6 +75,7 @@ typedef struct {
   char nextButton;
 } ButtonSpec;
 
+// 2D coordinates struct
 typedef struct {
   int x;
   int y;
@@ -304,20 +312,12 @@ void setup()
 
   penlift_penUp();
 
-  motorA.setMaxSpeed(currentMaxSpeed);
-  motorA.setAcceleration(currentAcceleration);
-  motorB.setMaxSpeed(currentMaxSpeed);
-  motorB.setAcceleration(currentAcceleration);
-
-  motorA.setCurrentPosition(startLengthStepsA);
-  motorB.setCurrentPosition(startLengthStepsB);
-
   comms_flushCommandStr(lastCommand, INLENGTH);
   comms_flushCommandAndParams();
   comms_ready();
 
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
-  delay(500);
+  delay(200);
 
 //  sd_autorunSD();
 }
