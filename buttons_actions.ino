@@ -6,7 +6,8 @@ Should only update the MODEL, not do any screen drawing.
 void button_genericButtonActionBegin(ButtonSpec *button)
 {
   // lcd_outlinePressedButton(button, TFT_WHITE);
-  printf("In %s", __FUNCTION__);
+  Serial.print("In ");
+  Serial.println(__FUNCTION__);
 }
 
 /*
@@ -15,7 +16,8 @@ Cleaning up after a button press.
 void button_genericButtonActionEnd(ButtonSpec *button)
 {
   // lcd_drawButton(button);
-  printf("In %s", __FUNCTION__);
+  Serial.print("In ");
+  Serial.println(__FUNCTION__);
 }
 
 /*
@@ -24,8 +26,10 @@ simple actions.
 */
 int button_genericButtonAction(int buttonId)
 {
-  printf("In %s", __FUNCTION__);
-  printf("\nButtonId: %s", buttonId);
+  Serial.print("In ");
+  Serial.println(__FUNCTION__);
+  Serial.print("ButtonId: ");
+  Serial.println(buttonId);
   // ButtonSpec button = buttons[buttonId];
   // printf("\n ... %s.\n", button.labelText);
   // if (menusToUpdate) {

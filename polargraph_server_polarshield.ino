@@ -69,10 +69,10 @@ typedef int (*button_Action) (int buttonId);
 This struct holds details about a button that can be displayed on the LCD.
 */
 typedef struct {
-  char id;
+  byte id;
   const char *labelText;
   button_Action action;
-  char nextButton;
+  byte nextButton;
 } ButtonSpec;
 
 // 2D coordinates struct
@@ -223,6 +223,14 @@ long motorIdleTimeBeforePowerDown = 600000L;
 boolean automaticPowerDown = true;
 
 volatile long lastInteractionTime = 0L;
+volatile long lastTouchTime = 0L;
+const int hightlightButtonDuration = 250;
+
+#define LONG_TOUCH_RETRIGGER_DELAY 500
+#define SHORT_TOUCH_RETRIGGER_DELAY 50
+int touchRetriggerDelay = LONG_TOUCH_RETRIGGER_DELAY;
+int buttonToRedraw = -1; // -1 is ALL buttons
+
 
 #define READY_STR "READY_200"
 #define RESEND_STR "RESEND"

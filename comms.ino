@@ -100,9 +100,9 @@ boolean comms_waitForNextCommand(char *buf)
     }
   }
 
-  idleTime = millis();
-  lastOperationTime = millis();
-  lastInteractionTime = lastOperationTime;
+  idleTime = lastOperationTime = lastInteractionTime = millis();
+//  lastOperationTime = idleTime;
+//  lastInteractionTime = lastOperationTime;
 #ifdef DEBUG_COMMS
   Serial.print(F("xbuf: "));
   Serial.println(buf);

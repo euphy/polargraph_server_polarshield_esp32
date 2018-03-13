@@ -41,10 +41,10 @@ boolean exec_executeBasicCommand(String &com)
     exec_setPosition();
   // else if (com.startsWith(CMD_TESTPENWIDTHSQUARE))
     // pixel_testPenWidth();
-  else if (com.startsWith(CMD_PENDOWN))
-    penlift_penDown();
-  else if (com.startsWith(CMD_PENUP))
-    penlift_penUp();
+//  else if (com.startsWith(CMD_PENDOWN))
+//    penlift_penDown();
+//  else if (com.startsWith(CMD_PENUP))
+//    penlift_penUp();
   else if (com.startsWith(CMD_SETMACHINESIZE))
     exec_setMachineSizeFromCommand();
   else if (com.startsWith(CMD_SETMACHINEMMPERREV))

@@ -31,7 +31,17 @@ void lcd_processTouchCommand()
   // 2.  ========================================
   // get boundaries of the displayed button
   byte positionInMenu = lcd_getButtonPosition(touchX, touchY);
+  if (positionInMenu<0 || positionInMenu>5) {
+    touchRetriggerDelay = SHORT_TOUCH_RETRIGGER_DELAY;
+    Serial.println("Didn't touch a button.");
+    return;
+  }
   ButtonSpec pressedButton = lcd_getButtonThatWasPressed(positionInMenu, currentMenu);
+  Serial.println("Pressed " + positionInMenu);
+  Serial.print("It was ");
+  Serial.println(pressedButton.labelText);
+  Serial.println("Ok.");
+  touchRetriggerDelay = LONG_TOUCH_RETRIGGER_DELAY;
 
   // 3. ======================================
   // Give feedback to show button is pressed
@@ -41,21 +51,35 @@ void lcd_processTouchCommand()
   // Do the button's actions, changing the model
   // (that includes updating menus!)
   if (pressedButton.action(pressedButton.id)) {
+    Serial.println("worked.");
     // successful
   }
   else {
+    Serial.println("failed!");
     // action failed
   }
 
   // 5.  =============================================
   // redraw bits of the screen if the button changed any number values
-  if (lcd_requiresRedrawing()){
-    // if it's a full redraw (like changing menu)
+  // this happens later, but we say which button needs redrawing, 
+  buttonToRedraw = positionInMenu; // just redraw the one button
+  
+}
+
+void lcd_redraw() 
+{
+  if (buttonToRedraw < -1 || buttonToRedraw > 5) {
+    // do nothing 
+  }
+  else if (buttonToRedraw == -1) {
     lcd_drawCurrentMenu();
   }
   else {
-    // redraw the button without the outline
+    lcd_outlinePressedButton(buttonToRedraw, TFT_RED);
   }
+
+  // set it to a "no redraw" value.
+  buttonToRedraw = -2;
 }
 
 /*
@@ -69,23 +93,24 @@ byte lcd_getButtonPosition(int x, int y)
   Serial.println(y);
   if (x >= buttonCoords[0][0] && x <= buttonCoords[1][0]
      && y >= buttonCoords[0][1] && y <= buttonCoords[1][1])
-    return 1;
+    return 0;
   else if (x >= buttonCoords[2][0] && x <= buttonCoords[3][0]
      && y >= buttonCoords[2][1] && y <= buttonCoords[3][1])
-    return 2;
+    return 1;
   else if (x >= buttonCoords[4][0] && x <= buttonCoords[5][0]
      && y >= buttonCoords[4][1] && y <= buttonCoords[5][1])
-    return 3;
+    return 2;
 
   else if (x >= buttonCoords[6][0] && x <= buttonCoords[7][0]
      && y >= buttonCoords[6][1] && y <= buttonCoords[7][1])
-     return 4;
+     return 3;
   else if (x >= buttonCoords[8][0] && x <= buttonCoords[9][0]
      && y >= buttonCoords[8][1] && y <= buttonCoords[9][1])
-     return 5;
+     return 4;
   else if (x >= buttonCoords[10][0] && x <= buttonCoords[11][0]
      && y >= buttonCoords[10][1] && y <= buttonCoords[11][1])
-    return 6;
+    return 5;
+  else return -1;
 }
 
 /*
@@ -94,30 +119,6 @@ Returns the ButtonSpec that was pressed, based on the position and the menu.
 ButtonSpec lcd_getButtonThatWasPressed(byte buttonPosition, byte menu)
 {
   return buttons[menus[menu][buttonPosition]];
-}
-
-/*
-Draws a white line around the edge of the button.
-*/
-void lcd_outlinePressedButton(byte pressedButton, uint32_t color)
-{
-  Serial.print("Outlining button ");
-  Serial.println(pressedButton);
-  if (pressedButton >= 1 && pressedButton <=6)
-  {
-    byte coordsIndex = lcd_getCoordsIndexFromButtonPosition(pressedButton);
-    lcd.drawRect(buttonCoords[coordsIndex][0], buttonCoords[coordsIndex][1],
-      buttonCoords[coordsIndex+1][0], buttonCoords[coordsIndex+1][1]-1, color);
-    lcd.drawRect(buttonCoords[coordsIndex][0]+1, buttonCoords[coordsIndex][1]+1,
-      buttonCoords[coordsIndex+1][0]-1, buttonCoords[coordsIndex+1][1]-2, color);
-  }
-}
-
-/*
-Returns true if the screen needs redrawing (buttons or values have changed)
-*/
-int lcd_requiresRedrawing() {
-  return 1;
 }
 
 
@@ -129,21 +130,17 @@ void lcd_setCurrentMenu(int menu)
 }
 
 
-
-
-
-/**  This is the method that is called by an interrupt when the touchscreen
-is touched. It sets a parameter (displayTouched) to true, but does not act
+/**  This sets a parameter (displayTouched) to true, but does not act
 directly on the touch.
 */
-
 void lcd_touchInput()
 {
   Serial.println("T.");
-  uint16_t x, y;
-  //don't trigger if it's already in processing
+  
+  //only trigger if it is NOT already processing a touch
   if (!displayTouched)
   {
+    uint16_t x, y;
     if (lcd.getTouch(&x, &y)) {
       if ((x != -1) and (y != -1)) {
         touchX = x;
@@ -153,7 +150,7 @@ void lcd_touchInput()
         Serial.print(",");
         Serial.println(touchY);
         displayTouched = true;
-        lastInteractionTime = millis();
+        lastTouchTime = lastInteractionTime = millis();
       }
     }
   }
@@ -170,6 +167,11 @@ void lcd_touchInput()
 */
 void lcd_checkForInput()
 {
+  if (millis() < (lastTouchTime + touchRetriggerDelay)) {
+    // ignore touches if they happened within a certain time from the last touch
+    return;
+  }
+  
   lcd_touchInput();
 
   if (displayTouched)
@@ -190,7 +192,7 @@ void lcd_checkForInput()
     else
     {
       Serial.println("Inputted!!");
-      delay(20);
+//      delay(20);
       lcd_processTouchCommand();
     }
     Serial.print("DONE.");
@@ -198,20 +200,6 @@ void lcd_checkForInput()
   }
   else
   {
-//    Serial.print("2a: ");
-//    Serial.print(touchX);
-//    Serial.print(",");
-//    Serial.println(touchY);
-
-//    Serial.print("Screen state: ");
-//    Serial.print(screenState);
-//    Serial.print(", lastInteractionTime: ");
-//    Serial.print(lastInteractionTime);
-//    Serial.print(" plus idle: ");
-//    Serial.print(lastInteractionTime + screenSaveIdleTime);
-//    Serial.print(", millis: ");
-//    Serial.println(millis());
-
     if (screenState == SCREEN_STATE_NORMAL
     && (millis() > (lastInteractionTime + screenSaveIdleTime)))
     {

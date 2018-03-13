@@ -94,16 +94,32 @@ Coord2D * lcd_getCoordsForButtonPosition(byte buttonPosition)
   return coords;
 }
 
+/*
+Draws a white line around the edge of the button.
+*/
+void lcd_outlinePressedButton(byte buttonPosition, uint32_t color)
+{
+  Serial.print("Outlining button ");
+  Serial.println(buttonPosition);
+  if (buttonPosition >= 0 && buttonPosition <=5)
+  {
+    Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
+    lcd.drawRect(coords[0].x, coords[0].y,
+      coords[1].x-coords[0].x, coords[1].y-coords[0].y,
+      color);
+    lcd.drawRect(coords[0].x+1, coords[0].y+1,
+      coords[1].x-coords[0].x-2, coords[1].y-coords[0].y-2,
+      color);
+  }
+  
+}
+
 void lcd_drawButtonBackground(byte buttonPosition)
 {
   Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
-  // lcd.fillRoundRect(coords[0].x, coords[0].y,
-  //   coords[1].x-coords[0].x, coords[1].y-coords[0].y,
-  //   6, TFT_RED);
   lcd.fillRect(coords[0].x, coords[0].y,
     coords[1].x-coords[0].x, coords[1].y-coords[0].y,
     TFT_RED);
-
 }
 
 void lcd_drawButtonLabelTextLine(byte buttonPosition, byte rowNumber, byte totalRows, char *textOfRow)
