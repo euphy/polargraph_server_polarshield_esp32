@@ -1,5 +1,5 @@
 
-#define BUTTON_GAP 10
+#define BUTTON_GAP 20
 static byte  buttonSize = 60;
 static byte  grooveSize = 36;
 static int screenWidth = 320; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 320 : 220;
@@ -108,19 +108,19 @@ static Menus menus = {
 void button_setup_loadButtons()
 {
   buttons[0] = {0, 0, 0, 0};
-  buttons[BUTTON_PAUSE_RUNNING] = (ButtonSpec){BUTTON_PAUSE_RUNNING, "PAUSE MOTORS", button_genericButtonAction, BUTTON_RESUME_RUNNING};
+  buttons[BUTTON_PAUSE_RUNNING] = (ButtonSpec){BUTTON_PAUSE_RUNNING, "pause motors", button_genericButtonAction, BUTTON_RESUME_RUNNING};
 
-  buttons[BUTTON_SET_HOME] = (ButtonSpec){BUTTON_SET_HOME, "SET HOME", button_genericButtonAction, 0};
-  buttons[BUTTON_DRAW_FROM_SD] = (ButtonSpec){BUTTON_DRAW_FROM_SD, "DRAW FROM SD", button_genericButtonAction, 0};
-  buttons[BUTTON_MORE_RIGHT] = (ButtonSpec){BUTTON_MORE_RIGHT, "MORE", button_genericButtonAction, 0};
-  buttons[BUTTON_PAUSE_RUNNING] = (ButtonSpec){BUTTON_PAUSE_RUNNING, "PAUSE MOTORS", button_genericButtonAction, BUTTON_RESUME_RUNNING};
-  buttons[BUTTON_RESUME_RUNNING] = (ButtonSpec){BUTTON_RESUME_RUNNING, "RUN MOTORS", button_genericButtonAction, BUTTON_PAUSE_RUNNING};
+  buttons[BUTTON_SET_HOME] = (ButtonSpec){BUTTON_SET_HOME, "set home", button_genericButtonAction, 0};
+  buttons[BUTTON_DRAW_FROM_SD] = (ButtonSpec){BUTTON_DRAW_FROM_SD, "draw from sd", button_genericButtonAction, 0};
+  buttons[BUTTON_MORE_RIGHT] = (ButtonSpec){BUTTON_MORE_RIGHT, "more", button_genericButtonAction, 0};
+  buttons[BUTTON_PAUSE_RUNNING] = (ButtonSpec){BUTTON_PAUSE_RUNNING, "pause motors", button_genericButtonAction, BUTTON_RESUME_RUNNING};
+  buttons[BUTTON_RESUME_RUNNING] = (ButtonSpec){BUTTON_RESUME_RUNNING, "run motors", button_genericButtonAction, BUTTON_PAUSE_RUNNING};
 
-  buttons[BUTTON_RESET] = (ButtonSpec){BUTTON_RESET, "RESET", button_genericButtonAction, 0};
-  buttons[BUTTON_PEN_UP] = (ButtonSpec){BUTTON_PEN_UP, "PEN UP", button_genericButtonAction, BUTTON_PEN_DOWN};
-  buttons[BUTTON_PEN_DOWN] = (ButtonSpec){BUTTON_PEN_DOWN, "PEN DOWN", button_genericButtonAction, BUTTON_PEN_UP};
-  buttons[BUTTON_INC_SPEED] = (ButtonSpec){BUTTON_INC_SPEED, "INC SPEED", button_genericButtonAction, 0};
-  buttons[BUTTON_DEC_SPEED] = (ButtonSpec){BUTTON_DEC_SPEED, "DEC SPEED", button_genericButtonAction, 0};
+  buttons[BUTTON_RESET] = (ButtonSpec){BUTTON_RESET, "reset", button_genericButtonAction, 0};
+  buttons[BUTTON_PEN_UP] = (ButtonSpec){BUTTON_PEN_UP, "pen up", button_genericButtonAction, BUTTON_PEN_DOWN};
+  buttons[BUTTON_PEN_DOWN] = (ButtonSpec){BUTTON_PEN_DOWN, "pen down", button_genericButtonAction, BUTTON_PEN_UP};
+  buttons[BUTTON_INC_SPEED] = (ButtonSpec){BUTTON_INC_SPEED, "inc speed", button_genericButtonAction, 0};
+  buttons[BUTTON_DEC_SPEED] = (ButtonSpec){BUTTON_DEC_SPEED, "dec speed", button_genericButtonAction, 0};
 
   buttons[BUTTON_NEXT_FILE] = (ButtonSpec){BUTTON_NEXT_FILE, "NEXT FILE", button_genericButtonAction, 0};
   buttons[BUTTON_PREV_FILE] = (ButtonSpec){BUTTON_PREV_FILE, "PREV FILE", button_genericButtonAction, 0};
@@ -146,11 +146,11 @@ void button_setup_loadButtons()
   buttons[BUTTON_ADJUST_PENSIZE_MENU] = (ButtonSpec){BUTTON_ADJUST_PENSIZE_MENU, "ADJUST PENTIP WIDTH", button_genericButtonAction, 0};
   buttons[BUTTON_ADJUST_POSITION_MENU] = (ButtonSpec){BUTTON_ADJUST_POSITION_MENU, "ADJUST POSITION", button_genericButtonAction, 0};
 
-  buttons[BUTTON_POWER_ON] = (ButtonSpec){BUTTON_POWER_ON, "MOTORS ON", button_genericButtonAction, BUTTON_POWER_OFF};
-  buttons[BUTTON_POWER_OFF] = (ButtonSpec){BUTTON_POWER_OFF, "MOTORS OFF", button_genericButtonAction, BUTTON_POWER_ON};
+  buttons[BUTTON_POWER_ON] = (ButtonSpec){BUTTON_POWER_ON, "motors on", button_genericButtonAction, BUTTON_POWER_OFF};
+  buttons[BUTTON_POWER_OFF] = (ButtonSpec){BUTTON_POWER_OFF, "motors off", button_genericButtonAction, BUTTON_POWER_ON};
   buttons[BUTTON_STOP_FILE] = (ButtonSpec){BUTTON_STOP_FILE, "STOP FILE", button_genericButtonAction, BUTTON_DRAW_THIS_FILE};
-  buttons[BUTTON_SETTINGS_MENU] = (ButtonSpec){BUTTON_SETTINGS_MENU, "SETTINGS", button_genericButtonAction, 0};
-  buttons[BUTTON_CALIBRATE] = (ButtonSpec){BUTTON_CALIBRATE, "CALIBRATE", button_genericButtonAction, 0};
+  buttons[BUTTON_SETTINGS_MENU] = (ButtonSpec){BUTTON_SETTINGS_MENU, "settings", button_genericButtonAction, 0};
+  buttons[BUTTON_CALIBRATE] = (ButtonSpec){BUTTON_CALIBRATE, "calibrate", button_genericButtonAction, 0};
 
   buttons[BUTTON_TOGGLE_ECHO] = (ButtonSpec){BUTTON_TOGGLE_ECHO, "TOGGLE ECHO", button_genericButtonAction, 0};
   buttons[BUTTON_RESET_SD] = (ButtonSpec){BUTTON_RESET_SD, "RESET SD", button_genericButtonAction, 0};

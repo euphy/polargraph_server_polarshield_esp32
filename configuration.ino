@@ -113,7 +113,7 @@ void configuration_setup()
 //  sd_initSD();
   lcd_initLCD();
 //  lcd_showSummary();
-  delay(2000);
+  delay(3000);
   pinMode(2, INPUT);
 
   // calibration pins

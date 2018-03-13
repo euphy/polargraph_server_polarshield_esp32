@@ -97,13 +97,19 @@ Coord2D * lcd_getCoordsForButtonPosition(byte buttonPosition)
 void lcd_drawButtonBackground(byte buttonPosition)
 {
   Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
-  lcd.fillRect(coords[0].x, coords[0].y, coords[1].x-coords[0].x, coords[1].y-coords[0].y, TFT_RED);
+  // lcd.fillRoundRect(coords[0].x, coords[0].y,
+  //   coords[1].x-coords[0].x, coords[1].y-coords[0].y,
+  //   6, TFT_RED);
+  lcd.fillRect(coords[0].x, coords[0].y,
+    coords[1].x-coords[0].x, coords[1].y-coords[0].y,
+    TFT_RED);
+
 }
 
 void lcd_drawButtonLabelTextLine(byte buttonPosition, byte rowNumber, byte totalRows, char *textOfRow)
 {
-  byte lineSpace = 4;
-  byte lineHeight = 10;
+  byte lineSpace = 2;
+  byte lineHeight = 14;
   byte halfLineHeight = lineHeight/2;
 
   // total label height
@@ -118,10 +124,12 @@ void lcd_drawButtonLabelTextLine(byte buttonPosition, byte rowNumber, byte total
   int x = (buttonSize/2) + coords->x;
   int y = datumOfThisLine + coords->y;
 
-  lcd.setTextColor(TFT_WHITE);
   lcd.setTextDatum(CC_DATUM);
-  lcd.drawString(textOfRow, x, y, 2);
 
+  lcd.setTextColor(TFT_MAROON);
+  lcd.drawString(textOfRow, x-1, y-1, 2);
+  lcd.setTextColor(TFT_WHITE);
+  lcd.drawString(textOfRow, x, y, 2);
 
 }
 

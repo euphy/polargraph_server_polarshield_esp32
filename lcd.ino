@@ -233,20 +233,52 @@ void lcd_drawSplashScreen()
   lcd.fillScreen(TFT_BLACK);
   int barTop = 80;
   int barHeight = 100;
+  int targetPosition = 35;
 
-  lcd.fillRect(
-    0, barTop,
-    screenWidth, barHeight, TFT_RED);
+  lcd.fillRect(0, barTop, screenWidth, barHeight, TFT_RED);
+  lcd.setTextSize(1);
+
+  for (int x = 320; x>targetPosition; x-=20) {
+    // write it
+    lcd.setTextColor(TFT_MAROON);
+    lcd.drawString("Polargraph.", x-1, barTop+23, 4);
+
+    lcd.setTextColor(TFT_WHITE);
+    lcd.drawString("Polargraph.", x, barTop+24, 4);
+    lcd.drawString("Polargraph.", x+1, barTop+24, 4); // bold it with double
+
+    lcd.setTextColor(TFT_MAROON);
+    lcd.drawString("An open-source art project", x+2, barTop+35+(9*3), 2);
+    lcd.setTextColor(TFT_WHITE);
+    lcd.drawString("An open-source art project", x+3, barTop+36+(9*3), 2);
+    delay(50);
+
+    // rub out the old
+    lcd.fillRect(0, barTop, screenWidth, barHeight, TFT_RED);
+    // lcd.setTextColor(TFT_RED);
+    // lcd.drawString("Polargraph.", x-1, barTop+23, 4);
+    // lcd.drawString("Polargraph.", x, barTop+24, 4);
+    // lcd.drawString("Polargraph.", x+1, barTop+24, 4); // bold it with double
+    //
+    // lcd.drawString("An open-source art project", x+2, barTop+35+(9*3), 2);
+    // lcd.drawString("An open-source art project", x+3, barTop+36+(9*3), 2);
+  }
+
+  lcd.setTextColor(TFT_MAROON);
+  lcd.drawString("Polargraph.", targetPosition-1, barTop+23, 4);
 
   lcd.setTextColor(TFT_WHITE);
-  lcd.setTextSize(1);
-  lcd.drawString("Polargraph.", 25, barTop+24, 4);
-  lcd.drawString("Polargraph.", 26, barTop+24, 4);
-  lcd.setTextSize(1);
-  lcd.drawString("An open source art project", 25, barTop+24+(9*3), 1);
+  lcd.drawString("Polargraph.", targetPosition, barTop+24, 4);
+  lcd.drawString("Polargraph.", targetPosition+1, barTop+24, 4); // bold it with double
+
+  lcd.setTextColor(TFT_MAROON);
+  lcd.drawString("An open-source art project", targetPosition+2, barTop+35+(9*3), 2);
+  lcd.setTextColor(TFT_WHITE);
+  lcd.drawString("An open-source art project", targetPosition+3, barTop+36+(9*3), 2);
 
   lcd.setTextDatum(BR_DATUM);
-  lcd.drawString("v"+FIRMWARE_VERSION_NO, 310, 230, 1);
+  lcd.drawString("v"+FIRMWARE_VERSION_NO, 310, 220, 1);
+  lcd.drawString(MB_NAME, 310, 230, 1);
 }
 /*
 This intialises the LCD itself, builds the map of the
