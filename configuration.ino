@@ -114,7 +114,12 @@ void configuration_setup()
   lcd_initLCD();
 //  lcd_showSummary();
   delay(3000);
-  pinMode(2, INPUT);
+
+  // set up touch interrupt pin
+  // Serial.println("Attaching interrupt");
+  // pinMode(INTERRUPT_TOUCH_PIN, INPUT_PULLUP);
+  // attachInterrupt(digitalPinToInterrupt(INTERRUPT_TOUCH_PIN), lcd_touchInput, FALLING);
+  // touchAttachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, 40);
 
   // calibration pins
   pinMode(ENDSTOP_X_MIN, INPUT_PULLUP);

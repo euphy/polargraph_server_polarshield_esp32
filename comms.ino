@@ -7,7 +7,7 @@
 
 Comms.
 
-This is one of the core files for the polargraph server program.  
+This is one of the core files for the polargraph server program.
 Comms can mean "communications" or "commands", either will do, since
 it contains methods for reading commands from the serial port.
 
@@ -21,7 +21,7 @@ boolean comms_waitForNextCommand(char *buf)
   int bufPos = 0;
   for (int i = 0; i<INLENGTH; i++) {
     buf[i] = 0;
-  }  
+  }
   long lastRxTime = 0L;
 
   // loop while there's there isn't a terminated command.
@@ -30,11 +30,12 @@ boolean comms_waitForNextCommand(char *buf)
   boolean terminated = false;
   while (!terminated)
   {
-#ifdef DEBUG_COMMS    
+#ifdef DEBUG_COMMS
 //    Serial.print(F("."));
-#endif    
+#endif
+    // Serial.println(analogRead(INTERRUPT_TOUCH_PIN));
     long timeSince = millis() - lastRxTime;
-    
+
     // If the buffer is being filled, but hasn't received a new char in less than 100ms,
     // just cancel it. It's probably just junk.
     if (bufPos != 0 && timeSince > 100)
@@ -49,20 +50,20 @@ boolean comms_waitForNextCommand(char *buf)
       }
       bufPos = 0;
     }
-    
+
     // idle time is mostly spent in this loop.
-//    impl_runBackgroundProcesses();
+    impl_runBackgroundProcesses();
     timeSince = millis() - idleTime;
     if (timeSince > rebroadcastReadyInterval)
     {
       // issue a READY every 5000ms of idling
-#ifdef DEBUG_COMMS      
+#ifdef DEBUG_COMMS
       Serial.println("");
 #endif
       comms_ready();
       idleTime = millis();
     }
-    
+
     // And now read the command if one exists.
     if (Serial.available() > 0)
     {
@@ -72,7 +73,7 @@ boolean comms_waitForNextCommand(char *buf)
       Serial.print(F("ch: "));
       Serial.println(ch);
 #endif
-      
+
       // look at it, if it's a terminator, then lets terminate the string
       if (ch == INTERMINATOR || ch == SEMICOLON) {
         buf[bufPos] = 0; // null terminate the string
@@ -83,7 +84,7 @@ boolean comms_waitForNextCommand(char *buf)
         for (int i = bufPos; i<INLENGTH-1; i++) {
           buf[i] = 0;
         }
-        
+
       } else {
         // otherwise, just add it into the buffer
         buf[bufPos] = ch;
@@ -128,7 +129,7 @@ void comms_parseAndExecuteCommand(char *inS)
     Serial.print(inS);
     Serial.println(F(") not parsed."));
   }
-  
+
   comms_flushCommandStr(inS, INLENGTH);
   comms_flushCommandAndParams();
 }
@@ -171,22 +172,22 @@ boolean comms_parseCommand(char *inS) {
     commandWasParsed = comms_extractParams(inS);
   }
   return commandWasParsed;
-}  
+}
 
 boolean comms_extractParams(char* inS) {
   comms_flushCommandAndParams();
   char in[strlen(inS)];
   strcpy(in, inS);
   char * param;
-  
+
 #ifdef DEBUG_COMMS
   Serial.print(F("In: "));
   Serial.print(in);
   Serial.println("...");
-#endif  
+#endif
   byte paramNumber = 0;
   param = strtok(in, COMMA);
- 
+
   for (byte i=0; i<6; i++) {
       if (i == 0) {
         strcpy(inCmd, param);
@@ -199,7 +200,7 @@ boolean comms_extractParams(char* inS) {
             paramNumber++;
           }
         }
-        
+
         switch(i)
         {
           case 1:
@@ -242,7 +243,7 @@ boolean comms_extractParams(char* inS) {
     Serial.print(F(", p4:"));
     Serial.println(inParam4);
     Serial.print(F("Params:"));
-    Serial.println(inNoOfParams);  
+    Serial.println(inNoOfParams);
 #endif
 
   if (inCmd) {
@@ -271,6 +272,4 @@ void comms_unrecognisedCommand(String &com)
   Serial.print(MSG_E_STR);
   Serial.print(com);
   Serial.println(F(" not recognised."));
-}  
-
-
+}

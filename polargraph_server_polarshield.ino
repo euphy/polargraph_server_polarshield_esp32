@@ -398,7 +398,7 @@ TFT_eSPI lcd = TFT_eSPI();       // Invoke custom library
 //#endif
 
 
-const int INTERRUPT_TOUCH_PIN = 0;
+#define INTERRUPT_TOUCH_PIN 32
 boolean displayTouched = false;
 int touchX = 0;
 int touchY = 0;

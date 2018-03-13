@@ -1,5 +1,5 @@
 /**
-*  Polargraph Server for ATMEGA1280+ 
+*  Polargraph Server for ATMEGA1280+
 *  Written by Sandy Noble
 *  Released under GNU License version 3.
 *  http://www.polargraph.co.uk
@@ -8,7 +8,7 @@
 Specific features for Polarshield / arduino mega.
 Implementation.
 
-So this file is the interface for the extra features available in the 
+So this file is the interface for the extra features available in the
 mega/polarshield version of the polargraph.
 
 */
@@ -18,15 +18,15 @@ have command storage features. */
 void impl_processCommand(String com)
 {
   lcd_echoLastCommandToDisplay(com, "usb:");
-  
+
   // The MEGA can change from LIVE to STORING modes
-  // LIVE is where it acts on the commands, 
+  // LIVE is where it acts on the commands,
   // STORING is where the commands are pushed into a file on an SD card.
 
   // If the command is to switch between these modes, then these are ALWAYS
-  // executed as if LIVE. 
+  // executed as if LIVE.
   // You can't store a mode-change command to SD.
-  if (com.startsWith(CMD_MODE_STORE_COMMANDS) 
+  if (com.startsWith(CMD_MODE_STORE_COMMANDS)
    || com.startsWith(CMD_MODE_LIVE))
   {
     Serial.println("Changing mode.");
@@ -45,7 +45,7 @@ void impl_processCommand(String com)
   }
 }
 
-/**  
+/**
 *  This includes the extra commands the MEGA is capable of handling.
 *  It tries to run the command using the core executeBasicCommand
 *  first, but if that doesn't work, then it will go through
@@ -58,7 +58,7 @@ void impl_executeCommand(String &com)
   {
     // that's nice, it worked
 #ifdef DEBUG
-	
+
     Serial.println("Executed basic.");
 #endif
   }
@@ -105,16 +105,16 @@ void impl_executeCommand(String &com)
   }
 }
 
-/** Polarshield implementation of runBackgroundProcesses. This is basically stuff to do with 
+/** Polarshield implementation of runBackgroundProcesses. This is basically stuff to do with
 the screen.
 */
 void impl_runBackgroundProcesses()
 {
-// #ifdef USE_LCD  
-  // lcd_checkForInput();
+#ifdef USE_LCD
+  lcd_checkForInput();
   // lcd_updateDisplay();
-// #endif
-      
+#endif
+
   // long motorCutoffTime = millis() - lastOperationTime;
   // if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
   // {
@@ -122,7 +122,7 @@ void impl_runBackgroundProcesses()
     // buttons_actions_motorsOff();
     // lcd_updateDisplay();
   // }
-  
+
   // if (swirling)
     // rove_swirl();
 }
@@ -159,10 +159,10 @@ void impl_exec_execFromStore(String inFilename)
       if (inFilename[i] != ' ')
         noBlanks = noBlanks + inFilename[i];
     }
-    
+
     char filename[noBlanks.length()+1];
     noBlanks.toCharArray(filename, noBlanks.length()+1);
-#ifdef DEBUG_SD    
+#ifdef DEBUG_SD
     Serial.print("Array to read from: ");
     Serial.println(filename);
 #endif
@@ -174,19 +174,19 @@ void impl_exec_execFromStore(String inFilename)
       String command = "";
       while (readFile.available() && currentlyDrawingFromFile)
       {
-#ifdef DEBUG_SD        
+#ifdef DEBUG_SD
         Serial.println("Reading...");
         // poll for input
 #endif
         char ch = readFile.read();
-#ifdef DEBUG_SD        
+#ifdef DEBUG_SD
         Serial.print(".");
         Serial.print(ch);
         Serial.print("-");
 #endif
         if (ch == INTERMINATOR || ch == SEMICOLON)
         {
-#ifdef DEBUG_SD        
+#ifdef DEBUG_SD
           Serial.println("New line");
 #endif
           // execute the line
@@ -195,7 +195,7 @@ void impl_exec_execFromStore(String inFilename)
           boolean commandParsed = comms_parseCommand(lastCommand);
           if (commandParsed)
           {
-#ifdef DEBUG_SD        
+#ifdef DEBUG_SD
             Serial.println("Stored command parsed.");
 #endif
             Serial.print(F("Executing command:"));
@@ -203,16 +203,16 @@ void impl_exec_execFromStore(String inFilename)
             if (echoingStoredCommands) lcd_echoLastCommandToDisplay(command, inFilename+": ");
             impl_executeCommand(command);
           }
-#ifdef DEBUG_SD        
+#ifdef DEBUG_SD
           else Serial.println("Stored command WAS NOT parsed.");
-#endif            
+#endif
           command = "";
           lcd_checkForInput();
         }
         else
           command += ch;
 
-#ifdef DEBUG_SD        
+#ifdef DEBUG_SD
         Serial.print("Command building:");
         Serial.println(command);
 #endif
@@ -250,7 +250,7 @@ void impl_exec_changeToStoreCommandMode()
       // delete file if it exists
       char filename[newfilename.length()+1];
       newfilename.toCharArray(filename, newfilename.length()+1);
-      
+
       if (SD.exists(filename))
       {
         // file exists
@@ -258,7 +258,7 @@ void impl_exec_changeToStoreCommandMode()
         boolean removed = SD.remove(filename);
         if (removed)
           Serial.println(F("File removed."));
-        
+
       }
     }
   }
@@ -278,25 +278,25 @@ void impl_pixel_testPenWidthScribble()
 {
   int rowWidth = multiplier(atoi(inParam1));
   float startWidth = atof(inParam2);
-  float endWidth = atof(inParam3); 
+  float endWidth = atof(inParam3);
   float incSize = atof(inParam4);
-  
+
   boolean ltr = true;
-  
+
   float oldPenWidth = penWidth;
   int iterations = 0;
-  
+
   int posA = motorA.currentPosition();
   int posB = motorB.currentPosition();
 
   int startColumn = posA;
   int startRow = posB;
-  
+
   for (float pw = startWidth; pw <= endWidth; pw+=incSize)
   {
     iterations++;
     int column = posA;
-    
+
     penWidth = pw;
     int maxDens = pixel_maxDensity(penWidth, rowWidth);
     Serial.print(F("Penwidth test "));
@@ -305,21 +305,21 @@ void impl_pixel_testPenWidthScribble()
     Serial.print(penWidth);
     Serial.print(F(", max density: "));
     Serial.println(maxDens);
-    
+
     for (int density = maxDens; density >= 0; density--)
     {
       pixel_drawScribblePixel(posA, posB, rowWidth, density);
       posB+=rowWidth;
     }
-    
+
     posA+=rowWidth;
     posB = startRow;
   }
-  
+
   changeLength(long(posA-(rowWidth/2)), long(startRow-(rowWidth/2)));
 
   penWidth = oldPenWidth;
-  
+
   moveB(0-rowWidth);
   for (int i = 1; i <= iterations; i++)
   {
@@ -327,16 +327,16 @@ void impl_pixel_testPenWidthScribble()
     moveA(0-rowWidth);
     moveB(rowWidth/2);
   }
-  
+
   penWidth = oldPenWidth;
-}    
+}
 
 void impl_engageMotors()
 {
   motorA.enableOutputs();
   motorB.enableOutputs();
   powerIsOn = true;
-  
+
   motorA.runToNewPosition(motorA.currentPosition()+multiplier(8));
   motorB.runToNewPosition(motorB.currentPosition()+multiplier(8));
   motorA.runToNewPosition(motorA.currentPosition()-multiplier(8));
@@ -381,7 +381,7 @@ void drawRandom()
       Serial.print("Chosen new B target: ");
       Serial.println(r);
     }
-    
+
     reportPosition();
   }
 }
@@ -392,16 +392,16 @@ void impl_exec_drawTestDirectionSquare()
   int segments = atoi(inParam2);
   pixel_drawSquarePixel(rowWidth, rowWidth, segments, DIR_SE);
   moveA(rowWidth*2);
-  
+
   pixel_drawSquarePixel(rowWidth, rowWidth, segments, DIR_SW);
   moveB(rowWidth*2);
-  
+
   pixel_drawSquarePixel(rowWidth, rowWidth, segments, DIR_NW);
   moveA(0-(rowWidth*2));
-  
+
   pixel_drawSquarePixel(rowWidth, rowWidth, segments, DIR_NE);
   moveB(0-(rowWidth*2));
-  
+
 }
 
 void impl_pixel_drawSawtoothPixel()
@@ -412,7 +412,7 @@ void impl_pixel_drawSawtoothPixel()
     int density = atoi(inParam4);
 
     int halfSize = size / 2;
-    
+
     long startPointA;
     long startPointB;
     long endPointA;
@@ -420,12 +420,12 @@ void impl_pixel_drawSawtoothPixel()
 
     int calcFullSize = halfSize * 2; // see if there's any rounding errors
     int offsetStart = size - calcFullSize;
-    
+
     if (globalDrawDirectionMode == DIR_MODE_AUTO)
       globalDrawDirection = pixel_getAutoDrawDirection(originA, originB, motorA.currentPosition(), motorB.currentPosition());
-      
 
-    if (globalDrawDirection == DIR_SE) 
+
+    if (globalDrawDirection == DIR_SE)
     {
 //      Serial.println(F("d: SE"));
       startPointA = originA - halfSize;
@@ -463,14 +463,14 @@ void impl_pixel_drawSawtoothPixel()
     }
 
     density = pixel_scaleDensity(density, 255, pixel_maxDensity(penWidth, size));
-    
+
     changeLength(startPointA, startPointB);
     if (density > 1)
     {
       pixel_drawWavePixel(size, size, density, globalDrawDirection, SAW_SHAPE);
     }
     changeLength(endPointA, endPointB);
-    
+
 }
 
 void impl_setDebugComms() {
@@ -480,4 +480,3 @@ void impl_setDebugComms() {
     case 1: debugComms = true; break;
   }
 }
-
