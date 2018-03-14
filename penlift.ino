@@ -28,6 +28,10 @@ The same goes for the down.
 
 void penlift_movePen(int start, int end, int delay_ms)
 {
+#ifdef DEBUG_PENLIFT
+      Serial.print("Attaching to pin ");
+      Serial.println(PEN_HEIGHT_SERVO_PIN);
+#endif
   penHeight.attach(PEN_HEIGHT_SERVO_PIN);
   if(start < end)
   {
@@ -35,6 +39,9 @@ void penlift_movePen(int start, int end, int delay_ms)
     {
       penHeight.write(i);
       delay(delay_ms);
+#ifdef DEBUG_PENLIFT
+      Serial.println(i);
+#endif
     }
   }
   else
@@ -43,17 +50,20 @@ void penlift_movePen(int start, int end, int delay_ms)
     {
       penHeight.write(i);
       delay(delay_ms);
-//      Serial.println(i);
+#ifdef DEBUG_PENLIFT
+      Serial.println(i);
+#endif
     }
   }
   penHeight.detach();
 }
 
+
 void penlift_penUp()
 {
   if (inNoOfParams > 1)
   {
-    //Serial.print("Penup with params");
+    Serial.print("Penup with params");
     int positionToMoveFrom = isPenUp ? upPosition : downPosition;
     upPosition = atoi(inParam1);
     penlift_movePen(positionToMoveFrom, upPosition, penLiftSpeed);

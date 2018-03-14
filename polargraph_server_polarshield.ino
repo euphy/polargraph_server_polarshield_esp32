@@ -110,6 +110,7 @@ typedef struct {
 #define DEBUG_STATE
 #define DEBUG_COMMS
 #define DEBUG_TOUCH
+#define DEBUG_PENLIFT
 boolean debugComms = false;
 
 /*  ===========================================================

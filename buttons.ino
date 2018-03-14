@@ -7,20 +7,9 @@ static int screenHeight = 240; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_
 static int centreYPosition = 112; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 112 : 80;
 
 
-#define MENU_INITIAL 1
-#define MENU_RUNNING 2
-#define MENU_CHOOSE_FILE 3
-#define MENU_ADJUST_PENSIZE 4
-#define MENU_ADJUST_POSITION 5
-#define MENU_ADJUST_SPEED 6
-#define MENU_SETTINGS 7
-#define MENU_SETTINGS_2 8
-#define MENU_ADJUST_PENLIFT 9
-
-
 #define BUTTON_SET_HOME 1
 #define BUTTON_DRAW_FROM_SD 2
-#define BUTTON_MORE_RIGHT 3
+#define BUTTON_MORE_RIGHT 3 // UNUSED
 #define BUTTON_PAUSE_RUNNING 4
 #define BUTTON_RESUME_RUNNING 5
 
@@ -71,8 +60,6 @@ static int centreYPosition = 112; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_
 #define BUTTON_ADJUST_PENLIFT 44
 #define BUTTON_PENLIFT_SAVE_TO_EEPROM 45
 
-char currentMenu = 0;
-
 // an array of buttons specifications, indexed by button id.
 #define NUM_OF_BUTTONS 46
 #define BUTTONS_PER_MENU 6
@@ -81,25 +68,56 @@ char currentMenu = 0;
 static ButtonSpec buttons[NUM_OF_BUTTONS];
 int buttonCoords[12][2];
 typedef byte Menus[NUM_OF_MENUS][BUTTONS_PER_MENU];
+
+#define MENU_INITIAL 1
+#define MENU_RUNNING 2 // UNUSED
+#define MENU_CHOOSE_FILE 3
+#define MENU_ADJUST_PENSIZE 4
+#define MENU_ADJUST_POSITION 5
+#define MENU_ADJUST_SPEED 6
+#define MENU_SETTINGS 7
+#define MENU_SETTINGS_2 8
+#define MENU_ADJUST_PENLIFT 9
+
+char currentMenu = 0;
+
 static Menus menus = {
   {0,0,0,
     0,0,0}, // the empty first element
-  {BUTTON_POWER_OFF, BUTTON_DRAW_FROM_SD, BUTTON_CALIBRATE,
+    
+  // MENU_INITIAL 
+  {BUTTON_POWER_ON, BUTTON_DRAW_FROM_SD, BUTTON_CALIBRATE,
      BUTTON_PEN_DOWN, BUTTON_PAUSE_RUNNING, BUTTON_SETTINGS_MENU},
-  {BUTTON_ADJUST_SPEED_MENU, BUTTON_ADJUST_PENSIZE_MENU, 0,
+     
+  // MENU_RUNNING (NOT USED)
+  {BUTTON_MAIN_MENU, BUTTON_ADJUST_SPEED_MENU, BUTTON_ADJUST_PENSIZE_MENU,
      BUTTON_PAUSE_RUNNING, 0, 0},
-  {BUTTON_RESET_SD, BUTTON_NEXT_FILE, BUTTON_PREV_FILE,
-     0, 0, BUTTON_DRAW_THIS_FILE},
+     
+  // MENU_CHOOSE_FILE
+  {0, BUTTON_NEXT_FILE, 0,
+     BUTTON_DONE, BUTTON_PREV_FILE, BUTTON_DRAW_THIS_FILE},
+     
+  // MENU_ADJUST_SPEED
   {0, BUTTON_INC_SPEED, BUTTON_INC_ACCEL,
      BUTTON_DONE, BUTTON_DEC_SPEED, BUTTON_DEC_ACCEL},
+     
+  // MENU_ADJUST_PENSIZE
   {0, BUTTON_INC_PENSIZE_INC, BUTTON_INC_PENSIZE,
      BUTTON_DONE, BUTTON_DEC_PENSIZE_INC, BUTTON_DEC_PENSIZE},
+     
+  // MENU_ADJUST_POSITION
   {0, BUTTON_MOVE_INC_A, BUTTON_MOVE_INC_B,
      BUTTON_DONE, BUTTON_MOVE_DEC_A, BUTTON_MOVE_DEC_B},
+     
+  // MENU_SETTINGS
   {BUTTON_ADJUST_POSITION_MENU, BUTTON_ADJUST_SPEED_MENU, BUTTON_ADJUST_PENSIZE_MENU,
      BUTTON_DONE, BUTTON_TOGGLE_ECHO, BUTTON_SETTINGS_MENU_2},
+     
+  // MENU_SETTINGS_2
   {BUTTON_ADJUST_PENLIFT, 0, 0,
      BUTTON_DONE, 0, 0},
+     
+  // MENU_ADJUST_PENLIFT
   {BUTTON_PENLIFT_SAVE_TO_EEPROM, BUTTON_INC_PENLIFT_DOWN, BUTTON_INC_PENLIFT_UP,
      BUTTON_DONE, BUTTON_DEC_PENLIFT_DOWN, BUTTON_DEC_PENLIFT_UP}
 };
@@ -111,57 +129,56 @@ void button_setup_loadButtons()
   buttons[BUTTON_PAUSE_RUNNING] = (ButtonSpec){BUTTON_PAUSE_RUNNING, "pause motors", button_genericButtonAction, BUTTON_RESUME_RUNNING};
 
   buttons[BUTTON_SET_HOME] = (ButtonSpec){BUTTON_SET_HOME, "set home", button_genericButtonAction, 0};
-  buttons[BUTTON_DRAW_FROM_SD] = (ButtonSpec){BUTTON_DRAW_FROM_SD, "draw from sd", button_genericButtonAction, 0};
-  buttons[BUTTON_MORE_RIGHT] = (ButtonSpec){BUTTON_MORE_RIGHT, "more", button_genericButtonAction, 0};
+  buttons[BUTTON_DRAW_FROM_SD] = (ButtonSpec){BUTTON_DRAW_FROM_SD, "draw from sd", genericChangeMenuAction, 0};
   buttons[BUTTON_PAUSE_RUNNING] = (ButtonSpec){BUTTON_PAUSE_RUNNING, "pause motors", button_genericButtonAction, BUTTON_RESUME_RUNNING};
   buttons[BUTTON_RESUME_RUNNING] = (ButtonSpec){BUTTON_RESUME_RUNNING, "run motors", button_genericButtonAction, BUTTON_PAUSE_RUNNING};
 
   buttons[BUTTON_RESET] = (ButtonSpec){BUTTON_RESET, "reset", button_genericButtonAction, 0};
   buttons[BUTTON_PEN_UP] = (ButtonSpec){BUTTON_PEN_UP, "pen up", button_genericButtonAction, BUTTON_PEN_DOWN};
   buttons[BUTTON_PEN_DOWN] = (ButtonSpec){BUTTON_PEN_DOWN, "pen down", button_genericButtonAction, BUTTON_PEN_UP};
-  buttons[BUTTON_INC_SPEED] = (ButtonSpec){BUTTON_INC_SPEED, "inc speed", button_genericButtonAction, 0};
-  buttons[BUTTON_DEC_SPEED] = (ButtonSpec){BUTTON_DEC_SPEED, "dec speed", button_genericButtonAction, 0};
+  buttons[BUTTON_INC_SPEED] = (ButtonSpec){BUTTON_INC_SPEED, "inc. speed", button_genericButtonAction, 0};
+  buttons[BUTTON_DEC_SPEED] = (ButtonSpec){BUTTON_DEC_SPEED, "dec. speed", button_genericButtonAction, 0};
 
-  buttons[BUTTON_NEXT_FILE] = (ButtonSpec){BUTTON_NEXT_FILE, "NEXT FILE", button_genericButtonAction, 0};
-  buttons[BUTTON_PREV_FILE] = (ButtonSpec){BUTTON_PREV_FILE, "PREV FILE", button_genericButtonAction, 0};
-  buttons[BUTTON_MAIN_MENU] = (ButtonSpec){BUTTON_MAIN_MENU, "MAIN MENU", button_genericButtonAction, 0};
+  buttons[BUTTON_NEXT_FILE] = (ButtonSpec){BUTTON_NEXT_FILE, "next file", button_genericButtonAction, 0};
+  buttons[BUTTON_PREV_FILE] = (ButtonSpec){BUTTON_PREV_FILE, "prev file", button_genericButtonAction, 0};
+  buttons[BUTTON_MAIN_MENU] = (ButtonSpec){BUTTON_MAIN_MENU, "main menu", genericChangeMenuAction, 0};
   buttons[BUTTON_OK] = (ButtonSpec){BUTTON_OK, "OK", button_genericButtonAction, 0};
-  buttons[BUTTON_CANCEL_FILE] = (ButtonSpec){BUTTON_CANCEL_FILE, "CANCEL DRAWING", button_genericButtonAction, 0};
+  buttons[BUTTON_CANCEL_FILE] = (ButtonSpec){BUTTON_CANCEL_FILE, "cancel drawing", button_genericButtonAction, 0};
 
-  buttons[BUTTON_DRAW_THIS_FILE] = (ButtonSpec){BUTTON_DRAW_THIS_FILE, "DRAW THIS FILE", button_genericButtonAction, BUTTON_STOP_FILE};
-  buttons[BUTTON_INC_ACCEL] = (ButtonSpec){BUTTON_INC_ACCEL, "INC ACCEL", button_genericButtonAction, 0};
-  buttons[BUTTON_DEC_ACCEL] = (ButtonSpec){BUTTON_DEC_ACCEL, "DEC ACCEL", button_genericButtonAction, 0};
-  buttons[BUTTON_DONE] = (ButtonSpec){BUTTON_DONE, "DONE", button_genericButtonAction, 0};
-  buttons[BUTTON_MOVE_INC_A] = (ButtonSpec){BUTTON_MOVE_INC_A, "INC MOTOR A", button_genericButtonAction, 0};
+  buttons[BUTTON_DRAW_THIS_FILE] = (ButtonSpec){BUTTON_DRAW_THIS_FILE, "draw this file", button_genericButtonAction, BUTTON_STOP_FILE};
+  buttons[BUTTON_INC_ACCEL] = (ButtonSpec){BUTTON_INC_ACCEL, "inc. accel", button_genericButtonAction, 0};
+  buttons[BUTTON_DEC_ACCEL] = (ButtonSpec){BUTTON_DEC_ACCEL, "dec. accel", button_genericButtonAction, 0};
+  buttons[BUTTON_DONE] = (ButtonSpec){BUTTON_DONE, "done", genericChangeMenuAction, 0};
+  buttons[BUTTON_MOVE_INC_A] = (ButtonSpec){BUTTON_MOVE_INC_A, "inc. motor A", button_genericButtonAction, 0};
 
-  buttons[BUTTON_MOVE_DEC_A] = (ButtonSpec){BUTTON_MOVE_DEC_A, "DEC MOTOR A", button_genericButtonAction, 0};
-  buttons[BUTTON_MOVE_INC_B] = (ButtonSpec){BUTTON_MOVE_INC_B, "INC MOTOR B", button_genericButtonAction, 0};
-  buttons[BUTTON_MOVE_DEC_B] = (ButtonSpec){BUTTON_MOVE_DEC_B, "DEC MOTOR B", button_genericButtonAction, 0};
-  buttons[BUTTON_INC_PENSIZE] = (ButtonSpec){BUTTON_INC_PENSIZE, "INC PENTIP WIDTH", button_genericButtonAction, 0};
-  buttons[BUTTON_DEC_PENSIZE] = (ButtonSpec){BUTTON_DEC_PENSIZE, "DEC PENTIP WIDTH", button_genericButtonAction, 0};
+  buttons[BUTTON_MOVE_DEC_A] = (ButtonSpec){BUTTON_MOVE_DEC_A, "dec. motor A", button_genericButtonAction, 0};
+  buttons[BUTTON_MOVE_INC_B] = (ButtonSpec){BUTTON_MOVE_INC_B, "inc. motor B", button_genericButtonAction, 0};
+  buttons[BUTTON_MOVE_DEC_B] = (ButtonSpec){BUTTON_MOVE_DEC_B, "dec. motor B", button_genericButtonAction, 0};
+  buttons[BUTTON_INC_PENSIZE] = (ButtonSpec){BUTTON_INC_PENSIZE, "inc. pentip width", button_genericButtonAction, 0};
+  buttons[BUTTON_DEC_PENSIZE] = (ButtonSpec){BUTTON_DEC_PENSIZE, "dec. pentip width", button_genericButtonAction, 0};
 
-  buttons[BUTTON_INC_PENSIZE_INC] = (ButtonSpec){BUTTON_INC_PENSIZE_INC, "INC PENTIP INCR", button_genericButtonAction, 0};
-  buttons[BUTTON_DEC_PENSIZE_INC] = (ButtonSpec){BUTTON_DEC_PENSIZE_INC, "DEC PENTIP INCR", button_genericButtonAction, 0};
-  buttons[BUTTON_ADJUST_SPEED_MENU] = (ButtonSpec){BUTTON_ADJUST_SPEED_MENU, "ADJUST SPEED", button_genericButtonAction, 0};
-  buttons[BUTTON_ADJUST_PENSIZE_MENU] = (ButtonSpec){BUTTON_ADJUST_PENSIZE_MENU, "ADJUST PENTIP WIDTH", button_genericButtonAction, 0};
-  buttons[BUTTON_ADJUST_POSITION_MENU] = (ButtonSpec){BUTTON_ADJUST_POSITION_MENU, "ADJUST POSITION", button_genericButtonAction, 0};
+  buttons[BUTTON_INC_PENSIZE_INC] = (ButtonSpec){BUTTON_INC_PENSIZE_INC, "inc. pentip incr", button_genericButtonAction, 0};
+  buttons[BUTTON_DEC_PENSIZE_INC] = (ButtonSpec){BUTTON_DEC_PENSIZE_INC, "dec. pentip incr", button_genericButtonAction, 0};
+  buttons[BUTTON_ADJUST_SPEED_MENU] = (ButtonSpec){BUTTON_ADJUST_SPEED_MENU, "adjust speed", genericChangeMenuAction, 0};
+  buttons[BUTTON_ADJUST_PENSIZE_MENU] = (ButtonSpec){BUTTON_ADJUST_PENSIZE_MENU, "adjust pentip width", genericChangeMenuAction, 0};
+  buttons[BUTTON_ADJUST_POSITION_MENU] = (ButtonSpec){BUTTON_ADJUST_POSITION_MENU, "adjust position", genericChangeMenuAction, 0};
 
   buttons[BUTTON_POWER_ON] = (ButtonSpec){BUTTON_POWER_ON, "motors on", button_genericButtonAction, BUTTON_POWER_OFF};
   buttons[BUTTON_POWER_OFF] = (ButtonSpec){BUTTON_POWER_OFF, "motors off", button_genericButtonAction, BUTTON_POWER_ON};
-  buttons[BUTTON_STOP_FILE] = (ButtonSpec){BUTTON_STOP_FILE, "STOP FILE", button_genericButtonAction, BUTTON_DRAW_THIS_FILE};
-  buttons[BUTTON_SETTINGS_MENU] = (ButtonSpec){BUTTON_SETTINGS_MENU, "settings", button_genericButtonAction, 0};
+  buttons[BUTTON_STOP_FILE] = (ButtonSpec){BUTTON_STOP_FILE, "stop file", button_genericButtonAction, BUTTON_DRAW_THIS_FILE};
+  buttons[BUTTON_SETTINGS_MENU] = (ButtonSpec){BUTTON_SETTINGS_MENU, "settings", genericChangeMenuAction, 0};
   buttons[BUTTON_CALIBRATE] = (ButtonSpec){BUTTON_CALIBRATE, "calibrate", button_genericButtonAction, 0};
 
-  buttons[BUTTON_TOGGLE_ECHO] = (ButtonSpec){BUTTON_TOGGLE_ECHO, "TOGGLE ECHO", button_genericButtonAction, 0};
-  buttons[BUTTON_RESET_SD] = (ButtonSpec){BUTTON_RESET_SD, "RESET SD", button_genericButtonAction, 0};
-  buttons[BUTTON_SETTINGS_MENU_2] = (ButtonSpec){BUTTON_SETTINGS_MENU_2, "MORE SETTINGS", button_genericButtonAction, 0};
-  buttons[BUTTON_INC_PENLIFT_UP] = (ButtonSpec){BUTTON_INC_PENLIFT_UP, "INC PENLIFT UP", button_genericButtonAction, 0};
-  buttons[BUTTON_DEC_PENLIFT_UP] = (ButtonSpec){BUTTON_DEC_PENLIFT_UP, "DEC PENLIFT UP", button_genericButtonAction, 0};
+  buttons[BUTTON_TOGGLE_ECHO] = (ButtonSpec){BUTTON_TOGGLE_ECHO, "toggle echo", button_genericButtonAction, 0};
+  buttons[BUTTON_RESET_SD] = (ButtonSpec){BUTTON_RESET_SD, "reset SD", button_genericButtonAction, 0};
+  buttons[BUTTON_SETTINGS_MENU_2] = (ButtonSpec){BUTTON_SETTINGS_MENU_2, "more settings", genericChangeMenuAction, 0};
+  buttons[BUTTON_INC_PENLIFT_UP] = (ButtonSpec){BUTTON_INC_PENLIFT_UP, "inc. penlift up", button_genericButtonAction, 0};
+  buttons[BUTTON_DEC_PENLIFT_UP] = (ButtonSpec){BUTTON_DEC_PENLIFT_UP, "dec. penlift up", button_genericButtonAction, 0};
 
-  buttons[BUTTON_INC_PENLIFT_DOWN] = (ButtonSpec){BUTTON_INC_PENLIFT_DOWN, "INC PENLIFT DOWN", button_genericButtonAction, 0};
-  buttons[BUTTON_DEC_PENLIFT_DOWN] = (ButtonSpec){BUTTON_DEC_PENLIFT_DOWN, "INC PENLIFT DOWN", button_genericButtonAction, 0};
-  buttons[BUTTON_ADJUST_PENLIFT] = (ButtonSpec){BUTTON_ADJUST_PENLIFT, "ADJUST PENLIFT", button_genericButtonAction, 0};
-  buttons[BUTTON_PENLIFT_SAVE_TO_EEPROM] = (ButtonSpec){BUTTON_PENLIFT_SAVE_TO_EEPROM, "SAVE TO EEPROM", button_genericButtonAction, 0};
+  buttons[BUTTON_INC_PENLIFT_DOWN] = (ButtonSpec){BUTTON_INC_PENLIFT_DOWN, "inc penlift down", button_genericButtonAction, 0};
+  buttons[BUTTON_DEC_PENLIFT_DOWN] = (ButtonSpec){BUTTON_DEC_PENLIFT_DOWN, "inc penlift down", button_genericButtonAction, 0};
+  buttons[BUTTON_ADJUST_PENLIFT] = (ButtonSpec){BUTTON_ADJUST_PENLIFT, "adjust penlift", genericChangeMenuAction, 0};
+  buttons[BUTTON_PENLIFT_SAVE_TO_EEPROM] = (ButtonSpec){BUTTON_PENLIFT_SAVE_TO_EEPROM, "save to eeprom", button_genericButtonAction, 0};
 }
 
 void button_setup_generateButtonCoords()

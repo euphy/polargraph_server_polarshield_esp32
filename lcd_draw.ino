@@ -100,7 +100,9 @@ Draws a white line around the edge of the button.
 void lcd_outlinePressedButton(byte buttonPosition, uint32_t color)
 {
   Serial.print("Outlining button ");
-  Serial.println(buttonPosition);
+  Serial.print(buttonPosition);
+  Serial.print(" in ");
+  Serial.println(color);
   if (buttonPosition >= 0 && buttonPosition <=5)
   {
     Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);

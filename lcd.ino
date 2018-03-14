@@ -19,7 +19,7 @@ This is the biggie! Converts touch into action.
 */
 void lcd_processTouchCommand()
 {
-  Serial.println("process touch.");
+  Serial.println(__FUNCTION__);
 
   // 1. ====================================
   // get control that is under the finger
@@ -37,10 +37,11 @@ void lcd_processTouchCommand()
     return;
   }
   ButtonSpec pressedButton = lcd_getButtonThatWasPressed(positionInMenu, currentMenu);
-  Serial.println("Pressed " + positionInMenu);
-  Serial.print("It was ");
-  Serial.println(pressedButton.labelText);
-  Serial.println("Ok.");
+  Serial.print("Pressed ");
+  Serial.println(positionInMenu);
+  Serial.print("It was '");
+  Serial.print(pressedButton.labelText);
+  Serial.println("'");
   touchRetriggerDelay = LONG_TOUCH_RETRIGGER_DELAY;
 
   // 3. ======================================
@@ -50,24 +51,32 @@ void lcd_processTouchCommand()
   // 4.  ==========================================
   // Do the button's actions, changing the model
   // (that includes updating menus!)
-  if (pressedButton.action(pressedButton.id)) {
-    Serial.println("worked.");
-    // successful
-  }
-  else {
+  int actionResult = pressedButton.action(pressedButton.id);
+  if (actionResult < 1) {
     Serial.println("failed!");
     // action failed
+  }
+  else if (actionResult == 1) {
+    Serial.println("worked, 1");
+    buttonToRedraw = positionInMenu; // just redraw the one button
+  }
+  else {
+    Serial.println("worked, more than 1");
+    buttonToRedraw = -1; // redraw whole menu
   }
 
   // 5.  =============================================
   // redraw bits of the screen if the button changed any number values
   // this happens later, but we say which button needs redrawing, 
-  buttonToRedraw = positionInMenu; // just redraw the one button
   
 }
 
 void lcd_redraw() 
 {
+//  Serial.println(__FUNCTION__);
+//  Serial.print("buttonToRedraw in: ");
+//  Serial.println(buttonToRedraw);
+  // got to be within -1 to 5
   if (buttonToRedraw < -1 || buttonToRedraw > 5) {
     // do nothing 
   }
@@ -75,11 +84,13 @@ void lcd_redraw()
     lcd_drawCurrentMenu();
   }
   else {
-    lcd_outlinePressedButton(buttonToRedraw, TFT_RED);
+    lcd_drawButton(buttonToRedraw);
   }
 
   // set it to a "no redraw" value.
   buttonToRedraw = -2;
+//  Serial.print("buttonToRedraw end: ");
+//  Serial.println(buttonToRedraw);
 }
 
 /*
