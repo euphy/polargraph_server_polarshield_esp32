@@ -112,6 +112,7 @@ void configuration_setup()
   // init SD card
 //  sd_initSD();
   lcd_initLCD();
+  touch_calibrate();
 //  lcd_showSummary();
   delay(3000);
 

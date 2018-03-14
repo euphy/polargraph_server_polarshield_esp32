@@ -1,45 +1,31 @@
 /**
-*  Polargraph Server for ATMEGA1280+ based arduino boards.
+*  Polargraph Server for ESP32 based microcontroller boards.
 *  Written by Sandy Noble
 *  Released under GNU License version 3.
 *  http://www.polargraph.co.uk
 *  https://github.com/euphy/polargraph_server_polarshield
 
-The program has a core part that consists of the following files:
 
-- comms.ino
-- configuration.ino
-- eeprom.ino
-- exec.ino
-- penlift.ino
-- pixel.ino
-- util.ino
+This version is for the Polarshield 3, which aggregates:
 
-and the first portion of this main file, probably called
-something like polargraph_server_polarshield.ino.
+  * NodeMCU32S
+  * 2x stepper drivers
+  * 320x240 LCD
+  * Touch panel
+  * SD card
 
-This version which is for the polarshield has a
-bunch of other files too, providing extra functions.
+This uses Bodmer's excellent TFT_eSPI library to provide graphics and 
+touchscreen control. You need to have it installed, and to modify
+the User_Setup.h file and add the following lines.
 
-The file called impl_ps perhaps deserves a special mention, and
-that file contains alternative implementations of a few functions,
-where the changes to make it work on ATMEGA1280+ mean that code
-is _different_ to the basic implemenation.
+#define TFT_MISO 19
+#define TFT_MOSI 23
+#define TFT_SCLK 18
+#define TFT_CS    5  // Chip select control pin
+#define TFT_DC    26  // Data Command control pin
+#define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
 
-The UTouch library needs a couple of calibration values:
-
-The UTouch library needs a couple of calibration values - these
-ones are the ones I use for the ITDB02-2.2 inch screen.
-#define CAL_X 0x039281CCUL
-#define CAL_Y 0x03A2C1DEUL
-#define CAL_S 0x000AF0DBUL
-
-// for the 2.4in screen that is current.
-#define CAL_X 0x03C34136UL
-#define CAL_Y 0x03C0018AUL
-#define CAL_S 0x000EF13FUL
-
-Put them in libraries/UTouch/UTouchCD.h
+#define TOUCH_CS 33     // Chip select pin (T_CS) of touch screen
 
 **/
 
@@ -51,7 +37,6 @@ Put them in libraries/UTouch/UTouchCD.h
 #include "SPIFFS.h"
 #include <SPI.h>
 #include <TFT_eSPI.h> // Hardware-specific library
-// #include "Fonts/FreeSans9pt7b.h";
 
 #include <AccelStepper.h>
 #include <ESP32_Servo.h>
@@ -60,7 +45,7 @@ Put them in libraries/UTouch/UTouchCD.h
 
 
 
-/* definition of a function that can be attached to a Button Specification
+/* Definition of a function that can be attached to a Button Specification
 and will get executed when the button is pushed..
 */
 typedef int (*button_Action) (int buttonId);
@@ -124,6 +109,7 @@ typedef struct {
 //#define DEBUG_SD
 #define DEBUG_STATE
 #define DEBUG_COMMS
+#define DEBUG_TOUCH
 boolean debugComms = false;
 
 /*  ===========================================================
@@ -387,29 +373,19 @@ TFT_eSPI lcd = TFT_eSPI();       // Invoke custom library
 
 // This is the file name used to store the touch coordinate
 // calibration data. Cahnge the name to start a new calibration.
-#define CALIBRATION_FILE "/TouchCalData3"
+#define CALIBRATION_FILE "/PolargraphCalData" // TouchCalData3
 
 // Set REPEAT_CAL to true instead of false to run calibration
 // again, otherwise it will only be done once.
 // Repeat calibration if you change the screen rotation.
-#define REPEAT_CAL true
+#define REPEAT_CAL false
 
-//boolean SwitchOn = false;
-//UTFT   lcd(LCD_TYPE, 38,39,40,41);
-//
-//#if MOTHERBOARD == TFTSHIELD
-//URTouch touch(6, 5, 4, 3, 2); // pinouts for the TFT shield
-//#elif MOTHERBOARD == NODEMCU32S
-//URTouch touch(6, 5, 4, 3, 2);
-//#else
-//URTouch touch(11,12,18,19, 2);
-//#endif
-
-
-#define INTERRUPT_TOUCH_PIN 32
 boolean displayTouched = false;
 int touchX = 0;
 int touchY = 0;
+
+long touchInputCount = 0L;
+long lastTouchInputReportTime = 0L;
 
 // size and location of rove area
 long rove1x = 1000;

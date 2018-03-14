@@ -210,8 +210,15 @@ void lcd_drawButton(byte buttonPosition)
 //   }
 }
 
-void lcd_drawCurrentMenu() {
+void lcd_drawCurrentMenu() 
+{
+  lcd.fillScreen(TFT_BLACK);
+  lcd_drawButtons();
+}
+void lcd_drawButtons() 
+{
   // Draw up six buttons
+  
   for (byte buttonPosition = 0; buttonPosition<BUTTONS_PER_MENU; buttonPosition++) {
     if (menus[currentMenu][buttonPosition]) {
       lcd_drawButton(buttonPosition);

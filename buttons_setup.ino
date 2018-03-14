@@ -1,5 +1,5 @@
 
-#define BUTTON_GAP 20
+#define BUTTON_GAP 16
 static byte  buttonSize = 60;
 static byte  grooveSize = 36;
 static int screenWidth = 320; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 320 : 220;

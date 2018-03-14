@@ -135,7 +135,20 @@ directly on the touch.
 */
 void lcd_touchInput()
 {
-  Serial.println("T.");
+#ifdef DEBUG_TOUCH
+  touchInputCount++;
+  const int sampleTime = 500;
+  if (millis() > (lastTouchInputReportTime + sampleTime)) {
+    Serial.print(__FUNCTION__);
+    Serial.print(" run ");
+    Serial.print(touchInputCount);
+    Serial.print(" times in the last ");
+    Serial.print(sampleTime);
+    Serial.println("ms");
+    touchInputCount = 0L;
+    lastTouchInputReportTime = millis();
+  }
+#endif
   
   //only trigger if it is NOT already processing a touch
   if (!displayTouched)
@@ -145,17 +158,21 @@ void lcd_touchInput()
       if ((x != -1) and (y != -1)) {
         touchX = x;
         touchY = y;
+#ifdef DEBUG_TOUCH        
         Serial.print("touch ok: ");
         Serial.print(touchX);
         Serial.print(",");
         Serial.println(touchY);
+#endif
         displayTouched = true;
         lastTouchTime = lastInteractionTime = millis();
       }
     }
   }
   else {
+#ifdef DEBUG_TOUCH    
     Serial.println("Already touched.");
+#endif
   }
 }
 
@@ -172,49 +189,59 @@ void lcd_checkForInput()
     return;
   }
   
-  lcd_touchInput();
+  lcd_touchInput(); // this sets displayTouched, touchX and touchY
 
   if (displayTouched)
   {
-    Serial.print("2: ");
+#ifdef DEBUG_TOUCH
+    Serial.print(__FUNCTION__);
+    Serial.print(": ");
     Serial.print(touchX);
     Serial.print(",");
     Serial.println(touchY);
-
-    Serial.println("Check for input");
+#endif
+    
     lastOperationTime = millis();
     if (screenState == SCREEN_STATE_POWER_SAVE)
     {
-      delay(20);
-      screenState = SCREEN_STATE_NORMAL;
-      lcd_drawCurrentMenu();
+      // Wake up from power save
+      lcd_wakeUpFromPowerSave();
     }
     else
     {
-      Serial.println("Inputted!!");
-//      delay(20);
+#ifdef DEBUG_TOUCH      
+      Serial.println("Input isolated, processing touch command.");
+#endif      
       lcd_processTouchCommand();
     }
-    Serial.print("DONE.");
+#ifdef DEBUG_TOUCH    
+    Serial.print("Touch finished.");
+#endif    
     displayTouched = false;
   }
-  else
+  else // displayTouched is false
   {
+    // put it to sleep if it's been idle
     if (screenState == SCREEN_STATE_NORMAL
     && (millis() > (lastInteractionTime + screenSaveIdleTime)))
     {
-      // put it to sleep
       screenState = SCREEN_STATE_POWER_SAVE;
       lcd.fillScreen(TFT_BLACK);
     }
     else if (screenState == SCREEN_STATE_POWER_SAVE
       && (millis() < lastInteractionTime + screenSaveIdleTime))
     {
-      delay(20);
-      screenState = SCREEN_STATE_NORMAL;
-      lcd_drawCurrentMenu();
+      lcd_wakeUpFromPowerSave();
     }
   }
+}
+
+void lcd_wakeUpFromPowerSave()
+{
+  screenState = SCREEN_STATE_NORMAL;
+  lcd_drawSplashScreen();
+  delay(1000);
+  lcd_drawCurrentMenu();
 }
 
 void lcd_drawSplashScreen()
@@ -252,11 +279,9 @@ void lcd_initLCD()
   lcd.init();
   lcd.setRotation(1);
   lcd.setTextDatum(TL_DATUM);
-//  touch_calibrate();
 
   button_setup_generateButtonCoords();
   button_setup_loadButtons();
-  //button_setup_loadMenus(); // this is initialised at declaration
 
   lcd_drawSplashScreen();
 }
