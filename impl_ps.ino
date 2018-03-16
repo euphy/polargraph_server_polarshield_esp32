@@ -110,6 +110,10 @@ the screen.
 */
 void impl_runBackgroundProcesses()
 {
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  #endif
+
 #ifdef USE_LCD
   lcd_checkForInput();
   if (millis() > (lastTouchTime + hightlightButtonDuration)) {
@@ -128,6 +132,9 @@ void impl_runBackgroundProcesses()
 
   // if (swirling)
     // rove_swirl();
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Exit %s at %d\n", __FUNCTION__, millis());
+  #endif
 }
 
 void impl_loadMachineSpecFromEeprom()

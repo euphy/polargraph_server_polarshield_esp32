@@ -2,8 +2,9 @@
 
 void lcd_draw_menuDecorations(byte menu)
 {
-  Serial.println(__FUNCTION__);
+//  Serial.println(__FUNCTION__);
   if (!updateValuesOnScreen) {
+    // quick escape if no decorations to update
     return;
   }
 

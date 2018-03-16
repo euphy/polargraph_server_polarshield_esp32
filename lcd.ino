@@ -19,7 +19,9 @@ This is the biggie! Converts touch into action.
 */
 void lcd_processTouchCommand(boolean buttonReleased)
 {
-  Serial.println(__FUNCTION__);
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  #endif
 
   // 1. ====================================
   // get control that is under the finger
@@ -31,12 +33,17 @@ void lcd_processTouchCommand(boolean buttonReleased)
   // 2.  ========================================
   // get boundaries of the displayed button
   byte positionInMenu = lcd_getButtonPosition(touchX, touchY);
-  if (positionInMenu<0 || positionInMenu>5) {
+  if ((positionInMenu<0) || (positionInMenu>5) || (!menus[currentMenu][positionInMenu])) {
     touchRetriggerDelay = SHORT_TOUCH_RETRIGGER_DELAY;
-    Serial.println("Didn't touch a button.");
+    #ifdef DEBUG_FUNCTION_BOUNDARIES
+    printf("Enter %s at %d because %s\n", __FUNCTION__, millis(), "Didn't touch a button.");
+    #endif
+    
     return;
   }
+ 
   ButtonSpec pressedButton = lcd_getButtonThatWasPressed(positionInMenu, currentMenu);
+  
   Serial.print("Pressed ");
   Serial.println(positionInMenu);
   Serial.print("It was '");
@@ -51,7 +58,18 @@ void lcd_processTouchCommand(boolean buttonReleased)
   // 4.  ==========================================
   // Do the button's actions, changing the model
   // (that includes updating menus!)
-  if (buttonReleased || ((touchRetriggerDelay>0 ) && (millis() > (lastInteractionTime + touchRetriggerDelay)))) {
+  long millisNow = millis();
+  if (buttonReleased || ((touchRetriggerDelay>0 ) && (millisNow > (lastInteractionTime + touchRetriggerDelay)))) {
+    Serial.print("Do the action (buttonReleased: ");
+    Serial.print(buttonReleased);
+    Serial.print(", touchRetriggerDelay: ");
+    Serial.print(touchRetriggerDelay);
+    Serial.print(", millisNow: ");
+    Serial.print(millisNow);
+    Serial.print(", (lastInteractionTime + touchRetriggerDelay): ");
+    Serial.print((lastInteractionTime + touchRetriggerDelay));
+    Serial.println(")");
+    
     int actionResult = pressedButton.action(pressedButton.id);
     if (actionResult < 1) {
       Serial.println("failed!");
@@ -63,39 +81,51 @@ void lcd_processTouchCommand(boolean buttonReleased)
     }
     else {
       Serial.println("worked, more than 1");
-      buttonToRedraw = -1; // redraw whole menu
+      buttonToRedraw = BUTTONS_PER_MENU; // redraw whole menu
     }
     lastInteractionTime = millis();
+  }
+  else {
+    // button not released yet OR retriggerDelay not reached yet
+    
   }
 
   // 5.  =============================================
   // redraw bits of the screen if the button changed any number values
   // this happens later, but we say which button needs redrawing, 
-  
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Exit %s at %d\n", __FUNCTION__, millis());
+  #endif
 }
 
 void lcd_redraw() 
 {
-//  Serial.println(__FUNCTION__);
-//  Serial.print("buttonToRedraw in: ");
-//  Serial.println(buttonToRedraw);
-  // got to be within -1 to 5
-  if (buttonToRedraw < -1 || buttonToRedraw > 5) {
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  #endif
+  Serial.print("buttonToRedraw is: ");
+  Serial.println(buttonToRedraw);
+  // got to be within 0 to 6
+  // 0-5 say to redraw the button in that position on the menu, 
+  // 6 says to redraw the whole menu
+  if (buttonToRedraw < 0 || buttonToRedraw > BUTTONS_PER_MENU) {
     // do nothing 
   }
-  else if (buttonToRedraw == -1) {
+  else if (buttonToRedraw == BUTTONS_PER_MENU) {
     lcd_drawCurrentMenu();
   }
   else {
     lcd_drawButton(buttonToRedraw);
   }
 
+  // decorations can only be drawn per menu, not per button (or value)
   lcd_draw_menuDecorations(currentMenu);
 
   // set it to a "no redraw" value.
-  buttonToRedraw = -2;
-//  Serial.print("buttonToRedraw end: ");
-//  Serial.println(buttonToRedraw);
+  buttonToRedraw = -1;
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Exit %s at %d after setting buttonToRedraw to %d\n", __FUNCTION__, millis(), buttonToRedraw);
+  #endif
 }
 
 /*
@@ -103,7 +133,7 @@ Returns the position of the touched button, within the current menu.
 */
 byte lcd_getButtonPosition(int x, int y)
 {
-  Serial.print("X:");
+  Serial.print("lcd_getButtonPosition X:");
   Serial.print(x);
   Serial.print(", Y:");
   Serial.println(y);
@@ -151,9 +181,13 @@ directly on the touch.
 */
 void lcd_touchInput()
 {
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  #endif
+
 #ifdef DEBUG_TOUCH
   touchInputCount++;
-  const int sampleTime = 500;
+  const int sampleTime = 5;
   if (millis() > (lastTouchInputReportTime + sampleTime)) {
     Serial.print(__FUNCTION__);
     Serial.print(" run ");
@@ -196,6 +230,9 @@ void lcd_touchInput()
 #endif
     }
   }
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Exit %s at %d\n", __FUNCTION__, millis());
+  #endif
 }
 
 /**
@@ -206,8 +243,15 @@ void lcd_touchInput()
 */
 void lcd_checkForInput()
 {
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  #endif
+  
   if (millis() < (lastTouchTime + touchRetriggerDelay)) {
     // ignore touches if they happened within a certain time from the last touch
+    #ifdef DEBUG_FUNCTION_BOUNDARIES
+    printf("Exit %s at %d because millis (%d) < (lastTouchTime + touchRetriggerDelay) (%d)\n", __FUNCTION__, millis(), millis(), (lastTouchTime + touchRetriggerDelay));
+    #endif
     return;
   }
   
@@ -244,7 +288,7 @@ void lcd_checkForInput()
       lcd_processTouchCommand(confirmedTouch);
     }
     #ifdef DEBUG_TOUCH    
-    Serial.print("Touch process finished.");
+    Serial.println("Touch process finished.");
     #endif    
     confirmedTouch = false;
   }
@@ -255,7 +299,7 @@ void lcd_checkForInput()
     Serial.println("No touch confirmed, but display is touched.");
     lcd_processTouchCommand(confirmedTouch);
   }
-  else // confirmedTouch is false
+  else // confirmedTouch && displayTouched are false
   {
     // put it to sleep if it's been idle
     if (screenState == SCREEN_STATE_NORMAL
@@ -270,6 +314,9 @@ void lcd_checkForInput()
       lcd_wakeUpFromPowerSave();
     }
   }
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Exit %s at %d\n", __FUNCTION__, millis());
+  #endif
 }
 
 void lcd_wakeUpFromPowerSave()
@@ -298,9 +345,9 @@ void lcd_drawSplashScreen()
   lcd.drawString("Polargraph.", targetPosition+1, barTop+24, 4); // bold it with double
 
   lcd.setTextColor(TFT_MAROON);
-  lcd.drawString("An open-source art project", targetPosition+2, barTop+35+(9*3), 2);
+  lcd.drawString("An open-source art project", targetPosition+2, barTop+33+(9*3), 2);
   lcd.setTextColor(TFT_WHITE);
-  lcd.drawString("An open-source art project", targetPosition+3, barTop+36+(9*3), 2);
+  lcd.drawString("An open-source art project", targetPosition+3, barTop+34+(9*3), 2);
 
   lcd.setTextDatum(BR_DATUM);
   lcd.drawString("v"+FIRMWARE_VERSION_NO, 310, 220, 1);

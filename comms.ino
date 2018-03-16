@@ -15,6 +15,9 @@ it contains methods for reading commands from the serial port.
 
 boolean comms_waitForNextCommand(char *buf)
 {
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  #endif
   // send ready
   // wait for instruction
   long idleTime = millis();
@@ -103,10 +106,14 @@ boolean comms_waitForNextCommand(char *buf)
   idleTime = lastOperationTime = lastInteractionTime = millis();
 //  lastOperationTime = idleTime;
 //  lastInteractionTime = lastOperationTime;
-#ifdef DEBUG_COMMS
+  #ifdef DEBUG_COMMS
   Serial.print(F("xbuf: "));
   Serial.println(buf);
-#endif
+  #endif
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("Exit %s at %d\n", __FUNCTION__, millis());
+  #endif
+
   return true;
 }
 

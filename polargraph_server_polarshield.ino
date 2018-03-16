@@ -107,11 +107,12 @@ typedef struct {
     Some debugging flags
 =========================================================== */
 
-//#define DEBUG_SD
+#define DEBUG_SD
 #define DEBUG_STATE
 #define DEBUG_COMMS
-#define DEBUG_TOUCH
+//#define DEBUG_TOUCH
 #define DEBUG_PENLIFT
+//#define DEBUG_FUNCTION_BOUNDARIES
 boolean debugComms = false;
 
 /*  ===========================================================
