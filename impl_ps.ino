@@ -116,10 +116,7 @@ void impl_runBackgroundProcesses()
 
 #ifdef USE_LCD
   lcd_checkForInput();
-  if (millis() > (lastTouchTime + hightlightButtonDuration)) {
-    lcd_redraw();
-  }
-
+  lcd_update();
 #endif
 
   // long motorCutoffTime = millis() - lastOperationTime;

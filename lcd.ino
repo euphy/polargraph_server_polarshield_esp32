@@ -130,6 +130,17 @@ void lcd_redraw()
   #endif
 }
 
+void lcd_update()
+{
+  // Three things that might get redrawn
+  //  1. A menu
+  //  2. A button
+  //  3. Number values
+  //(lastTouchTime + hightlightButtonDuration)
+  if (millis() > redrawButtonsTime) {
+    lcd_redraw();
+  }
+}
 /*
 Returns the position of the touched button, within the current menu.
 */
