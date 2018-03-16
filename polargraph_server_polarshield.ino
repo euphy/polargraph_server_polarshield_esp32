@@ -58,6 +58,7 @@ typedef struct {
   const char *labelText;
   button_Action action;
   byte nextButton;
+  int retriggerDelay;
 } ButtonSpec;
 
 // 2D coordinates struct
@@ -117,7 +118,7 @@ boolean debugComms = false;
     These variables are common to all polargraph server builds
 =========================================================== */
 
-const String FIRMWARE_VERSION_NO = "1.5";
+const String FIRMWARE_VERSION_NO = "2.0";
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == NODEMCU32S
@@ -215,9 +216,10 @@ const int hightlightButtonDuration = 250;
 
 #define LONG_TOUCH_RETRIGGER_DELAY 500
 #define SHORT_TOUCH_RETRIGGER_DELAY 50
+#define NEVER_RETRIGGER -1
 int touchRetriggerDelay = LONG_TOUCH_RETRIGGER_DELAY;
 int buttonToRedraw = -1; // -1 is ALL buttons
-
+static boolean updateValuesOnScreen = true;
 
 #define READY_STR "READY_200"
 #define RESEND_STR "RESEND"
@@ -381,7 +383,9 @@ TFT_eSPI lcd = TFT_eSPI();       // Invoke custom library
 // Repeat calibration if you change the screen rotation.
 #define REPEAT_CAL false
 
-boolean displayTouched = false;
+volatile boolean displayTouched = false;
+volatile boolean displayReleased = true;
+volatile boolean confirmedTouch = false;
 int touchX = 0;
 int touchY = 0;
 

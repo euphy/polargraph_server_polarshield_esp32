@@ -17,7 +17,7 @@ There is a lot of this, but it's pretty samey.
 /*
 This is the biggie! Converts touch into action.
 */
-void lcd_processTouchCommand()
+void lcd_processTouchCommand(boolean buttonReleased)
 {
   Serial.println(__FUNCTION__);
 
@@ -42,7 +42,7 @@ void lcd_processTouchCommand()
   Serial.print("It was '");
   Serial.print(pressedButton.labelText);
   Serial.println("'");
-  touchRetriggerDelay = LONG_TOUCH_RETRIGGER_DELAY;
+  touchRetriggerDelay = pressedButton.retriggerDelay;
 
   // 3. ======================================
   // Give feedback to show button is pressed
@@ -51,18 +51,21 @@ void lcd_processTouchCommand()
   // 4.  ==========================================
   // Do the button's actions, changing the model
   // (that includes updating menus!)
-  int actionResult = pressedButton.action(pressedButton.id);
-  if (actionResult < 1) {
-    Serial.println("failed!");
-    // action failed
-  }
-  else if (actionResult == 1) {
-    Serial.println("worked, 1");
-    buttonToRedraw = positionInMenu; // just redraw the one button
-  }
-  else {
-    Serial.println("worked, more than 1");
-    buttonToRedraw = -1; // redraw whole menu
+  if (buttonReleased || ((touchRetriggerDelay>0 ) && (millis() > (lastInteractionTime + touchRetriggerDelay)))) {
+    int actionResult = pressedButton.action(pressedButton.id);
+    if (actionResult < 1) {
+      Serial.println("failed!");
+      // action failed
+    }
+    else if (actionResult == 1) {
+      Serial.println("worked, 1");
+      buttonToRedraw = positionInMenu; // just redraw the one button
+    }
+    else {
+      Serial.println("worked, more than 1");
+      buttonToRedraw = -1; // redraw whole menu
+    }
+    lastInteractionTime = millis();
   }
 
   // 5.  =============================================
@@ -86,6 +89,8 @@ void lcd_redraw()
   else {
     lcd_drawButton(buttonToRedraw);
   }
+
+  lcd_draw_menuDecorations(currentMenu);
 
   // set it to a "no redraw" value.
   buttonToRedraw = -2;
@@ -160,30 +165,36 @@ void lcd_touchInput()
     lastTouchInputReportTime = millis();
   }
 #endif
-  
-  //only trigger if it is NOT already processing a touch
-  if (!displayTouched)
-  {
-    uint16_t x, y;
-    if (lcd.getTouch(&x, &y)) {
-      if ((x != -1) and (y != -1)) {
-        touchX = x;
-        touchY = y;
+
+  // test if touched
+  uint16_t x, y;
+  if (lcd.getTouch(&x, &y)) {
+    if ((x != -1) and (y != -1)) {
+      touchX = x;
+      touchY = y;
+      displayTouched = true;
 #ifdef DEBUG_TOUCH        
-        Serial.print("touch ok: ");
-        Serial.print(touchX);
-        Serial.print(",");
-        Serial.println(touchY);
+      Serial.print("Touch registered: ");
+      Serial.print(touchX);
+      Serial.print(",");
+      Serial.println(touchY);
 #endif
-        displayTouched = true;
-        lastTouchTime = lastInteractionTime = millis();
-      }
     }
+    lastTouchTime = lastInteractionTime = millis();
   }
-  else {
-#ifdef DEBUG_TOUCH    
-    Serial.println("Already touched.");
+  else { // not touched!
+    if (displayTouched) {
+      // it was touched before, now it's not: the finger has lifted!
+      // touchX and touchY will have the coords of the last touch
+      confirmedTouch = true;
+      displayTouched = false;
+#ifdef DEBUG_TOUCH        
+      Serial.print("Touch released! Last coords were: ");
+      Serial.print(touchX);
+      Serial.print(",");
+      Serial.println(touchY);
 #endif
+    }
   }
 }
 
@@ -200,17 +211,24 @@ void lcd_checkForInput()
     return;
   }
   
-  lcd_touchInput(); // this sets displayTouched, touchX and touchY
+  lcd_touchInput(); // this sets displayTouched, confirmedTouch, touchX and touchY
 
-  if (displayTouched)
+  // displayTouched = true means that there was a finger pressing on the screen. 
+  // This should either a) do nothing if the machines already processing a touch, or
+  // b) put a highlight around the button that the finger is on
+
+  // confirmedTouch = true means that the finger has released, and now the command can be 
+  // acted on.
+  
+  if (confirmedTouch)
   {
-#ifdef DEBUG_TOUCH
+    #ifdef DEBUG_TOUCH
     Serial.print(__FUNCTION__);
     Serial.print(": ");
     Serial.print(touchX);
     Serial.print(",");
     Serial.println(touchY);
-#endif
+    #endif
     
     lastOperationTime = millis();
     if (screenState == SCREEN_STATE_POWER_SAVE)
@@ -220,17 +238,24 @@ void lcd_checkForInput()
     }
     else
     {
-#ifdef DEBUG_TOUCH      
+      #ifdef DEBUG_TOUCH      
       Serial.println("Input isolated, processing touch command.");
-#endif      
-      lcd_processTouchCommand();
+      #endif      
+      lcd_processTouchCommand(confirmedTouch);
     }
-#ifdef DEBUG_TOUCH    
-    Serial.print("Touch finished.");
-#endif    
-    displayTouched = false;
+    #ifdef DEBUG_TOUCH    
+    Serial.print("Touch process finished.");
+    #endif    
+    confirmedTouch = false;
   }
-  else // displayTouched is false
+  else if (displayTouched) {
+    // there's a touch, so 
+    //   1. highlight the button that the finger's on, and optionally
+    //   2. trigger an action based on holding down (rather than releasing)
+    Serial.println("No touch confirmed, but display is touched.");
+    lcd_processTouchCommand(confirmedTouch);
+  }
+  else // confirmedTouch is false
   {
     // put it to sleep if it's been idle
     if (screenState == SCREEN_STATE_NORMAL

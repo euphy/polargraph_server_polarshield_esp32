@@ -17,6 +17,7 @@ void button_genericButtonActionEnd(ButtonSpec *button)
   Serial.print("In ");
   Serial.println(__FUNCTION__);
   replaceButtonInMenus(button->id, button->nextButton);
+  updateValuesOnScreen = true;
 }
 
 boolean replaceButtonInMenus(byte oldId, byte newId)

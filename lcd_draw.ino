@@ -1,6 +1,37 @@
 // ============================
 
+void lcd_draw_menuDecorations(byte menu)
+{
+  Serial.println(__FUNCTION__);
+  if (!updateValuesOnScreen) {
+    return;
+  }
 
+  // Here's some special decoration on some menus
+  switch (menu) {
+    case MENU_CHOOSE_FILE:
+      break;
+    case MENU_ADJUST_SPEED:
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, currentMaxSpeed);
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, currentAcceleration);
+      break;
+    case MENU_ADJUST_PENSIZE: 
+      lcd_drawFloatWithBackground(buttonCoords[8][0], centreYPosition, penWidthIncrement);
+      lcd_drawFloatWithBackground(buttonCoords[10][0], centreYPosition, penWidth);
+      break;
+    case MENU_ADJUST_POSITION:
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, motorA.currentPosition());
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, motorB.currentPosition());
+      break;
+    case MENU_ADJUST_PENLIFT:
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, downPosition);
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, upPosition);
+      break;
+   }
+
+   // Now don't do it again!
+   updateValuesOnScreen = false;
+}
 
 void lcd_drawNumberWithBackground(int x, int y, long value)
 {
@@ -184,32 +215,6 @@ void lcd_drawButton(byte buttonPosition)
     piece = strtok(NULL, " ");
   }
 
-//
-//   // Here's some special decoration on some menus
-//   if (currentMenu == MENU_CHOOSE_FILE)
-//   {
-// //    lcd_drawCurrentSelectedFilename();
-//   }
-//   else if (currentMenu == MENU_ADJUST_SPEED)
-//   {
-//     lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, currentMaxSpeed);
-//     lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, currentAcceleration);
-//   }
-//   else if (currentMenu == MENU_ADJUST_PENSIZE)
-//   {
-//     lcd_drawFloatWithBackground(buttonCoords[8][0], centreYPosition, penWidthIncrement);
-//     lcd_drawFloatWithBackground(buttonCoords[10][0], centreYPosition, penWidth);
-//   }
-//   else if (currentMenu == MENU_ADJUST_POSITION)
-//   {
-//     lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, motorA.currentPosition());
-//     lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, motorB.currentPosition());
-//   }
-//   else if (currentMenu == MENU_ADJUST_PENLIFT)
-//   {
-//     lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, downPosition);
-//     lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, upPosition);
-//   }
 }
 
 void lcd_drawCurrentMenu() 
