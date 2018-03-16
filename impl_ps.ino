@@ -111,7 +111,7 @@ the screen.
 void impl_runBackgroundProcesses()
 {
   #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  printf("\n\n\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
 
 #ifdef USE_LCD
@@ -133,7 +133,7 @@ void impl_runBackgroundProcesses()
   // if (swirling)
     // rove_swirl();
   #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("Exit %s at %d\n", __FUNCTION__, millis());
+  printf("\tExit %s at %d\n", __FUNCTION__, millis());
   #endif
 }
 

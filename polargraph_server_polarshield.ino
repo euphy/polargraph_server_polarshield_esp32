@@ -110,9 +110,9 @@ typedef struct {
 #define DEBUG_SD
 #define DEBUG_STATE
 #define DEBUG_COMMS
-//#define DEBUG_TOUCH
+#define DEBUG_TOUCH
 #define DEBUG_PENLIFT
-//#define DEBUG_FUNCTION_BOUNDARIES
+#define DEBUG_FUNCTION_BOUNDARIES
 boolean debugComms = false;
 
 /*  ===========================================================
@@ -213,13 +213,15 @@ boolean automaticPowerDown = true;
 
 volatile long lastInteractionTime = 0L;
 volatile long lastTouchTime = 0L;
+volatile long touchStartTime = 0L;
 const int hightlightButtonDuration = 250;
 
 #define LONG_TOUCH_RETRIGGER_DELAY 500
-#define SHORT_TOUCH_RETRIGGER_DELAY 50
+#define SHORT_TOUCH_RETRIGGER_DELAY 100
 #define NEVER_RETRIGGER -1
+#define MINIMUM_BUTTON_PRESS_DURATION 100
 int touchRetriggerDelay = LONG_TOUCH_RETRIGGER_DELAY;
-int buttonToRedraw = -1; // -1 is ALL buttons
+int buttonToRedraw = 6; // 6 is ALL buttons
 static boolean updateValuesOnScreen = true;
 
 #define READY_STR "READY_200"

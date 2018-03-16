@@ -71,7 +71,7 @@ boolean replaceButtonInMenus(byte oldId, byte newId)
 int button_genericButtonAction(int buttonId)
 {
   #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  printf("\t\t\t\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
   Serial.print("ButtonId: ");
   Serial.println(buttonId);
@@ -270,7 +270,7 @@ int button_genericButtonAction(int buttonId)
   }
   button_genericButtonActionEnd(&button);
   #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("Exit %s at %d\n", __FUNCTION__, millis());
+  printf("\t\t\t\tExit %s at %d\n", __FUNCTION__, millis());
   #endif  
   return 1; // one button changed
 }
@@ -281,7 +281,7 @@ int button_genericButtonAction(int buttonId)
 int genericChangeMenuAction(int buttonId)
 {
   #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("Enter %s at %d\n", __FUNCTION__, millis());
+  printf("\t\t\t\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
   Serial.print("ButtonId: ");
   Serial.println(buttonId);
@@ -319,7 +319,7 @@ int genericChangeMenuAction(int buttonId)
   button_genericButtonActionEnd(&button);
   
   #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("Exit %s at %d\n", __FUNCTION__, millis());
+  printf("\t\t\t\tExit %s at %d\n", __FUNCTION__, millis());
   #endif  
   return BUTTONS_PER_MENU; // whole menu changed
 }

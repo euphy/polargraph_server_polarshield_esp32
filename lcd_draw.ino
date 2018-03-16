@@ -131,7 +131,7 @@ Draws a white line around the edge of the button.
 */
 void lcd_outlinePressedButton(byte buttonPosition, uint32_t color)
 {
-  Serial.print("Outlining button ");
+  Serial.print("\t\t\t\tOutlining button ");
   Serial.print(buttonPosition);
   Serial.print(" in ");
   Serial.println(color);
@@ -235,6 +235,32 @@ void lcd_drawButtons()
 }
 
 
+void lcd_drawSplashScreen()
+{
+  lcd.fillScreen(TFT_BLACK);
+  int barTop = 80;
+  int barHeight = 100;
+  int targetPosition = 35;
+
+  lcd.fillRect(0, barTop, screenWidth, barHeight, TFT_RED);
+  lcd.setTextSize(1);
+
+  // write it with a drop shadow
+  lcd.setTextColor(TFT_MAROON);
+  lcd.drawString("Polargraph.", targetPosition-1, barTop+23, 4);
+  lcd.setTextColor(TFT_WHITE);
+  lcd.drawString("Polargraph.", targetPosition, barTop+24, 4);
+  lcd.drawString("Polargraph.", targetPosition+1, barTop+24, 4); // bold it with double
+
+  lcd.setTextColor(TFT_MAROON);
+  lcd.drawString("An open-source art project", targetPosition+2, barTop+31+(9*3), 2);
+  lcd.setTextColor(TFT_WHITE);
+  lcd.drawString("An open-source art project", targetPosition+3, barTop+32+(9*3), 2);
+
+  lcd.setTextDatum(BR_DATUM);
+  lcd.drawString("v"+FIRMWARE_VERSION_NO, 310, 220, 1);
+  lcd.drawString(MB_NAME, 310, 230, 1);
+}
 
 
 void lcd_echoLastCommandToDisplay(String com, String prefix)
