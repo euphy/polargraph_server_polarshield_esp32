@@ -1,16 +1,23 @@
 polargraph_server_polarshield
 =============================
 
-Polargraph Server for ATMEGA2560 based arduino boards, primarily targetting a Polarshield motor controller.
+Polargraph Server for NodeMCU-32S, which is based on the Espressif ESP32 chip, combined with an SPI-based 240x320 TFT touchscreen, an SD card reader and two A4988 stepper drivers. This is currently breadboarded.
 
-A Polarshield is an add-on board for an Arduino MEGA that provides two stepper drivers, an SD card reader and 
-an LCD touchscreen. The firmware may also be configured at compile time to target RAMPS, though without SD reader and touchscreen (yet...).
+The display and touch routines are courtesy of Bodmers excellent TFT_eSPI library, which rolls up and optimises some of the Adafruit GFX libraries.
 
-There is a precompiled binary hex file you can use if you don't want to compile from source.
+The ESP32 currently has sufficient pins for either:
 
-- polargraph_server_polarshield.ino.hex is for versions of the Polarshield or PolargraphSD that shipped after August 2014.
+* Encoders for the two motors, plus endstops, to build a Polargraph Pro type device, OR...
+* Another motor axis.
 
-If you have a 2.2 inch screen, then you need to compile the firmware yourself.
+The button and menu drawing routines are spread out over a couple of files:
+
+* buttons.ino - initialise and define the button data
+* buttons_actions.ino - the actions that get called when a button is activated
+* lcd.ino - touch input handling
+* lcd_draw.ino - for drawing to the lcd, layout
+
+
 
 The program has a core part that consists of the following files that are common to all Polargraph Server versions:
 
