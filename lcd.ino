@@ -33,7 +33,7 @@ This is the biggie! Converts touch into action.
 //  // 2.  ========================================
 //  // get boundaries of the displayed button
 //  byte positionInMenu = lcd_getButtonPosition(touchX, touchY);
-//  
+//
 //  if ((positionInMenu<0) || (positionInMenu>5) || (!menus[currentMenu][positionInMenu])) {
 //    touchRetriggerDelay = SHORT_TOUCH_RETRIGGER_DELAY;
 //    #ifdef DEBUG_FUNCTION_BOUNDARIES
@@ -42,7 +42,7 @@ This is the biggie! Converts touch into action.
 //    buttonToRedraw = BUTTONS_PER_MENU;
 //    return;
 //  }
-// 
+//
 //  ButtonSpec pressedButton = lcd_getButtonThatWasPressed(positionInMenu, currentMenu);
 //  Serial.print("\t\t\tPressed ");
 //  Serial.println(positionInMenu);
@@ -50,7 +50,7 @@ This is the biggie! Converts touch into action.
 //  Serial.print(pressedButton.labelText);
 //  Serial.println("'");
 ////  touchRetriggerDelay = pressedButton.retriggerDelay;
-//  
+//
 //
 //  // 3. ======================================
 //  // Give feedback to show button is pressed
@@ -71,7 +71,7 @@ This is the biggie! Converts touch into action.
 //    Serial.print(", (lastInteractionTime + touchRetriggerDelay): ");
 //    Serial.print((lastInteractionTime + touchRetriggerDelay));
 //    Serial.println(")");
-//    
+//
 //    int actionResult = pressedButton.action(pressedButton.id);
 //    if (actionResult < 1) {
 //      Serial.println("\t\t\tfailed!");
@@ -89,12 +89,12 @@ This is the biggie! Converts touch into action.
 //  }
 //  else {
 //    // button not released yet OR retriggerDelay not reached yet
-//    
+//
 //  }
 //
 //  // 5.  =============================================
 //  // redraw bits of the screen if the button changed any number values
-//  // this happens later, but we say which button needs redrawing, 
+//  // this happens later, but we say which button needs redrawing,
 //  #ifdef DEBUG_FUNCTION_BOUNDARIES
 //  printf("\t\t\tExit %s at %d\n", __FUNCTION__, millis());
 //  #endif
@@ -103,7 +103,7 @@ This is the biggie! Converts touch into action.
 void lcd_scheduleRedraw(int whatToRedraw, int timeFromNow)
 {
   switch (whatToRedraw) {
-    case REDRAW_BUTTON: 
+    case REDRAW_BUTTON:
       lcdPlan.buttonDue = millis() + timeFromNow;
       break;
     case REDRAW_MENU:
@@ -115,14 +115,14 @@ void lcd_scheduleRedraw(int whatToRedraw, int timeFromNow)
   }
 }
 
-void lcd_reset_redrawSchedule()
+void lcd_resetRedrawSchedule()
 {
   lcdPlan.buttonDue = NO_REDRAW_SCHEDULED;
   lcdPlan.menuDue = NO_REDRAW_SCHEDULED;
   lcdPlan.decorationDue = NO_REDRAW_SCHEDULED;
 }
 
-void lcd_redraw() 
+void lcd_redraw()
 {
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\t\tEnter %s at %d\n", __FUNCTION__, millis());
@@ -131,12 +131,12 @@ void lcd_redraw()
   Serial.print("\t\tbuttonToRedraw is: ");
   Serial.println(buttonToRedraw);
   #endif
-  
+
   // got to be within 0 to 6
-  // 0-5 say to redraw the button in that position on the menu, 
+  // 0-5 say to redraw the button in that position on the menu,
   // 6 says to redraw the whole menu
   if (buttonToRedraw < 0 || buttonToRedraw > BUTTONS_PER_MENU) {
-    // do nothing 
+    // do nothing
   }
   else if (buttonToRedraw == BUTTONS_PER_MENU) {
     lcd_drawCurrentMenu();
@@ -155,19 +155,32 @@ void lcd_redraw()
   #endif
 }
 
+/*
+ * If a redraw is schedules, it triggers the redraw and
+ * resets the schedule.
+ */
 void lcd_doScheduledRedraw()
 {
   // Three things that might get redrawn
   //  1. A menu
   //  2. A button
   //  3. Decoration (usually Number values)
-  
-  long now = millis(); // going to multiple comparisons, so save this out
-  if ((now >= lcdPlan.buttonDue) || (now >= lcdPlan.menuDue) || (now >= lcdPlan.decorationDue)) {
+
+  if (lcd_redrawRequired()) {
     lcd_redraw();
-    lcd_reset_redrawSchedule();
+    lcd_resetRedrawSchedule();
   }
 }
+
+/*
+ * Return true if it's time to redraw something.
+ */
+boolean lcd_redrawRequired()
+{
+  long now = millis();
+  return (now > lcdPlan.buttonDue) || (now > lcdPlan.menuDue) || (now > lcdPlan.decorationDue);
+}
+
 /*
 Returns the position of the touched button, within the current menu.
 */
@@ -252,7 +265,7 @@ void lcd_setCurrentMenu(int menu)
 //        touchStartTime = millis();
 //      }
 //      displayTouched = true;
-//#ifdef DEBUG_TOUCH        
+//#ifdef DEBUG_TOUCH
 //      Serial.print("\t\t\tTouch registered: ");
 //      Serial.print(touchX);
 //      Serial.print(",");
@@ -275,7 +288,7 @@ void lcd_setCurrentMenu(int menu)
 //      }
 //      displayTouched = false;
 //
-//#ifdef DEBUG_TOUCH        
+//#ifdef DEBUG_TOUCH
 //      Serial.print("\t\t\tTouch released! Last coords were: ");
 //      Serial.print(touchX);
 //      Serial.print(",");
@@ -299,7 +312,7 @@ void lcd_setCurrentMenu(int menu)
 //  #ifdef DEBUG_FUNCTION_BOUNDARIES
 //  printf("\t\tEnter %s at %d\n", __FUNCTION__, millis());
 //  #endif
-//  
+//
 //  if (millis() < (lastTouchTime + touchRetriggerDelay)) {
 //    // ignore touches if they happened within a certain time from the last touch
 //    #ifdef DEBUG_FUNCTION_BOUNDARIES
@@ -307,16 +320,16 @@ void lcd_setCurrentMenu(int menu)
 //    #endif
 //    return;
 //  }
-//  
+//
 //  lcd_touchInput(); // this sets displayTouched, confirmedTouch, touchX and touchY
 //
-//  // displayTouched = true means that there was a finger pressing on the screen. 
+//  // displayTouched = true means that there was a finger pressing on the screen.
 //  // This should either a) do nothing if the machines already processing a touch, or
 //  // b) put a highlight around the button that the finger is on
 //
-//  // confirmedTouch = true means that the finger has released, and now the command can be 
+//  // confirmedTouch = true means that the finger has released, and now the command can be
 //  // acted on.
-//  
+//
 //  if (confirmedTouch)
 //  {
 //    #ifdef DEBUG_TOUCH
@@ -326,7 +339,7 @@ void lcd_setCurrentMenu(int menu)
 //    Serial.print(",");
 //    Serial.println(touchY);
 //    #endif
-//    
+//
 //    lastOperationTime = millis();
 //    if (screenState == SCREEN_STATE_POWER_SAVE)
 //    {
@@ -335,18 +348,18 @@ void lcd_setCurrentMenu(int menu)
 //    }
 //    else
 //    {
-//      #ifdef DEBUG_TOUCH      
+//      #ifdef DEBUG_TOUCH
 //      Serial.println("\t\tInput isolated, processing touch command.");
-//      #endif      
+//      #endif
 //      lcd_processTouchCommand(confirmedTouch);
 //    }
-//    #ifdef DEBUG_TOUCH    
+//    #ifdef DEBUG_TOUCH
 //    Serial.println("\t\tTouch process finished.");
-//    #endif    
+//    #endif
 //    confirmedTouch = false;
 //  }
 //  else if (displayTouched) {
-//    // there's a touch, so 
+//    // there's a touch, so
 //    //   1. highlight the button that the finger's on, and optionally
 //    //   2. trigger an action based on holding down (rather than releasing)
 //    Serial.println("\t\tNo touch confirmed, but display is touched.");

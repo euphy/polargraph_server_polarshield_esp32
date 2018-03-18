@@ -16,7 +16,7 @@ void lcd_draw_menuDecorations(byte menu)
       lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, currentMaxSpeed);
       lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, currentAcceleration);
       break;
-    case MENU_ADJUST_PENSIZE: 
+    case MENU_ADJUST_PENSIZE:
       lcd_drawFloatWithBackground(buttonCoords[8][0], centreYPosition, penWidthIncrement);
       lcd_drawFloatWithBackground(buttonCoords[10][0], centreYPosition, penWidth);
       break;
@@ -243,16 +243,16 @@ void lcd_drawButton(byte buttonPosition)
 
 }
 
-void lcd_drawCurrentMenu() 
+void lcd_drawCurrentMenu()
 {
   lcd.fillScreen(TFT_BLACK);
   lcd_drawButtons();
 }
 
-void lcd_drawButtons() 
+void lcd_drawButtons()
 {
   // Draw up six buttons
-  
+
   for (byte buttonPosition = 0; buttonPosition<BUTTONS_PER_MENU; buttonPosition++) {
     if (menus[currentMenu][buttonPosition]) {
       lcd_drawButton(buttonPosition);
@@ -295,16 +295,3 @@ void lcd_echoLastCommandToDisplay(String com, String prefix)
   lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24, TFT_RED);
   // lcd.print(prefix + com, buttonCoords[0][0],buttonCoords[1][1]+10, TFT_WHITE);
 }
-
-/*
- * Return true if it's time to redraw something.
- */
-boolean lcd_redrawRequired()
-{
-  long now = millis();
-  return (now > redrawPlan.buttonDue) || (now > redrawPlan.menuDue) || (now > redrawPlan.decorationDue);
-}
-
-void lcd_scheduleDraw(
-
-

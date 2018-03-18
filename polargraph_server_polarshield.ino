@@ -14,7 +14,7 @@ This version is for the Polarshield 3, which aggregates:
   * Touch panel
   * SD card
 
-This uses Bodmer's excellent TFT_eSPI library to provide graphics and 
+This uses Bodmer's excellent TFT_eSPI library to provide graphics and
 touchscreen control. You need to have it installed, and to modify
 the User_Setup.h file and add the following lines.
 
