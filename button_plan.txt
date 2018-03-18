@@ -1,0 +1,76 @@
+New menu button
+---------------
+
+// highlight when touch is over button
+if (touched)
+	drawHighlight(thisButton);
+// activate when touch released
+if (touchReleased && touchDuration > MIN_TOUCH_DURATION)
+	// block further touches until screen redraw happens
+	blockTouch();
+	// do button action (change currentMenu)
+	buttonAction();
+	// schedule full menu screen redraw for 100ms
+	scheduleMenuRedraw(100);
+	// schedule touch unblock for 200ms
+	scheduleTouchUnblock(200);
+
+
+Toggle feature button
+---------------------
+
+// highlight when touch is over button
+if (touched)
+	drawHighlight(thisButton);
+// activate when touch released
+if (touchReleased && touchDuration > MIN_TOUCH_DURATION)
+	// block further touches until screen redraw happens
+	blockTouch();
+	// do button action (change button in menu and do the thing)
+	buttonAction();
+	// schedule button redraw for 100ms
+	scheduleButtonRedraw(100);
+	// schedule touch unblock for 200ms
+	scheduleTouchUnblock(200);
+
+	
+Change value button
+-------------------
+
+// highlight when touch is over button
+if (touched)
+	drawHighlight(thisButton);
+after 200ms of contact OR when touch released
+if (touchDuration > 200 OR (touchReleased && touchDuration > MIN_TOUCH_DURATION))
+	// do button action (update number value)
+	buttonAction();
+	// schedule values update and button redraw for immediately
+	scheduleValuesRedraw(0);
+	scheduleButtonRedraw(0);
+	// if button still down, then reset contact time
+	if (!touchReleased) 
+		touchDuration = 0;
+	else if (touchReleased)
+		// block touch
+		blockTouchNow();
+		// schedule touch unblock for 50ms
+		scheduleTouchUnblock(50);
+
+
+Then regularly
+--------------
+
+// Check scheduler to see if deadlines for redrawing or unblocking have passed.
+if (timeNow > redrawMenuTime)
+	redrawMenu();
+	redrawButtonTime = NEVER;
+	redrawMenuTime = NEVER;
+else if (timeNow > redrawButtonTime)
+	redrawButton();
+	redrawButtonTime = NEVER;
+	redrawMenuTime = NEVER;
+	
+if (timeNow > redrawValuesTime)
+	redrawValues();
+	
+	

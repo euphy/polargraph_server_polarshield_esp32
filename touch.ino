@@ -1,3 +1,133 @@
+
+/**  This sets parameters 
+ *   
+ *   displayTouched  if the display was sensed as being touched
+ *   touchReleased   if the display had been touched last time round, but wasn't this time round
+ *   touchStartTime  when the display was first touched
+ *   touchDuration   now minus touchStartTime
+ *   
+ *   This function does not act directly on the touch.
+*/
+void touch_sense()
+{
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("\t\t\tEnter %s at %d\n", __FUNCTION__, millis());
+  #endif
+
+  // test if touched
+  uint16_t x, y;
+  if (lcd.getTouch(&x, &y) && (x != -1 && (y != -1))) {
+    // Display was touched, and it's in-bounds.
+    touchX = x;
+    touchY = y;
+    
+    // If it's not already touching (ie displayTouched is false), 
+    // then this is the start of a new press
+    if (!displayTouched) {
+      touchStartTime = millis();
+    }
+    else {
+      // display already touched. This means a finger was held down, but 
+      // nothing really else has changed.
+    }
+    displayReleased = false;
+    displayTouched = true;
+    touchDuration = millis() - touchStartTime;
+
+    #ifdef DEBUG_TOUCH
+    printf(("\t\t\tTouch registered: %d, %d at %d.\n", touchX, touchY, touchStartTime);
+    #endif
+  }
+  else {
+    // not touched now, but look...
+    if (displayTouched) {
+      // it was touched before, now it's not: the finger has lifted!
+      // touchX and touchY will have the coords of the last touch
+      displayReleased = true;
+      displayTouched = false;
+      touchDuration = millis() - touchStartTime;
+
+      #ifdef DEBUG_TOUCH        
+      printf("\t\t\tTouch released! Last coords were: %d, %d.\n", touchX, touchY);
+      #endif
+    }
+    else {
+      // display not touched now, and wasn't before either. 
+      // This just means nothing happened.
+      touchDuration = 0L;
+      displayReleased = false;
+      displayTouched = false;
+    }
+  }
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("\t\t\tExit %s at %d\n", __FUNCTION__, millis());
+  #endif
+}
+
+
+
+void touch_input()
+{
+  if (!touchEnabled) {
+    return; // short circuit if disabled
+  }
+
+  touch_sense();
+
+  byte buttonPosition;
+  ButtonSpec pressedButton;
+  
+  if (displayTouched || displayReleased) {
+    buttonPosition = lcd_getButtonPosition(touchX, touchY);
+    pressedButton = lcd_getButtonThatWasPressed(buttonPosition, currentMenu);
+  }
+  
+  // highlight when touch is over button
+  if (displayTouched) {
+    lcd_draw_buttonHighlight(buttonPosition);
+    if (touchDuration > pressedButton.type.triggerAfter) {
+      // this is a "BUTTONTYPE_CHANGE_VALUE" kind of button press, it has a low triggerAfter value.
+      // triggerAfter is REDRAW_VALUES, probably 200 or somesuch.
+      touch_buttonTouch(pressedButton);
+    }
+    else {
+      // touchDuration hasn't reached the time to retrigger this button yet
+    }
+  }
+  else if (displayReleased) {
+    touch_buttonTouch(pressedButton);
+  }
+}
+
+/**
+ * 1) Disables touch; 2) runs action; 3) schedules redraw and touch re-enable.
+ */
+int touch_buttonPressAction(ButtonSpec b)
+{
+  touch_disable();
+  // do button action (change currentMenu)
+  int actionResult = b.action(pressedButton.id);
+  // block further touches until screen redraw happens
+  touch_scheduleRedraw(b.type.whatToRedraw, b.type.triggerAfter);
+  touch_scheduleEnable(100);
+  return actionResult;
+}
+
+
+void touch_scheduleEnable(int timeFromNow)
+{
+  lcdPlan.enableTouchDue = millis() + timeFromNow;  
+}
+
+void touch_disable()
+{
+  touchEnabled = false;
+  displayTouched = false;
+  displayReleased = true;
+  touchDuration = 0L;
+  touchStartTime = 0L;
+}
+
  /*
  * This function lifted directly from Bodmer's TFT_eSPI library.
  * https://github.com/Bodmer/TFT_eSPI

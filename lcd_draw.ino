@@ -126,26 +126,50 @@ Coord2D * lcd_getCoordsForButtonPosition(byte buttonPosition)
   return coords;
 }
 
+///*
+//Draws a white line around the edge of the button.
+//*/
+//void lcd_outlinePressedButton(byte buttonPosition, uint32_t color)
+//{
+//  Serial.print("\t\t\t\tOutlining button ");
+//  Serial.print(buttonPosition);
+//  Serial.print(" in ");
+//  Serial.println(color);
+//  if (buttonPosition >= 0 && buttonPosition <=5)
+//  {
+//    Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
+//    lcd.drawRect(coords[0].x, coords[0].y,
+//      coords[1].x-coords[0].x, coords[1].y-coords[0].y,
+//      color);
+//    lcd.drawRect(coords[0].x+1, coords[0].y+1,
+//      coords[1].x-coords[0].x-2, coords[1].y-coords[0].y-2,
+//      color);
+//  }
+//}
+
 /*
 Draws a white line around the edge of the button.
+Furthermore, it sets highLightedButton so that it knows not to do it again.
+Relies on highlightedButton being unset by screen redraws.
 */
-void lcd_outlinePressedButton(byte buttonPosition, uint32_t color)
+void lcd_draw_buttonHighlight(byte buttonPosition)
 {
-  Serial.print("\t\t\t\tOutlining button ");
-  Serial.print(buttonPosition);
-  Serial.print(" in ");
-  Serial.println(color);
-  if (buttonPosition >= 0 && buttonPosition <=5)
-  {
+  printf("\t\t\t\tOutlining button %d\n", buttonPosition);
+
+  if (highlightedButton == buttonPosition) {
+    // This button is already highlighted.
+    // Don't bother highlighting it again.
+  }
+  else if (buttonPosition >= 0 && buttonPosition <=5) {
     Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
     lcd.drawRect(coords[0].x, coords[0].y,
       coords[1].x-coords[0].x, coords[1].y-coords[0].y,
-      color);
+      TFT_WHITE);
     lcd.drawRect(coords[0].x+1, coords[0].y+1,
       coords[1].x-coords[0].x-2, coords[1].y-coords[0].y-2,
-      color);
+      TFT_WHITE);
+    highlightedButton = buttonPosition;
   }
-  
 }
 
 void lcd_drawButtonBackground(byte buttonPosition)
@@ -187,6 +211,7 @@ void lcd_drawButton(byte buttonPosition)
 {
   // plain background
   lcd_drawButtonBackground(buttonPosition);
+  highlightedButton = NO_HIGHLIGHTED_BUTTON; // background draws over the highlight, so nix this
 
   // get the screen coords of the button
   Coord2D *buttonCoords = lcd_getCoordsForButtonPosition(buttonPosition);
@@ -223,6 +248,7 @@ void lcd_drawCurrentMenu()
   lcd.fillScreen(TFT_BLACK);
   lcd_drawButtons();
 }
+
 void lcd_drawButtons() 
 {
   // Draw up six buttons
@@ -269,3 +295,16 @@ void lcd_echoLastCommandToDisplay(String com, String prefix)
   lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24, TFT_RED);
   // lcd.print(prefix + com, buttonCoords[0][0],buttonCoords[1][1]+10, TFT_WHITE);
 }
+
+/*
+ * Return true if it's time to redraw something.
+ */
+boolean lcd_redrawRequired()
+{
+  long now = millis();
+  return (now > redrawPlan.buttonDue) || (now > redrawPlan.menuDue) || (now > redrawPlan.decorationDue);
+}
+
+void lcd_scheduleDraw(
+
+

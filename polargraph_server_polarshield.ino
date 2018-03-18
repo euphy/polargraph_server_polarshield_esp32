@@ -44,7 +44,6 @@ the User_Setup.h file and add the following lines.
 #include "EEPROMAnything.h"
 
 
-
 /* Definition of a function that can be attached to a Button Specification
 and will get executed when the button is pushed..
 */
@@ -58,7 +57,7 @@ typedef struct {
   const char *labelText;
   button_Action action;
   byte nextButton;
-  int retriggerDelay;
+  int type;
 } ButtonSpec;
 
 // 2D coordinates struct
@@ -66,6 +65,13 @@ typedef struct {
   int x;
   int y;
 } Coord2D;
+
+typedef struct {
+  long menuDue;         // redraw the menu when this time is reached
+  long buttonDue;       // redraw the button when this time is reached
+  long decorationDue;   // redraw the decoration when this time is reached
+  long enableTouchDue;  // block touch until this time
+} LcdPlan;
 
 
 /*  ===========================================================
@@ -211,18 +217,26 @@ volatile long lastOperationTime = 0L;
 long motorIdleTimeBeforePowerDown = 600000L;
 boolean automaticPowerDown = true;
 
-volatile long lastInteractionTime = 0L;
-volatile long lastTouchTime = 0L;
-volatile long touchStartTime = 0L;
-const int hightlightButtonDuration = 250;
 
-#define LONG_TOUCH_RETRIGGER_DELAY 500
-#define SHORT_TOUCH_RETRIGGER_DELAY 100
-#define NEVER_RETRIGGER -1
-#define MINIMUM_BUTTON_PRESS_DURATION 100
-int touchRetriggerDelay = LONG_TOUCH_RETRIGGER_DELAY;
+volatile long lastInteractionTime = 0L;
+
+static int touchX = 0;
+static int touchY = 0;
+
+volatile boolean touchEnabled = true;
+
+volatile long touchStartTime = 0L;
+volatile long touchDuration = 0L;
+volatile boolean displayTouched = false;
+volatile boolean displayReleased = true;
+
 int buttonToRedraw = 6; // 6 is ALL buttons
 static boolean updateValuesOnScreen = true;
+#define NO_HIGHLIGHTED_BUTTON -1
+static byte highlightedButton = NO_HIGHLIGHTED_BUTTON;
+
+#define NO_REDRAW_SCHEDULED -1L
+volatile LcdPlan lcdPlan = {0L, 0L, 0L, 0L};
 
 #define READY_STR "READY_200"
 #define RESEND_STR "RESEND"
@@ -386,14 +400,6 @@ TFT_eSPI lcd = TFT_eSPI();       // Invoke custom library
 // Repeat calibration if you change the screen rotation.
 #define REPEAT_CAL false
 
-volatile boolean displayTouched = false;
-volatile boolean displayReleased = true;
-volatile boolean confirmedTouch = false;
-int touchX = 0;
-int touchY = 0;
-
-long touchInputCount = 0L;
-long lastTouchInputReportTime = 0L;
 
 // size and location of rove area
 long rove1x = 1000;

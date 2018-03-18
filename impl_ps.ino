@@ -114,10 +114,10 @@ void impl_runBackgroundProcesses()
   printf("\n\n\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
 
-#ifdef USE_LCD
-  lcd_checkForInput();
-  lcd_update();
-#endif
+  touch_input();
+  lcd_doScheduledRedraw();
+
+  
 
   // long motorCutoffTime = millis() - lastOperationTime;
   // if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
@@ -127,8 +127,6 @@ void impl_runBackgroundProcesses()
     // lcd_updateDisplay();
   // }
 
-  // if (swirling)
-    // rove_swirl();
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\tExit %s at %d\n", __FUNCTION__, millis());
   #endif
