@@ -100,11 +100,20 @@ This is the biggie! Converts touch into action.
 //  #endif
 //}
 
-void lcd_scheduleRedraw(int whatToRedraw, int timeFromNow)
+void lcd_scheduleRedraw(ButtonSpec *b)
 {
-  switch (whatToRedraw) {
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("\t\tEnter %s at %d\n", __FUNCTION__, millis());
+  #endif
+
+  ButtonType buttonType = buttonTypes[b->type];
+  printf("\t\tScheduling redraw (%d) in %dms (%d))\n",
+  buttonType.whatToRedraw, buttonType.triggerAfter, (millis()+buttonType.triggerAfter));
+  long timeFromNow = buttonType.triggerAfter;
+  switch (buttonType.whatToRedraw) {
     case REDRAW_BUTTON:
       lcdPlan.buttonDue = millis() + timeFromNow;
+      lcdPlan.buttonToRedraw = lcd_getPositionOfButtonInMenu(b->id, currentMenu);
       break;
     case REDRAW_MENU:
       lcdPlan.menuDue = millis() + timeFromNow;
@@ -113,13 +122,34 @@ void lcd_scheduleRedraw(int whatToRedraw, int timeFromNow)
       lcdPlan.decorationDue = millis() + timeFromNow;
       break;
   }
+
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  lcd_printf_lcdPlan();
+  printf("\t\tExit %s at %d, set lcdPlan.buttonToRedraw to %d, lcdPlan.lastRedrawnTime to %d\n", __FUNCTION__, millis(), lcdPlan.buttonToRedraw, lcdPlan.lastRedrawnTime);
+  #endif
+}
+
+void lcd_printf_lcdPlan()
+{
+  printf("lcdPlan due: menu: %d, button: %d, decoration: %d\n", lcdPlan.menuDue, lcdPlan.buttonDue, lcdPlan.decorationDue);
+  printf("lcdPlan enableTouchDue: %d, lastRedrawnTime: %d, buttonToRedraw: %d\n", lcdPlan.enableTouchDue, lcdPlan.lastRedrawnTime, (int)lcdPlan.buttonToRedraw);
+}
+
+int lcd_getPositionOfButtonInMenu(byte id, byte menu)
+{
+  for (int i=0; i<BUTTONS_PER_MENU; i++) {
+    if (menus[menu][i] == id) {
+      return i;
+    }
+  }
+  return -1; // not in the menu
 }
 
 void lcd_resetRedrawSchedule()
 {
-  lcdPlan.buttonDue = NO_REDRAW_SCHEDULED;
-  lcdPlan.menuDue = NO_REDRAW_SCHEDULED;
-  lcdPlan.decorationDue = NO_REDRAW_SCHEDULED;
+  lcdPlan.buttonDue = lcdPlan.lastRedrawnTime;
+  lcdPlan.menuDue = lcdPlan.lastRedrawnTime;
+  lcdPlan.decorationDue = lcdPlan.lastRedrawnTime;
 }
 
 void lcd_redraw()
@@ -128,30 +158,32 @@ void lcd_redraw()
   printf("\t\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
   #ifdef DEBUG_TOUCH
-  Serial.print("\t\tbuttonToRedraw is: ");
-  Serial.println(buttonToRedraw);
+  Serial.print("\t\tlcdPlan.buttonToRedraw is: ");
+  Serial.println(lcdPlan.buttonToRedraw);
   #endif
 
   // got to be within 0 to 6
   // 0-5 say to redraw the button in that position on the menu,
   // 6 says to redraw the whole menu
-  if (buttonToRedraw < 0 || buttonToRedraw > BUTTONS_PER_MENU) {
+  if (lcdPlan.buttonToRedraw < 0 || lcdPlan.buttonToRedraw > BUTTONS_PER_MENU) {
     // do nothing
   }
-  else if (buttonToRedraw == BUTTONS_PER_MENU) {
+  else if (lcdPlan.buttonToRedraw == BUTTONS_PER_MENU) {
     lcd_drawCurrentMenu();
   }
   else {
-    lcd_drawButton(buttonToRedraw);
+    lcd_drawButton(lcdPlan.buttonToRedraw);
   }
 
   // decorations can only be drawn per menu, not per button (or value)
   lcd_draw_menuDecorations(currentMenu);
 
   // set it to a "no redraw" value.
-  buttonToRedraw = -1;
+  lcdPlan.buttonToRedraw = -1;
+  lcdPlan.lastRedrawnTime = millis();
+
   #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("\t\tExit %s at %d after setting buttonToRedraw to %d\n", __FUNCTION__, millis(), buttonToRedraw);
+  printf("\t\tExit %s at %d, set lcdPlan.buttonToRedraw to %d, lcdPlan.lastRedrawnTime to %d\n", __FUNCTION__, millis(), lcdPlan.buttonToRedraw, lcdPlan.lastRedrawnTime);
   #endif
 }
 
@@ -161,6 +193,9 @@ void lcd_redraw()
  */
 void lcd_doScheduledRedraw()
 {
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("\t\tEnter %s at %d\n", __FUNCTION__, millis());
+  #endif
   // Three things that might get redrawn
   //  1. A menu
   //  2. A button
@@ -170,6 +205,9 @@ void lcd_doScheduledRedraw()
     lcd_redraw();
     lcd_resetRedrawSchedule();
   }
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("\t\tExit %s at %d\n", __FUNCTION__, millis());
+  #endif
 }
 
 /*
@@ -177,12 +215,26 @@ void lcd_doScheduledRedraw()
  */
 boolean lcd_redrawRequired()
 {
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("\t\t\tEnter %s at %d\n", __FUNCTION__, millis());
+  #endif
+
   long now = millis();
-  return (now > lcdPlan.buttonDue) || (now > lcdPlan.menuDue) || (now > lcdPlan.decorationDue);
+  long lastRedrawn = lcdPlan.lastRedrawnTime;
+
+  boolean redrawButton = (lcdPlan.buttonDue<=now && lcdPlan.buttonDue > lastRedrawn);
+  boolean redrawMenu = (lcdPlan.menuDue<=now && lcdPlan.menuDue > lastRedrawn);
+  boolean redrawDecoration = (lcdPlan.decorationDue<=now && lcdPlan.decorationDue > lastRedrawn);
+
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("\t\t\tExit %s at %d, redrawing button (%d), menu (%d) or decoration (%d)\n", __FUNCTION__, millis(), (int)redrawButton, (int)redrawMenu, (int)redrawDecoration);
+  #endif
+  return redrawButton || redrawMenu || redrawDecoration;
 }
 
 /*
-Returns the position of the touched button, within the current menu.
+Returns the position of the touched button, within the current menu,
+and -1 if it wans't on a button.
 */
 byte lcd_getButtonPosition(int x, int y)
 {
@@ -217,7 +269,19 @@ Returns the ButtonSpec that was pressed, based on the position and the menu.
 */
 ButtonSpec lcd_getButtonThatWasPressed(byte buttonPosition, byte menu)
 {
-  return buttons[menus[menu][buttonPosition]];
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("...Enter %s at %d, buttonPosition: %d\n", __FUNCTION__, millis());
+  #endif
+
+  ButtonSpec b = {0};
+  if (menus[menu][buttonPosition] != 0) {
+    b = buttons[menus[menu][buttonPosition]];
+  }
+
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("...Exit %s at %d, the button is %d.\n", __FUNCTION__, millis(), b.id);
+  #endif
+  return b;
 }
 
 
@@ -406,6 +470,8 @@ void lcd_initLCD()
   button_setup_generateButtonCoords();
   button_setup_loadButtonTypes();
   button_setup_loadButtons();
+
+  touch_scheduleEnable(1000);
 
   lcd_drawSplashScreen();
 }

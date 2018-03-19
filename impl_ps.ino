@@ -116,8 +116,9 @@ void impl_runBackgroundProcesses()
 
   touch_input();
   lcd_doScheduledRedraw();
+  touch_doScheduledEnable();
 
-  
+
 
   // long motorCutoffTime = millis() - lastOperationTime;
   // if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))

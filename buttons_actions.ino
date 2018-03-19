@@ -22,7 +22,7 @@ void button_genericButtonActionEnd(ButtonSpec *button)
   printf("Enter %s at %d\n", __FUNCTION__, millis());
   #endif
   replaceButtonInMenus(button->id, button->nextButton);
-  updateValuesOnScreen = true;
+  // updateValuesOnScreen = true;
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("Exit %s at %d\n", __FUNCTION__, millis());
   #endif
@@ -57,7 +57,7 @@ boolean replaceButtonInMenus(byte oldId, byte newId)
   printf("Exit %s at %d, returning %d changes\n", __FUNCTION__, millis(), changes);
   #endif
   if (changes) {
-    //trigger a menu redraw
+    //trigger a button redraw
     return true;
   }
   else {
@@ -271,7 +271,7 @@ int button_genericButtonAction(int buttonId)
   button_genericButtonActionEnd(&button);
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\t\t\t\tExit %s at %d\n", __FUNCTION__, millis());
-  #endif  
+  #endif
   return 1; // one button changed
 }
 
@@ -290,7 +290,7 @@ int genericChangeMenuAction(int buttonId)
 
   button_genericButtonActionBegin(&button);
 
-  switch (button.id) { 
+  switch (button.id) {
     case BUTTON_DRAW_FROM_SD:
       currentMenu = MENU_CHOOSE_FILE;
       break;
@@ -314,13 +314,13 @@ int genericChangeMenuAction(int buttonId)
       break;
     case BUTTON_ADJUST_PENLIFT:
       currentMenu = MENU_ADJUST_PENLIFT;
-      break;    
+      break;
   }
   button_genericButtonActionEnd(&button);
-  
+
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\t\t\t\tExit %s at %d\n", __FUNCTION__, millis());
-  #endif  
+  #endif
   return BUTTONS_PER_MENU; // whole menu changed
 }
 

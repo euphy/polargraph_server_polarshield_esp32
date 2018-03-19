@@ -7,7 +7,7 @@
 
 Util.
 
-This is one of the core files for the polargraph server program.  
+This is one of the core files for the polargraph server program.
 
 This has all the methods that let the rest actually work, including
 the geometry routines that convert from the different coordinates
@@ -42,7 +42,7 @@ void transform(float &tA, float &tB)
   tB = tB * scaleY;
 
   // rotate
-  
+
   if (rotateTransform >45 && rotateTransform <= 135) // 90 degree rotation
   {
     float temp = tA;
@@ -60,11 +60,11 @@ void transform(float &tA, float &tB)
     tA = tB;
     tB = -temp;
   }
-  else // no rotation 
+  else // no rotation
   {
-    
+
   }
-  
+
   tA = tA + translateX;
   tB = tB + translateY;
 
@@ -72,7 +72,7 @@ void transform(float &tA, float &tB)
 //  Serial.println(tA);
 //  Serial.print("Out tB:");
 //  Serial.println(tB);
-  
+
 }
 
 void changeLength(long tA, long tB)
@@ -86,10 +86,10 @@ void changeLength(float tA, float tB)
   lastOperationTime = millis();
 
   transform(tA,tB);
-  
+
   float currSpeedA = motorA.speed();
   float currSpeedB = motorB.speed();
-  
+
 //  Serial.print("A pos: ");
 //  Serial.print(motorA.currentPosition());
 //  Serial.print(", A target: ");
@@ -98,19 +98,19 @@ void changeLength(float tA, float tB)
 //  Serial.print(motorB.currentPosition());
 //  Serial.print(", B target: ");
 //  Serial.println(tB);
-  
-  
+
+
   motorA.setSpeed(0.0);
   motorB.setSpeed(0.0);
   motorA.moveTo(tA);
   motorB.moveTo(tB);
-  
-  
+
+
   if (!usingAcceleration)
   {
     // The moveTo() function changes the speed in order to do a proper
     // acceleration. This counteracts it. Ha.
-    
+
     if (motorA.speed() < 0)
       currSpeedA = -currSpeedA;
     if (motorB.speed() < 0)
@@ -124,12 +124,12 @@ void changeLength(float tA, float tB)
 //    Serial.print(motorB.speed());
 //    Serial.print(" back to ");
 //    Serial.println(currSpeedB);
-      
+
     motorA.setSpeed(currSpeedA);
     motorB.setSpeed(currSpeedB);
   }
-  
-  
+
+
   while (motorA.distanceToGo() != 0 || motorB.distanceToGo() != 0)
   {
 //    Serial.print("dA:");
@@ -153,7 +153,7 @@ void changeLength(float tA, float tB)
       }
     }
   }
-  
+
   reportPosition();
 }
 
@@ -166,7 +166,7 @@ void changeLengthRelative(long tA, long tB)
   lastOperationTime = millis();
   motorA.move(tA);
   motorB.move(tB);
-  
+
   while (motorA.distanceToGo() != 0 || motorB.distanceToGo() != 0)
   {
     //impl_runBackgroundProcesses();
@@ -184,7 +184,7 @@ void changeLengthRelative(long tA, long tB)
       }
     }
   }
-  
+
   reportPosition();
 }
 
@@ -245,7 +245,7 @@ void reportPosition()
     Serial.print(COMMA);
     Serial.print(divider(motorB.currentPosition()));
     Serial.println(CMD_END);
-    
+
   //  int cX = getCartesianX();
   //  int cY = getCartesianY(cX, motorA.currentPosition());
   //  Serial.print(OUT_CMD_CARTESIAN);
@@ -302,10 +302,10 @@ float getCartesianXFP(float aPos, float bPos)
 
 //  Serial.print("CalcX float: ");
 //  Serial.println(calcX);
-  
-  return calcX;  
+
+  return calcX;
 }
-float getCartesianYFP(float cX, float aPos) 
+float getCartesianYFP(float cX, float aPos)
 {
 //  Serial.print("aPos: ");
 //  Serial.print(aPos);
@@ -326,12 +326,12 @@ float getCartesianYFP(float cX, float aPos)
 long getCartesianX(float aPos, float bPos)
 {
   long calcX = long((pow(pageWidth, 2) - pow(bPos, 2) + pow(aPos, 2)) / (pageWidth*2));
-  return calcX;  
+  return calcX;
 }
 
 long getCartesianX() {
   long calcX = getCartesianX(motorA.currentPosition(), motorB.currentPosition());
-  return calcX;  
+  return calcX;
 }
 
 long getCartesianY() {
@@ -341,7 +341,3 @@ long getCartesianY(long cX, float aPos) {
   long calcY = long(sqrt(pow(aPos,2)-pow(cX,2)));
   return calcY;
 }
-
-
-
-
