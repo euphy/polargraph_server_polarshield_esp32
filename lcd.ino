@@ -100,28 +100,49 @@ This is the biggie! Converts touch into action.
 //  #endif
 //}
 
-void lcd_scheduleRedraw(ButtonSpec *b)
+
+void lcd_scheduleRedraw(ButtonSpec *button, boolean syncTouchEnable)
 {
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\t\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
 
+  touchEnableDelay = 0;
+
+  ButtonSpec *b;
+
+  if (button->nextButton) {
+    printf("\t\tUsing nextButton (%d), rather than this one (%d)\n",
+      button->nextButton, button->id);
+    b = &buttons[button->nextButton];
+  } else {
+    printf("\t\tUsing this button (%d)\n",
+      button->id);
+    b = button;
+  }
+
+  printf("\t\tB.id: %d, b.labelText: %s, b.nextButton: %d, b.type: %d\n",
+    b->id, b->labelText, b->nextButton, b->type);
+
   ButtonType buttonType = buttonTypes[b->type];
   printf("\t\tScheduling redraw (%d) in %dms (%d))\n",
-  buttonType.whatToRedraw, buttonType.triggerAfter, (millis()+buttonType.triggerAfter));
-  long timeFromNow = buttonType.triggerAfter;
+  buttonType.whatToRedraw, 0, millis());
   switch (buttonType.whatToRedraw) {
     case REDRAW_BUTTON:
-      lcdPlan.buttonDue = millis() + timeFromNow;
+      lcdPlan.buttonDue = millis();
       lcdPlan.buttonToRedraw = lcd_getPositionOfButtonInMenu(b->id, currentMenu);
       break;
     case REDRAW_MENU:
-      lcdPlan.menuDue = millis() + timeFromNow;
+      lcdPlan.menuDue = millis();
+      lcdPlan.buttonToRedraw = BUTTONS_PER_MENU;
+      touchEnableDelay = 200;
       break;
     case REDRAW_VALUES:
-      lcdPlan.decorationDue = millis() + timeFromNow;
+      lcdPlan.decorationDue = millis();
       break;
   }
+
+  if (syncTouchEnable) { touch_scheduleEnable(touchEnableDelay); }
 
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   lcd_printf_lcdPlan();

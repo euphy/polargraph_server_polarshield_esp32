@@ -118,9 +118,9 @@ typedef struct {
 #define DEBUG_SD
 #define DEBUG_STATE
 #define DEBUG_COMMS
-#define DEBUG_TOUCH
+// #define DEBUG_TOUCH
 #define DEBUG_PENLIFT
-#define DEBUG_FUNCTION_BOUNDARIES
+// #define DEBUG_FUNCTION_BOUNDARIES
 boolean debugComms = false;
 
 /*  ===========================================================
@@ -226,6 +226,8 @@ static int touchX = 0;
 static int touchY = 0;
 
 volatile boolean touchEnabled = false;
+#define TOUCH_SENSITIVITY_THRESHOLD 800
+#define TOUCH_HYSTERESIS 50
 
 volatile long touchStartTime = 0L;
 volatile long touchDuration = 0L;

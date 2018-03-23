@@ -16,7 +16,7 @@ void touch_sense()
 
   // test if touched and touch is in-bounds
   uint16_t x, y;
-  boolean touchResponse = lcd.getTouch(&x, &y);
+  boolean touchResponse = lcd.getTouch(&x, &y, TOUCH_SENSITIVITY_THRESHOLD);
   if (touchResponse) {
     printf("lcd.getTouch() returned true");
     if ((x != -1) && (y != -1)) {
@@ -55,14 +55,25 @@ void touch_sense()
   else if (!touchResponse && displayTouched) {
     // it was touched before, now it's not: the finger has lifted!
     // touchX and touchY will have the coords of the last touch
-    displayReleased = true;
-    displayTouched = false;
-    touchDuration = millis() - touchStartTime;
-    touchStartTime = 0L;
 
-    #ifdef DEBUG_TOUCH
-    printf("\t\t\tTouch released! Last coords were: %d, %d.\n", touchX, touchY);
-    #endif
+    touchDuration = millis() - touchStartTime;
+
+    // lets add some hysteresis in here pls
+    if (touchDuration > TOUCH_HYSTERESIS) {
+      // pretend this release never happened
+      displayReleased = true;
+      displayTouched = false;
+      touchStartTime = 0L;
+      #ifdef DEBUG_TOUCH
+      printf("\t\t\tTouch released! Last coords were: %d, %d.\n", touchX, touchY);
+      #endif
+    }
+    else {
+      #ifdef DEBUG_TOUCH
+      printf("\t\t\tTouch registered as released, but it was too soon. I don't believe it.\n");
+      #endif
+    }
+
   }
   else if (!touchResponse && !displayTouched){
     // display not touched now, and wasn't before either.
@@ -90,14 +101,14 @@ void touch_input()
   printf("\t\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
 
+  touch_sense();
+
   if (!touchEnabled) {
     #ifdef DEBUG_FUNCTION_BOUNDARIES
     printf("\t\tExit %s at %d because touchEnabled is false.\n", __FUNCTION__, millis());
     #endif
     return; // short circuit if disabled
   }
-
-  touch_sense();
 
   // try to look up the button that was touched
   byte buttonPosition = -1;
@@ -107,9 +118,19 @@ void touch_input()
     buttonPosition = lcd_getButtonPosition(touchX, touchY);
     if (buttonPosition>=0 && buttonPosition<BUTTONS_PER_MENU) {
       pressedButton = lcd_getButtonThatWasPressed(buttonPosition, currentMenu);
+      if (pressedButton.id > 0) {
+        touch_reactToTouchEvent(&pressedButton, buttonPosition);
+      }
     }
   }
 
+  #ifdef DEBUG_FUNCTION_BOUNDARIES
+  printf("\t\tExit %s at %d\n", __FUNCTION__, millis());
+  #endif
+}
+
+void touch_reactToTouchEvent(ButtonSpec *pressedButton, int buttonPosition)
+{
   // Do some stuff to the button you got back
   if (displayTouched) {
     #ifdef DEBUG_TOUCH
@@ -117,7 +138,7 @@ void touch_input()
     #endif
 
     lcd_draw_buttonHighlight(buttonPosition);
-    ButtonType buttonType = buttonTypes[pressedButton.type];
+    ButtonType buttonType = buttonTypes[pressedButton->type];
     if (touchDuration > buttonType.triggerAfter) {
       #ifdef DEBUG_TOUCH
       printf("\t\t\tTouchDuration (%d) is more than the triggerAfter time (%d)\n",
@@ -125,7 +146,7 @@ void touch_input()
       #endif
       // this is a "BUTTONTYPE_CHANGE_VALUE" kind of button press, it has a low triggerAfter value.
       // triggerAfter is REDRAW_VALUES, probably 200 or somesuch.
-      touch_buttonPressAction(&pressedButton);
+      touch_buttonPressAction(pressedButton);
     }
     else {
       #ifdef DEBUG_TOUCH
@@ -139,13 +160,8 @@ void touch_input()
     #ifdef DEBUG_TOUCH
     printf("\t\t\tdisplayTouched is %d\n",(int)displayTouched);
     #endif
-    touch_buttonPressAction(&pressedButton);
-
+    touch_buttonPressAction(pressedButton);
   }
-
-  #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("\t\tExit %s at %d\n", __FUNCTION__, millis());
-  #endif
 }
 
 /**
@@ -166,8 +182,8 @@ int touch_buttonPressAction(ButtonSpec *b)
   #endif
 
   // block further touches until screen redraw happens
-  lcd_scheduleRedraw(b);
-  touch_scheduleEnable(100);
+  lcd_scheduleRedraw(b, true);
+  // touch_syncEnableWithRedraw();
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\t\t\t\Exit %s at %d returning %d.\n", __FUNCTION__, millis(), actionResult);
   #endif
