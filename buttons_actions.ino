@@ -22,7 +22,7 @@ void button_genericButtonActionEnd(ButtonSpec *button)
   printf("Enter %s at %d\n", __FUNCTION__, millis());
   #endif
   replaceButtonInMenus(button->id, button->nextButton);
-  // updateValuesOnScreen = true;
+  updateValuesOnScreen = true;
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("Exit %s at %d\n", __FUNCTION__, millis());
   #endif

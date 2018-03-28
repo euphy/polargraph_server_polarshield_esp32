@@ -110,7 +110,7 @@ void configuration_setup()
   stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
 
   // init SD card
-//  sd_initSD();
+  sd_initSD();
   lcd_initLCD();
   touch_calibrate();
 //  lcd_showSummary();

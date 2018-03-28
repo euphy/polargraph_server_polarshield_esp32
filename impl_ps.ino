@@ -15,9 +15,9 @@ mega/polarshield version of the polargraph.
 
 /*  Implementation of executeCommand for MEGA-sized boards that
 have command storage features. */
-void impl_processCommand(String com)
+void impl_processCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams)
 {
-  lcd_echoLastCommandToDisplay(com, "usb:");
+  lcd_echoLastCommandToDisplay(inCmd, "usb:");
 
   // The MEGA can change from LIVE to STORING modes
   // LIVE is where it acts on the commands,
@@ -26,22 +26,22 @@ void impl_processCommand(String com)
   // If the command is to switch between these modes, then these are ALWAYS
   // executed as if LIVE.
   // You can't store a mode-change command to SD.
-  if (com.startsWith(CMD_MODE_STORE_COMMANDS)
-   || com.startsWith(CMD_MODE_LIVE))
+  if (inCmd.startsWith(CMD_MODE_STORE_COMMANDS)
+   || inCmd.startsWith(CMD_MODE_LIVE))
   {
     Serial.println("Changing mode.");
-    impl_executeCommand(com);
+    impl_executeCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams);
   }
   // else execute / store the command
   else if (storeCommands)
   {
     Serial.print(F("Storing command:"));
-    Serial.println(com);
-//    sd_storeCommand(com);
+    Serial.println(inCmd);
+//    sd_storeCommand(inCmd);
   }
   else
   {
-    impl_executeCommand(com);
+    impl_executeCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams);
   }
 }
 
@@ -52,55 +52,52 @@ void impl_processCommand(String com)
 *  it's own decision tree to try and run one of the additional
 *  routines.
 */
-void impl_executeCommand(String &com)
+void impl_executeCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams)
 {
-  if (exec_executeBasicCommand(com))
+  if (exec_executeBasicCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams))
   {
     // that's nice, it worked
-#ifdef DEBUG
-
     Serial.println("Executed basic.");
-#endif
   }
-  else if (com.startsWith(CMD_DRAWCIRCLEPIXEL))
+  else if (inCmd.startsWith(CMD_DRAWCIRCLEPIXEL))
     curves_pixel_drawCircularPixel();
-  else if (com.startsWith(CMD_TESTPENWIDTHSCRIBBLE))
+  else if (inCmd.startsWith(CMD_TESTPENWIDTHSCRIBBLE))
     impl_pixel_testPenWidthScribble();
-  else if (com.startsWith(CMD_DRAWSAWPIXEL))
+  else if (inCmd.startsWith(CMD_DRAWSAWPIXEL))
     impl_pixel_drawSawtoothPixel();
-  else if (com.startsWith(CMD_DRAWDIRECTIONTEST))
+  else if (inCmd.startsWith(CMD_DRAWDIRECTIONTEST))
     impl_exec_drawTestDirectionSquare();
-  else if (com.startsWith(CMD_MODE_STORE_COMMANDS))
+  else if (inCmd.startsWith(CMD_MODE_STORE_COMMANDS))
     impl_exec_changeToStoreCommandMode();
-  else if (com.startsWith(CMD_MODE_LIVE))
+  else if (inCmd.startsWith(CMD_MODE_LIVE))
     impl_exec_changeToLiveCommandMode();
-  else if (com.startsWith(CMD_MODE_EXEC_FROM_STORE))
+  else if (inCmd.startsWith(CMD_MODE_EXEC_FROM_STORE))
     impl_exec_execFromStore();
-//  else if (com.startsWith(CMD_RANDOM_DRAW))
+//  else if (inCmd.startsWith(CMD_RANDOM_DRAW))
 //    drawRandom();
-//  else if (com.startsWith(CMD_SET_ROVE_AREA))
+//  else if (inCmd.startsWith(CMD_SET_ROVE_AREA))
 //    rove_setRoveArea();
-//  else if (com.startsWith(CMD_START_TEXT))
+//  else if (inCmd.startsWith(CMD_START_TEXT))
 //    rove_startText();
-//  else if (com.startsWith(CMD_DRAW_SPRITE))
+//  else if (inCmd.startsWith(CMD_DRAW_SPRITE))
 //    sprite_drawSprite();
-//  else if (com.startsWith(CMD_DRAW_RANDOM_SPRITE))
+//  else if (inCmd.startsWith(CMD_DRAW_RANDOM_SPRITE))
 //    sprite_drawRandomPositionedSprite();
-  else if (com.startsWith(CMD_CHANGELENGTH_RELATIVE))
+  else if (inCmd.startsWith(CMD_CHANGELENGTH_RELATIVE))
     exec_changeLength();
-//  else if (com.startsWith(CMD_SWIRLING))
+//  else if (inCmd.startsWith(CMD_SWIRLING))
 //    rove_controlSwirling();
-//  else if (com.startsWith(CMD_DRAW_NORWEGIAN))
+//  else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN))
 //    rove_drawNorwegianFromFile();
-//  else if (com.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE))
+//  else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE))
 //    rove_drawRoveAreaFittedToImage();
-  else if (com.startsWith(CMD_AUTO_CALIBRATE))
+  else if (inCmd.startsWith(CMD_AUTO_CALIBRATE))
     calibrate_doCalibration();
-  else if (com.startsWith(CMD_SET_DEBUGCOMMS))
+  else if (inCmd.startsWith(CMD_SET_DEBUGCOMMS))
     impl_setDebugComms();
   else
   {
-    comms_unrecognisedCommand(com);
+    comms_unrecognisedCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams);
     comms_ready();
   }
 }
@@ -118,8 +115,9 @@ void impl_runBackgroundProcesses()
   lcd_doScheduledRedraw();
   touch_doScheduledEnable();
 
-
-
+  if (heartbeat.check()) {
+    comms_ready();
+  }
   // long motorCutoffTime = millis() - lastOperationTime;
   // if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
   // {

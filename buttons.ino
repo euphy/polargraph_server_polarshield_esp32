@@ -23,12 +23,6 @@ enum ButtonTypes {
  BUTTONTYPE_CHANGE_VALUE=2
 };
 
-// enum TouchDuration {
-//   DEFAULT_TOUCH_DURATION=100,
-//   LONG_TOUCH_DURATION=500,
-//   SHORT_TOUCH_DURATION=20
-// };
-
 enum RedrawItem {
   REDRAW_NOTHING=0,
   REDRAW_BUTTON=1,

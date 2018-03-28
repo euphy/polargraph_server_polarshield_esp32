@@ -7,7 +7,7 @@
 
 Exec.
 
-This is one of the core files for the polargraph server program.  
+This is one of the core files for the polargraph server program.
 Purposes are getting a little more blurred here.  This file contains
 the basic decision tree that branches based on command.
 
@@ -18,46 +18,46 @@ routines are here.
 */
 /**  This method looks only for the basic command set
 */
-boolean exec_executeBasicCommand(String &com)
+boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams)
 {
   boolean executed = true;
-  if (com.startsWith(CMD_CHANGELENGTH))
+  if (inCmd.startsWith(CMD_CHANGELENGTH))
     exec_changeLength();
-  // else if (com.startsWith(CMD_CHANGELENGTHDIRECT))
-    // exec_changeLengthDirect();
-  else if (com.startsWith(CMD_CHANGEPENWIDTH))
+  else if (inCmd.startsWith(CMD_CHANGELENGTHDIRECT))
+    exec_changeLengthDirect();
+  else if (inCmd.startsWith(CMD_CHANGEPENWIDTH))
     exec_changePenWidth();
-  else if (com.startsWith(CMD_SETMOTORSPEED))
+  else if (inCmd.startsWith(CMD_SETMOTORSPEED))
     exec_setMotorSpeed();
-  else if (com.startsWith(CMD_SETMOTORACCEL))
+  else if (inCmd.startsWith(CMD_SETMOTORACCEL))
     exec_setMotorAcceleration();
-  // else if (com.startsWith(CMD_DRAWPIXEL))
-    // pixel_drawSquarePixel();
-  // else if (com.startsWith(CMD_DRAWSCRIBBLEPIXEL))
-    // pixel_drawScribblePixel();
-  // else if (com.startsWith(CMD_CHANGEDRAWINGDIRECTION))
-    // exec_changeDrawingDirection();
-  else if (com.startsWith(CMD_SETPOSITION))
+  else if (inCmd.startsWith(CMD_DRAWPIXEL))
+    pixel_drawSquarePixel();
+  else if (inCmd.startsWith(CMD_DRAWSCRIBBLEPIXEL))
+    pixel_drawScribblePixel();
+  else if (inCmd.startsWith(CMD_CHANGEDRAWINGDIRECTION))
+    exec_changeDrawingDirection();
+  else if (inCmd.startsWith(CMD_SETPOSITION))
     exec_setPosition();
   // else if (com.startsWith(CMD_TESTPENWIDTHSQUARE))
-    // pixel_testPenWidth();
-  else if (com.startsWith(CMD_PENDOWN))
+  //   pixel_testPenWidth();
+  else if (inCmd.startsWith(CMD_PENDOWN))
     penlift_penDown();
-  else if (com.startsWith(CMD_PENUP))
+  else if (inCmd.startsWith(CMD_PENUP))
     penlift_penUp();
-  else if (com.startsWith(CMD_SETMACHINESIZE))
+  else if (inCmd.startsWith(CMD_SETMACHINESIZE))
     exec_setMachineSizeFromCommand();
-  else if (com.startsWith(CMD_SETMACHINEMMPERREV))
+  else if (inCmd.startsWith(CMD_SETMACHINEMMPERREV))
     exec_setMachineMmPerRevFromCommand();
-  else if (com.startsWith(CMD_SETMACHINESTEPSPERREV))
+  else if (inCmd.startsWith(CMD_SETMACHINESTEPSPERREV))
     exec_setMachineStepsPerRevFromCommand();
-  else if (com.startsWith(CMD_SETMACHINESTEPMULTIPLIER))
+  else if (inCmd.startsWith(CMD_SETMACHINESTEPMULTIPLIER))
     exec_setMachineStepMultiplierFromCommand();
-  else if (com.startsWith(CMD_SETPENLIFTRANGE))
+  else if (inCmd.startsWith(CMD_SETPENLIFTRANGE))
     exec_setPenLiftRange();
-  else if (com.startsWith(CMD_GETMACHINEDETAILS))
+  else if (inCmd.startsWith(CMD_GETMACHINEDETAILS))
     exec_reportMachineSpec();
-  else if (com.startsWith(CMD_RESETEEPROM))
+  else if (inCmd.startsWith(CMD_RESETEEPROM))
     eeprom_resetEeprom();
   else
     executed = false;
@@ -65,7 +65,7 @@ boolean exec_executeBasicCommand(String &com)
   return executed;
 }
 
-void exec_changeDrawingDirection() 
+void exec_changeDrawingDirection()
 {
   globalDrawDirectionMode = atoi(inParam1);
   globalDrawDirection = atoi(inParam2);
@@ -79,7 +79,7 @@ void exec_changeDrawingDirection()
 void exec_reportMachineSpec()
 {
   eeprom_dumpEeprom();
-  
+
   Serial.print(F("PGSIZE,"));
   Serial.print(machineWidth);
   Serial.print(COMMA);
@@ -93,7 +93,7 @@ void exec_reportMachineSpec()
   Serial.print(F("PGSTEPSPERREV,"));
   Serial.print(motorStepsPerRev);
   Serial.println(CMD_END);
-  
+
   Serial.print(F("PGSTEPMULTIPLIER,"));
   Serial.print(stepMultiplier);
   Serial.println(CMD_END);
@@ -119,13 +119,13 @@ void exec_setMachineSizeFromCommand()
 
   // load to get current settings
   int currentValue = width;
-  EEPROM_readAnything(EEPROM_MACHINE_WIDTH, currentValue);  
+  EEPROM_readAnything(EEPROM_MACHINE_WIDTH, currentValue);
   if (currentValue != width)
     if (width > 10)
     {
       EEPROM_writeAnything(EEPROM_MACHINE_WIDTH, width);
     }
-  
+
   EEPROM_readAnything(EEPROM_MACHINE_HEIGHT, currentValue);
   if (currentValue != height)
     if (height > 10)
@@ -133,7 +133,7 @@ void exec_setMachineSizeFromCommand()
       EEPROM_writeAnything(EEPROM_MACHINE_HEIGHT, height);
     }
 
-  // reload 
+  // reload
   eeprom_loadMachineSize();
 }
 
@@ -144,7 +144,7 @@ void exec_setMachineMmPerRevFromCommand()
   if (mmPerRev != newMmPerRev) {
     EEPROM_writeAnything(EEPROM_MACHINE_MM_PER_REV, newMmPerRev);
     eeprom_loadMachineSpecFromEeprom();
-  } 
+  }
 }
 
 void exec_setMachineStepsPerRevFromCommand()
@@ -170,13 +170,13 @@ void exec_setPenLiftRange()
 {
   int down = atoi(inParam1);
   int up = atoi(inParam2);
-  
+
   Serial.print(F("Down: "));
   Serial.println(down);
   Serial.print(F("Up: "));
   Serial.println(up);
-  
-  if (inNoOfParams == 3) 
+
+  if (inNoOfParams == 3)
   {
     // 4 params (C45,<downpos>,<uppos>,1,END) means save values to EEPROM
     EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
@@ -250,9 +250,9 @@ void exec_setPosition()
 
   motorA.setCurrentPosition(targetA);
   motorB.setCurrentPosition(targetB);
-  
+
   engageMotors();
-  
+
   reportPosition();
 }
 
@@ -260,15 +260,15 @@ void exec_changeLengthRelative()
 {
   long lenA = multiplier(atol(inParam1));
   long lenB = multiplier(atol(inParam2));
-  
+
   changeLengthRelative(lenA, lenB);
-}  
+}
 
 void exec_changeLength()
 {
   float lenA = multiplier(atof(inParam1));
   float lenB = multiplier(atof(inParam2));
-  
+
   changeLength(lenA, lenB);
 }
 
@@ -289,13 +289,13 @@ void exec_changeLengthDirect()
   {
     exec_drawBetweenPoints(startA, startB, endA, endB, maxSegmentLength);
   }
-}  
+}
 
 /**
-This moves the gondola in a straight line between p1 and p2.  Both input coordinates are in 
-the native coordinates system.  
+This moves the gondola in a straight line between p1 and p2.  Both input coordinates are in
+the native coordinates system.
 
-The fidelity of the line is controlled by maxLength - this is the longest size a line segment is 
+The fidelity of the line is controlled by maxLength - this is the longest size a line segment is
 allowed to be.  1 is finest, slowest.  Use higher values for faster, wobblier.
 */
 void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxSegmentLength)
@@ -309,16 +309,16 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
 //  Serial.print(",");
 //  Serial.println(p2b);
   // ok, we're going to plot some dots between p1 and p2.  Using maths. I know! Brave new world etc.
-  
+
   // First, convert these values to cartesian coordinates
   // We're going to figure out how many segments the line
   // needs chopping into.
   float c1x = getCartesianXFP(p1a, p1b);
   float c1y = getCartesianYFP(c1x, p1a);
-  
+
   float c2x = getCartesianXFP(p2a, p2b);
   float c2y = getCartesianYFP(c2x, p2a);
-  
+
 //  Serial.print("From coords: ");
 //  Serial.print(c1x);
 //  Serial.print(",");
@@ -327,19 +327,19 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
 //  Serial.print(c2x);
 //  Serial.print(",");
 //  Serial.println(c2y);
-  
+
   // test to see if it's on the page
   // AND ALSO TO see if the current position is on the page.
   // Remember, the native system can easily specify points that can't exist,
   // particularly up at the top.
-  if (c2x > 20 
-    && c2x<pageWidth-20 
-    && c2y > 20 
+  if (c2x > 20
+    && c2x<pageWidth-20
+    && c2y > 20
     && c2y <pageHeight-20
-    && c1x > 20 
-    && c1x<pageWidth-20 
-    && c1y > 20 
-    && c1y <pageHeight-20 
+    && c1x > 20
+    && c1x<pageWidth-20
+    && c1y > 20
+    && c1y <pageHeight-20
     )
     {
     reportingPosition = false;
@@ -350,7 +350,7 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
     long linesegs = 1;            // assume at least 1 line segment will get us there.
     if (abs(deltaX) > abs(deltaY))
     {
-      // slope <=1 case    
+      // slope <=1 case
       while ((abs(deltaX)/linesegs) > maxSegmentLength)
       {
         linesegs++;
@@ -364,11 +364,11 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
         linesegs++;
       }
     }
-    
+
     // reduce delta to one line segments' worth.
     deltaX = deltaX/linesegs;
     deltaY = deltaY/linesegs;
-  
+
     // render the line in N shorter segments
     long runSpeed = 0;
 
@@ -380,21 +380,21 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
       // compute next new location
       c1x = c1x + deltaX;
       c1y = c1y + deltaY;
-  
+
       // convert back to machine space
       float pA = getMachineA(c1x, c1y);
       float pB = getMachineB(c1x, c1y);
-    
+
       // do the move
       runSpeed = desiredSpeed(linesegs, runSpeed, currentAcceleration*4);
-      
+
 //      Serial.print("Setting speed:");
 //      Serial.println(runSpeed);
-      
+
       motorA.setSpeed(runSpeed);
       motorB.setSpeed(runSpeed);
       changeLength(pA, pB);
-  
+
       // one line less to do!
       linesegs--;
     }
@@ -423,9 +423,9 @@ float desiredSpeed(long distanceTo, float currentSpeed, float acceleration)
     float sqrSpeed = sq(currentSpeed);
     if (currentSpeed < 0.0)
       sqrSpeed = -sqrSpeed;
-      
+
     float twoa = 2.0f * acceleration; // 2ag
-    
+
     // if v^^2/2as is the the left of target, we will arrive at 0 speed too far -ve, need to accelerate clockwise
     if ((sqrSpeed / twoa) < distanceTo)
     {
@@ -450,8 +450,7 @@ float desiredSpeed(long distanceTo, float currentSpeed, float acceleration)
 	if (requiredSpeed < -currentMaxSpeed)
 	    requiredSpeed = -currentMaxSpeed;
     }
-    
+
     //Serial.println(requiredSpeed);
     return requiredSpeed;
 }
-

@@ -29,10 +29,8 @@ the User_Setup.h file and add the following lines.
 
 **/
 
-//http://forum.arduino.cc/index.php?topic=173584.0
-//#include <SPI.h>
-//#include <SD.h>
 
+#include <SD.h>
 #include "FS.h"
 #include "SPIFFS.h"
 #include <SPI.h>
@@ -42,7 +40,8 @@ the User_Setup.h file and add the following lines.
 #include <ESP32_Servo.h>
 #include <EEPROM.h>
 #include "EEPROMAnything.h"
-
+#include <ESP32Ticker.h>
+#include <Metro.h>
 
 /* Definition of a function that can be attached to a Button Specification
 and will get executed when the button is pushed..
@@ -118,6 +117,7 @@ typedef struct {
 #define DEBUG_SD
 #define DEBUG_STATE
 #define DEBUG_COMMS
+#define DEBUG_COMMS_BUFF
 // #define DEBUG_TOUCH
 #define DEBUG_PENLIFT
 // #define DEBUG_FUNCTION_BOUNDARIES
@@ -174,9 +174,6 @@ static int defaultStepMultiplier = 8;
 static long startLengthStepsA = 8000;
 static long startLengthStepsB = 8000;
 
-String machineName = "";
-const String DEFAULT_MACHINE_NAME = "PG01    ";
-
 float currentMaxSpeed = 2000.0;
 float currentAcceleration = 2000.0;
 boolean usingAcceleration = true;
@@ -188,39 +185,52 @@ long pageWidth = machineWidth * stepsPerMM;
 long pageHeight = machineHeight * stepsPerMM;
 long maxLength = 0;
 
-//static char rowAxis = 'A';
-const int INLENGTH = 50;
+/*==========================================================================
+    COMMUNICATION PROTOCOL, how to chat
+  ========================================================================*/
+
+// max length of incoming command
+const int INLENGTH = 60;
 const char INTERMINATOR = 10;
-const char SEMICOLON = ';';
 
-float penWidth = 0.8f; // line width in mm
-
-boolean reportingPosition = true;
-boolean acceleration = true;
-
-extern AccelStepper motorA;
-extern AccelStepper motorB;
-
-volatile boolean currentlyRunning = true;
-
+static char nextCommand[INLENGTH+1];
+volatile int bufferPosition = 0;
 static char inCmd[10];
 static char inParam1[14];
 static char inParam2[14];
 static char inParam3[14];
 static char inParam4[14];
+static byte inNoOfParams = 0;
+boolean paramsExtracted = false;
+boolean readyForNextCommand = false;
+volatile static boolean executing = false;
 
-static byte inNoOfParams;
-
-char lastCommand[INLENGTH+1];
 boolean commandConfirmed = false;
+boolean usingCrc = false;
+boolean reportingPosition = true;
+boolean requestResend = false;
 
-int rebroadcastReadyInterval = 5000L;
+float penWidth = 0.8f; // line width in mm
+
+
+extern AccelStepper motorA;
+extern AccelStepper motorB;
+
+volatile boolean currentlyRunning = true;
+volatile boolean backgroundRunning = false;
+
+hw_timer_t * motorTimer = NULL;
+portMUX_TYPE motorTimerMux = portMUX_INITIALIZER_UNLOCKED;
+
 volatile long lastOperationTime = 0L;
 long motorIdleTimeBeforePowerDown = 600000L;
 boolean automaticPowerDown = true;
 
-
 volatile long lastInteractionTime = 0L;
+
+// period between status rebroadcasts
+long comms_rebroadcastStatusInterval = 4000;
+Metro heartbeat = Metro(comms_rebroadcastStatusInterval);
 
 static int touchX = 0;
 static int touchY = 0;
@@ -310,6 +320,25 @@ const static String CMD_SETPENLIFTRANGE = "C45";
 const static String CMD_PIXELDIAGNOSTIC = "C46";
 const static String CMD_SET_DEBUGCOMMS = "C47";
 
+Ticker motorRunner;
+Ticker commsRunner;
+
+void IRAM_ATTR runMotors() {
+  portENTER_CRITICAL_ISR(&motorTimerMux);
+  if (backgroundRunning) {
+    if (usingAcceleration) {
+      motorA.run();
+      motorB.run();
+    }
+    else {
+      motorA.runSpeed();
+      motorB.runSpeed();
+    }
+  }
+  portEXIT_CRITICAL_ISR(&motorTimerMux);
+}
+
+
 void setup()
 {
   Serial.begin(57600);           // set up Serial library at 57600 bps
@@ -328,27 +357,41 @@ void setup()
 
   penlift_penUp();
 
-  comms_flushCommandStr(lastCommand, INLENGTH);
-  comms_flushCommandAndParams();
-  comms_ready();
+//  comms_clearParams();
+//  comms_flushCommandAndParams();
+//  comms_ready();
 
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(200);
+
+  // motor time triggers runMotors every 50,000us
+  motorTimer = timerBegin(1, 80, true);  // timer 1, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  timerAttachInterrupt(motorTimer, &runMotors, true); // edge (not level) triggered
+  timerAlarmWrite(motorTimer, 50000, true); // 1000000 * 1 us = 1 s, autoreload true
+  timerAlarmEnable(motorTimer); // enable
+
+//  // comms timer can go every 200,000us
+//  commsTimer = timerBegin(2, 80, true);  // timer 2, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+//  timerAttachInterrupt(commsTimer, &comms_checkForCommand, true); // edge (not level) triggered
+//  timerAlarmWrite(commsTimer, 200000, true); // 1000000 * 1 us = 1 s, autoreload true
+//  timerAlarmEnable(commsTimer); // enable
+
+  commsRunner.attach_ms(50, comms_checkForCommand);
+
+//  // lcd timer is 250,000us
+//  lcdTimer = timerBegin(3, 80, true);  // timer 3, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+//  timerAttachInterrupt(lcdTimer, &impl_runBackgroundProcesses_f, true); // edge (not level) triggered
+//  timerAlarmWrite(lcdTimer, 250000, true); // 1000000 * 1 us = 1 s, autoreload true
+//  timerAlarmEnable(lcdTimer); // enable
+
+
 
 //  sd_autorunSD();
 }
 
 void loop()
 {
-  if (comms_waitForNextCommand(lastCommand))
-  {
-#ifdef DEBUG_COMMS
-    Serial.print(F("Last comm: "));
-    Serial.print(lastCommand);
-    Serial.println(F("..."));
-#endif
-    comms_parseAndExecuteCommand(lastCommand);
-  }
+  comms_commandLoop();
 }
 
 
@@ -424,24 +467,24 @@ boolean drawFromStore = false;
 String commandFilename = "";
 
 //sd card stuff
- const int chipSelect = 53;
+ const int sdChipSelectPin = 25;
  boolean sdCardInit = false;
 
-////set up variables using the SD utility library functions:
-// File root;
- boolean cardPresent = false;
- boolean cardInit = false;
- boolean echoingStoredCommands = false;
+//set up variables using the SD utility library functions:
+File root;
+boolean cardPresent = false;
+boolean cardInit = false;
+boolean echoingStoredCommands = false;
 
-////the file itself
-// File pbmFile;
+//the file itself
+File pbmFile;
 
-////information we extract about the bitmap file
-// long pbmWidth, pbmHeight;
-// float pbmScaling = 1.0;
-// int pbmDepth, pbmImageoffset;
-// long pbmFileLength = 0;
-// float pbmAspectRatio = 1.0;
+//information we extract about the bitmap file
+long pbmWidth, pbmHeight;
+float pbmScaling = 1.0;
+int pbmDepth, pbmImageoffset;
+long pbmFileLength = 0;
+float pbmAspectRatio = 1.0;
 
 volatile int speedChangeIncrement = 100;
 volatile int accelChangeIncrement = 100;
