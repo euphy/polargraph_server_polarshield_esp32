@@ -18,15 +18,19 @@ For initialising, reading and writing the SD card data store.
 
 void sd_initSD()
 {
+  sd_resetCard();
+  sd_initAutoStartFile();
+}
+
+void sd_resetCard()
+{
   currentlyDrawingFromFile = false;
   currentlyDrawingFilename = "";
   cardPresent = false;
   cardInit = false;
   commandFilename = "";
 
-//  sd_alternativeInit();
   sd_simpleInit();
-  sd_initAutoStartFile();
 }
 
 void sd_simpleInit() {
@@ -67,7 +71,9 @@ void sd_simpleInit() {
 
     Serial.println("card initialized.");
     root = SD.open("/", FILE_READ);
+
     cardInit = true;
+
     sd_printDirectory(root, 0);
     Serial.println("done!");
   }

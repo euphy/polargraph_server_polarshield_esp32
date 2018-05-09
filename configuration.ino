@@ -113,14 +113,7 @@ void configuration_setup()
   sd_initSD();
   lcd_initLCD();
   touch_calibrate();
-//  lcd_showSummary();
   delay(1000);
-
-  // set up touch interrupt pin
-  // Serial.println("Attaching interrupt");
-  // pinMode(INTERRUPT_TOUCH_PIN, INPUT_PULLUP);
-  // attachInterrupt(digitalPinToInterrupt(INTERRUPT_TOUCH_PIN), lcd_touchInput, FALLING);
-  // touchAttachInterrupt(INTERRUPT_TOUCH_PIN, lcd_touchInput, 40);
 
   // calibration pins
   pinMode(ENDSTOP_X_MIN, INPUT_PULLUP);

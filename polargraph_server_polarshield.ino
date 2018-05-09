@@ -386,7 +386,7 @@ void setup()
 
 
 
-//  sd_autorunSD();
+  sd_autorunSD();
 }
 
 void loop()
@@ -509,7 +509,6 @@ byte screenState = SCREEN_STATE_NORMAL;
 boolean powerIsOn = false;
 boolean isCalibrated = false;
 boolean canCalibrate = false;
-
-boolean useAutoStartFromSD = true;
-String autoStartFilename = "AUTORUN.TXT";
+boolean useAutoStartFromSD = false;
+String autoStartFilename = "/AUTORUN.TXT";
 boolean autoStartFileFound = false;

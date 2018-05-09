@@ -7,12 +7,12 @@
 
 EEPROM.
 
-This is one of the core files for the polargraph server program.  
+This is one of the core files for the polargraph server program.
 Has a couple of little helper methods for reading and writing
 ints and floats to EEPROM using the EEPROM library.
 
 But mostly it contains the loadMachineSpecFromEeprom method, which is
-used to retrieve the machines saved values when it restarts, or 
+used to retrieve the machines saved values when it restarts, or
 whenever a value is written to the EEPROM.
 
 */
@@ -54,7 +54,7 @@ void eeprom_dumpEeprom()
     Serial.print(". ");
     Serial.println(EEPROM.read(i));
   }
-}  
+}
 
 void eeprom_loadMachineSize()
 {
@@ -65,7 +65,7 @@ void eeprom_loadMachineSize()
   }
   Serial.print(F("Loaded machine width:"));
   Serial.println(machineWidth);
-  
+
   EEPROM_readAnything(EEPROM_MACHINE_HEIGHT, machineHeight);
   if (machineHeight < 1)
   {
@@ -98,7 +98,7 @@ void eeprom_loadSpoolSpec()
   }
   Serial.print(F("Loaded motor steps per rev:"));
   Serial.println(motorStepsPerRev);
-}  
+}
 
 void eeprom_loadPenLiftRange()
 {
@@ -117,7 +117,13 @@ void eeprom_loadPenLiftRange()
   }
   Serial.print(F("Loaded up pos:"));
   Serial.println(upPosition);
-}  
+}
+
+void eeprom_storePenLiftRange(int up, int down)
+{
+  EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
+  EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
+}
 
 
 void eeprom_loadStepMultiplier()
@@ -128,21 +134,21 @@ void eeprom_loadStepMultiplier()
     stepMultiplier = defaultStepMultiplier;
   }
   Serial.print(F("Loaded motor step multiplier:"));
-  Serial.println(stepMultiplier);  
-}  
+  Serial.println(stepMultiplier);
+}
 
 void eeprom_loadSpeed()
 {
   // load speed, acceleration
   EEPROM_readAnything(EEPROM_MACHINE_MOTOR_SPEED, currentMaxSpeed);
-  
-  // not sure why this requires a cast to int for the comparision, but a 
-  // if (currentMaxSpeed < 1.0) wasn't catching cases where 
+
+  // not sure why this requires a cast to int for the comparision, but a
+  // if (currentMaxSpeed < 1.0) wasn't catching cases where
   // currentMaxSpeed == 0.00, ODD.
   if (int(currentMaxSpeed) < 1) {
     currentMaxSpeed = 800.0;
   }
-    
+
   EEPROM_readAnything(EEPROM_MACHINE_MOTOR_ACCEL, currentAcceleration);
   if (int(currentAcceleration) < 1) {
     currentAcceleration = 800.0;
@@ -166,7 +172,7 @@ void eeprom_loadMachineSpecFromEeprom()
 
   mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
   stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
-  
+
   Serial.print(F("Recalc mmPerStep ("));
   Serial.print(mmPerStep);
   Serial.print(F("), stepsPerMM ("));
@@ -187,4 +193,3 @@ void eeprom_loadMachineSpecFromEeprom()
 
   maxLength = 0;
 }
-

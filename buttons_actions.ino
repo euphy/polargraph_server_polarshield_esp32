@@ -90,9 +90,11 @@ int button_genericButtonAction(int buttonId)
       buttons_actions_motorsOff();
       break;
     case BUTTON_RESET_SD:
-//      root.close();
-//      sd_initSD();
-//      lcd_drawStoreContentsMenu();
+      Serial.println("Resetting SD card.");
+      root.close();
+      sd_resetCard();
+      commandFilename = "";
+      currentlyDrawingFromFile = false;
       break;
     case BUTTON_PAUSE_RUNNING:
       currentlyRunning = false;
@@ -153,19 +155,16 @@ int button_genericButtonAction(int buttonId)
       delay(500);
       break;
     case BUTTON_DRAW_THIS_FILE:
-//      if (commandFilename != "None" && commandFilename != "" && commandFilename != "            ")
-//      {
-//        Serial.print("Drawing this file: ");
-//        Serial.println(commandFilename);
-//        currentlyDrawingFromFile = true;
-//        displayTouched = false;
-//        impl_exec_execFromStore(commandFilename);
-//        lcd_drawButton(pressedButton);
-//      }
-//      else
-//      {
-//        lcd_drawButton(pressedButton);
-//      }
+      if (commandFilename != "None" &&
+          commandFilename != "" &&
+          commandFilename != "            ")
+      {
+       Serial.print("Drawing this file: ");
+       Serial.println(commandFilename);
+       currentlyDrawingFromFile = true;
+       displayTouched = false;
+       impl_exec_execFromStore(commandFilename);
+      }
       break;
     case BUTTON_STOP_FILE:
       Serial.print("Cancelling drawing this file: ");
@@ -188,8 +187,9 @@ int button_genericButtonAction(int buttonId)
       // return to main menu
       commandFilename = "";
       currentMenu = MENU_INITIAL;
-//      lcd.setColor(colorLightRed,colorLightGreen,colorLightBlue);
-//      lcd.clrScr();
+      Serial.print("Cancelling drawing this file: ");
+      Serial.println(commandFilename);
+      currentlyDrawingFromFile = false;
       break;
     case BUTTON_MOVE_INC_A:
       motorA.move(moveIncrement);
@@ -264,9 +264,8 @@ int button_genericButtonAction(int buttonId)
       break;
     case BUTTON_PENLIFT_SAVE_TO_EEPROM:
       Serial.println("Hey");
-      //      EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, downPosition);
-      //      EEPROM_writeAnything(EEPROM_PENLIFT_UP, upPosition);
-      //      eeprom_loadPenLiftRange();
+      eeprom_storePenLiftRange(upPosition, downPosition);
+      eeprom_loadPenLiftRange();
       delay(1000);
       break;
   }

@@ -61,13 +61,16 @@ void lcd_drawCurrentSelectedFilename()
     TFT_BLACK);
 
   // see if there's one already found
-  String msg = "No card found";
+  String msg = "";
 
   if (commandFilename == "" || commandFilename == "            ")
   {
     if (cardInit) {
       commandFilename = sd_loadFilename("", 1);
       msg = commandFilename;
+    }
+    else {
+      msg = "No card found";
     }
   }
   else
@@ -77,7 +80,7 @@ void lcd_drawCurrentSelectedFilename()
 
   lcd.setTextColor(TFT_WHITE);
   lcd.setTextSize(decorationTextSize);
-  lcd.setCursor(buttonCoords[0][0],buttonCoords[1][1]+BUTTON_GAP);
+  lcd.setCursor(buttonCoords[0][0], buttonCoords[1][1]+12);
   lcd.print(msg);
 }
 
@@ -87,15 +90,6 @@ void lcd_displayFirstMenu()
   lcd_setCurrentMenu(MENU_INITIAL);
   lcd_drawCurrentMenu();
 }
-
-void lcd_drawStoreContentsMenu()
-{
-  lcd.fillScreen(TFT_BLACK);
-  lcd_setCurrentMenu(MENU_CHOOSE_FILE);
-  lcd_drawCurrentMenu();
-}
-
-
 
 //
 //void lcd_showSummary()

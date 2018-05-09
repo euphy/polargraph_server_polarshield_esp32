@@ -142,8 +142,8 @@ static Menus menus = {
      BUTTON_PAUSE_RUNNING, 0, 0},
 
   // MENU_CHOOSE_FILE 3
-  {0, BUTTON_NEXT_FILE, 0,
-     BUTTON_DONE, BUTTON_PREV_FILE, BUTTON_DRAW_THIS_FILE},
+  {BUTTON_RESET_SD, BUTTON_PREV_FILE, 0,
+     BUTTON_DONE, BUTTON_NEXT_FILE, BUTTON_DRAW_THIS_FILE},
 
   // MENU_ADJUST_PENSIZE 4
   {0, BUTTON_INC_PENSIZE_INC, BUTTON_INC_PENSIZE,
@@ -228,7 +228,7 @@ void button_setup_loadButtons()
   buttons[BUTTON_CALIBRATE] = (ButtonSpec){BUTTON_CALIBRATE, "calibrate", button_genericButtonAction, 0, BUTTONTYPE_TOGGLE};
 
   buttons[BUTTON_TOGGLE_ECHO] = (ButtonSpec){BUTTON_TOGGLE_ECHO, "toggle echo", button_genericButtonAction, 0, BUTTONTYPE_TOGGLE};
-  buttons[BUTTON_RESET_SD] = (ButtonSpec){BUTTON_RESET_SD, "reset SD", button_genericButtonAction, 0, BUTTONTYPE_TOGGLE};
+  buttons[BUTTON_RESET_SD] = (ButtonSpec){BUTTON_RESET_SD, "reload SD", button_genericButtonAction, 0, BUTTONTYPE_TOGGLE};
   buttons[BUTTON_SETTINGS_MENU_2] = (ButtonSpec){BUTTON_SETTINGS_MENU_2, "more settings", genericChangeMenuAction, 0, BUTTONTYPE_CHANGE_MENU};
   buttons[BUTTON_INC_PENLIFT_UP] = (ButtonSpec){BUTTON_INC_PENLIFT_UP, "inc. penlift up", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
   buttons[BUTTON_DEC_PENLIFT_UP] = (ButtonSpec){BUTTON_DEC_PENLIFT_UP, "dec. penlift up", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
