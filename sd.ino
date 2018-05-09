@@ -1,5 +1,5 @@
 /**
-*  Polargraph Server for ATMEGA1280+ 
+*  Polargraph Server for ATMEGA1280+
 *  Written by Sandy Noble
 *  Released under GNU License version 3.
 *  http://www.polargraph.co.uk
@@ -13,7 +13,7 @@ For initialising, reading and writing the SD card data store.
 */
 
 /*  ==============================================================
-    Processing the SD card if there is one attached. 
+    Processing the SD card if there is one attached.
 =================================================================*/
 
 void sd_initSD()
@@ -23,7 +23,7 @@ void sd_initSD()
   cardPresent = false;
   cardInit = false;
   commandFilename = "";
-  
+
 //  sd_alternativeInit();
   sd_simpleInit();
   sd_initAutoStartFile();
@@ -50,7 +50,7 @@ void sd_simpleInit() {
         Serial.println("No SD card attached");
         return;
     }
-  
+
     Serial.print("SD Card Type: ");
     if(cardType == CARD_MMC){
         Serial.println("MMC");
@@ -61,10 +61,10 @@ void sd_simpleInit() {
     } else {
         Serial.println("UNKNOWN");
     }
-  
+
     uint64_t cardSize = SD.cardSize() / (1024 * 1024);
     Serial.printf("SD Card Size: %lluMB\n", cardSize);
-  
+
     Serial.println("card initialized.");
     root = SD.open("/", FILE_READ);
     cardInit = true;
@@ -74,7 +74,7 @@ void sd_simpleInit() {
 }
 
 
-void sd_printDirectory(File dir, int numTabs) 
+void sd_printDirectory(File dir, int numTabs)
 {
    while(true) {
      File entry =  dir.openNextFile();
@@ -107,9 +107,9 @@ void sd_storeCommand(String command)
   commandFilename.toCharArray(filename, commandFilename.length()+1);
 
   File storeFile = SD.open(filename, FILE_WRITE);
-  
+
   // if the file opened okay, write to it:
-  if (storeFile) 
+  if (storeFile)
   {
     Serial.print("Writing to file ");
     Serial.println(commandFilename);
@@ -118,13 +118,13 @@ void sd_storeCommand(String command)
     // close the file:
     storeFile.close();
     Serial.println("done.");
-  } 
-  else 
+  }
+  else
   {
     // if the file didn't open, print an error:
     Serial.print("error opening ");
     Serial.println(commandFilename);
-  }  
+  }
 }
 
 /**
@@ -136,38 +136,38 @@ https://github.com/adafruit/TFTLCD-Library/blob/master/examples/tftbmp/tftbmp.pd
 boolean sd_openPbm(String pbmFilename)
 {
   char filename[pbmFilename.length()+1];
-  pbmFilename.toCharArray(filename, pbmFilename.length()+1);  
+  pbmFilename.toCharArray(filename, pbmFilename.length()+1);
   pbmFile = SD.open(filename, FILE_READ);
 
-  if (! pbmFile) 
+  if (! pbmFile)
   {
     Serial.println("didnt find image");
     return false;
   }
-  
-  if (! sd_pbmReadHeader()) 
-  { 
+
+  if (! sd_pbmReadHeader())
+  {
      Serial.println("bad pbm");
      return false;
   }
-  
+
   pbmFileLength = pbmFile.size();
-  
+
   return true;
 }
 
-byte sd_getBrightnessAtPixel(int x, int y) 
+byte sd_getBrightnessAtPixel(int x, int y)
 {
   Serial.print("Pixel x:");
   Serial.print(x);
   Serial.print(", y:");
   Serial.println(y);
-  
+
   Serial.print("PbmImageOffset:");
   Serial.println(pbmImageoffset);
   Serial.print("pbmWidth:");
   Serial.println(pbmWidth);
-  
+
   long addressToSeek = (pbmImageoffset + (y * pbmWidth) + x);
   Serial.print("Address:");
   Serial.print(addressToSeek);
@@ -185,7 +185,7 @@ byte sd_getBrightnessAtPixel(int x, int y)
   }
 }
 
-boolean sd_pbmReadHeader() 
+boolean sd_pbmReadHeader()
 {
   pbmFile.seek(0);
   // read header
@@ -193,10 +193,10 @@ boolean sd_pbmReadHeader()
   String magicNumber = "  ";
   buf = pbmFile.read();
   magicNumber[0] = buf;
-  
+
   buf = pbmFile.read();
   magicNumber[1] = buf;
-  
+
   if (magicNumber != "P5")
   {
     Serial.print("This isn't a P5 file. It's a ");
@@ -206,16 +206,16 @@ boolean sd_pbmReadHeader()
   }
   else
     Serial.println("This is a very good file Herr Doktor!");
-  
+
   buf = pbmFile.read(); // this is a blank
 
   // get image width
   String numberString = "";
   buf = pbmFile.read();
-  
+
   // photoshop puts a linebreak (0A) inbetween the width & height,
   // GIMP puts a space (20).
-  while (buf != 0x0A && buf != 0x20) 
+  while (buf != 0x0A && buf != 0x20)
   {
     // check for comments, these start with a # - hex 23
     if (buf == 0x23)
@@ -227,14 +227,14 @@ boolean sd_pbmReadHeader()
     numberString = numberString + buf;
     buf = pbmFile.read();
   }
-  
+
   Serial.print("PBM width:");
   Serial.println(numberString);
-  
+
   char paramChar[numberString.length() + 1];
   numberString.toCharArray(paramChar, numberString.length() + 1);
   pbmWidth = atoi(paramChar);
-  
+
   if (pbmWidth < 10)
   {
     Serial.println(F("PBM image must be at least 10 pixels wide."));
@@ -255,14 +255,14 @@ boolean sd_pbmReadHeader()
     numberString = numberString + buf;
     buf = pbmFile.read();
   }
-  
+
   Serial.print("PBM height:");
   Serial.println(numberString);
-  
+
   paramChar[numberString.length() + 1];
   numberString.toCharArray(paramChar, numberString.length() + 1);
   pbmHeight = atoi(paramChar);
-  
+
   // work out aspect ratio
   pbmAspectRatio = float(pbmHeight) / float(pbmWidth);
   Serial.print("PBM aspect ratio:");
@@ -276,10 +276,10 @@ boolean sd_pbmReadHeader()
     numberString = numberString + buf;
     buf = pbmFile.read();
   }
-  
+
   Serial.print("Numberstring depth:");
   Serial.println(numberString);
-  
+
   paramChar[numberString.length() + 1];
   numberString.toCharArray(paramChar, numberString.length() + 1);
   pbmDepth = atoi(paramChar);
@@ -306,7 +306,7 @@ void sd_initAutoStartFile() {
 
 void sd_autorunSD() {
   if (autoStartFileFound) {
-    // attempt to open the file 
+    // attempt to open the file
     Serial.print("Auto executing:");
     Serial.println(autoStartFilename);
     delay(4000);
@@ -315,3 +315,103 @@ void sd_autorunSD() {
   }
 }
 
+
+
+String sd_loadFilename(String selectedFilename, int direction)
+{
+  Serial.print("Current command filename: ");
+  Serial.println(selectedFilename);
+  Serial.println("Loading filename.");
+
+  // start from the beginning
+//  root = SD.open("/");
+  root.rewindDirectory();
+
+  // deal with first showing
+  if (selectedFilename == "") {
+    File entry =  root.openNextFile();
+    if (entry)
+      selectedFilename = entry.name();
+    entry.close();
+  }
+  else {
+    if (direction > 0) {
+      selectedFilename = sd_getNextFile(selectedFilename);
+    }
+    else if (direction < 0) {
+      selectedFilename = sd_getPreviousFile(selectedFilename);
+    }
+  }
+
+  Serial.print("Now command filename: ");
+  Serial.println(selectedFilename);
+
+  return selectedFilename;
+}
+
+String sd_getNextFile(String selectedFilename) {
+  boolean found = false;
+  while(!found) {
+    File entry = root.openNextFile();
+//    Serial.println(entry.name());
+    if (entry) {
+      if (selectedFilename.equals(entry.name())) {
+        Serial.println("Found file!");
+        found = true;
+        entry.close();
+
+        // looking for next file
+        entry = root.openNextFile();
+        if (entry) {
+          selectedFilename = entry.name();
+        }
+        entry.close();
+      }
+    }
+    else {
+      found = true;
+    }
+
+    entry.close();
+  }
+  return selectedFilename;
+}
+
+String sd_getPreviousFile(String selectedFilename) {
+  boolean fileIncremented = false;
+  String prevFilename = "";
+
+  // see if it is the first one, and just return straight away if so
+  File entry =  root.openNextFile();
+  if (entry) {
+    if (selectedFilename.equals(entry.name())) {
+      Serial.println("ent2");
+      entry.close();
+      return selectedFilename;
+    }
+  }
+
+  // else go through and find the currently selected file, and keep track of the previous filename
+  prevFilename = entry.name();
+  Serial.print("Prev file: ");
+  Serial.println(prevFilename);
+
+  while (true) {
+      entry.close();
+      entry =  root.openNextFile();
+      if (entry) {
+//        Serial.print("next file: ");
+//        Serial.println(entry.name());
+        if (selectedFilename.equals(entry.name())) {
+          selectedFilename = prevFilename;
+          break;
+        }
+        else {
+          prevFilename = entry.name();
+        }
+      }
+      else break;
+  }
+  entry.close();
+  return selectedFilename;
+}

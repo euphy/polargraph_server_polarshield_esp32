@@ -112,7 +112,7 @@ void lcd_redraw()
   }
 
   // decorations can only be drawn per menu, not per button (or value)
-  updateValuesOnScreen = false;
+  updateValuesOnScreen = true;
   lcd_draw_menuDecorations(currentMenu);
 
   // set it to a "no redraw" value.
@@ -244,7 +244,7 @@ button corner coordinates and the buttons and menus.
 void lcd_initLCD()
 {
   lcd.init();
-  lcd.setRotation(1);
+  lcd.setRotation(3);
   lcd.setTextDatum(TL_DATUM);
 
   button_setup_generateButtonCoords();

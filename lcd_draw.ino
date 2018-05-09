@@ -11,6 +11,7 @@ void lcd_draw_menuDecorations(byte menu)
   // Here's some special decoration on some menus
   switch (menu) {
     case MENU_CHOOSE_FILE:
+      lcd_drawCurrentSelectedFilename();
       break;
     case MENU_ADJUST_SPEED:
       lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, currentMaxSpeed);
@@ -39,6 +40,7 @@ void lcd_drawNumberWithBackground(int x, int y, long value)
   lcd.fillRect(x, y, buttonSize, 20, TFT_BLACK);
   lcd.setTextColor(TFT_WHITE);
   lcd.setCursor(x, y);
+  lcd.setTextSize(decorationTextSize);
   lcd.print(value);
 }
 
@@ -47,7 +49,36 @@ void lcd_drawFloatWithBackground(int x, int y, float value)
   lcd.fillRect(x, y, buttonSize, 20, TFT_BLACK);
   lcd.setTextColor(TFT_WHITE);
   lcd.setCursor(x, y);
+  lcd.setTextSize(decorationTextSize);
   lcd.print(value);
+}
+
+void lcd_drawCurrentSelectedFilename()
+{
+  // erase the previous stuff
+  lcd.fillRect(buttonCoords[0][0], buttonCoords[1][1],
+    screenWidth, grooveSize,
+    TFT_BLACK);
+
+  // see if there's one already found
+  String msg = "No card found";
+
+  if (commandFilename == "" || commandFilename == "            ")
+  {
+    if (cardInit) {
+      commandFilename = sd_loadFilename("", 1);
+      msg = commandFilename;
+    }
+  }
+  else
+  {
+    msg = commandFilename;
+  }
+
+  lcd.setTextColor(TFT_WHITE);
+  lcd.setTextSize(decorationTextSize);
+  lcd.setCursor(buttonCoords[0][0],buttonCoords[1][1]+BUTTON_GAP);
+  lcd.print(msg);
 }
 
 void lcd_displayFirstMenu()
@@ -161,6 +192,7 @@ void lcd_drawButtonBackground(byte buttonPosition)
 
 void lcd_drawButtonLabelTextLine(byte buttonPosition, byte rowNumber, byte totalRows, char *textOfRow)
 {
+  lcd.setTextSize(buttonTextSize);
   byte lineSpace = 2;
   byte lineHeight = 14;
   byte halfLineHeight = lineHeight/2;

@@ -175,14 +175,14 @@ int button_genericButtonAction(int buttonId)
     case BUTTON_NEXT_FILE:
       // load the next filename
       Serial.println("looking up next filename.");
-//      commandFilename = lcd_loadFilename(commandFilename, 1);
-//      lcd_drawCurrentSelectedFilename();
+      commandFilename = sd_loadFilename(commandFilename, 1);
+      lcd_drawCurrentSelectedFilename();
       break;
     case BUTTON_PREV_FILE:
       // load the next filename
       Serial.println("looking up previous filename.");
-      //      commandFilename = lcd_loadFilename(commandFilename, -1);
-      //      lcd_drawCurrentSelectedFilename();
+      commandFilename = sd_loadFilename(commandFilename, -1);
+      lcd_drawCurrentSelectedFilename();
       break;
     case BUTTON_CANCEL_FILE:
       // return to main menu

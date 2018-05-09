@@ -6,6 +6,8 @@ static int screenWidth = 320; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8
 static int screenHeight = 240; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 240 : 176;
 static int centreYPosition = 112; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 112 : 80;
 
+static int decorationTextSize = 2;
+static int buttonTextSize = 1;
 
 /*  This defines a particular generic type of button
  *  These settings control some of the behaviour.

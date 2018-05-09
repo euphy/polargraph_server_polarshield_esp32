@@ -41,7 +41,7 @@ void comms_checkForCommand() {
           Serial.print("Resend (got): ");
           Serial.println(nextCommand);
           comms_requestResend();
-          nextCommand[0] = NULL;
+          nextCommand[0] = 0;
           commandConfirmed = false;
         }
         else {
@@ -58,7 +58,7 @@ void comms_checkForCommand() {
         bufferPosition++;
         if (bufferPosition > INLENGTH)
         { // if the command is too big, chuck it out!
-          nextCommand[0] = NULL;
+          nextCommand[0] = 0;
           commandConfirmed = false;
           bufferPosition = 0;
         }
