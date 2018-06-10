@@ -61,9 +61,9 @@ void penlift_movePen(int start, int end, int delay_ms)
 
 void penlift_penUp()
 {
-  if (inNoOfParams > 1)
+  if (inNoOfParams == 3)
   {
-    Serial.print("Penup with params");
+    Serial.println("Penup with params");
     int positionToMoveFrom = isPenUp ? upPosition : downPosition;
     upPosition = atoi(inParam1);
     penlift_movePen(positionToMoveFrom, upPosition, penLiftSpeed);
@@ -82,7 +82,7 @@ void penlift_penDown()
 {
   // check to see if this is a multi-action command (if there's a
   // parameter then this sets the "down" motor position too).
-  if (inNoOfParams > 1)
+  if (inNoOfParams == 3)
   {
     int positionToMoveFrom = isPenUp ? upPosition : downPosition;
     downPosition = atoi(inParam1);

@@ -8,8 +8,12 @@
 EEPROM.
 
 This is one of the core files for the polargraph server program.
-Has a couple of little helper methods for reading and writing
-ints and floats to EEPROM using the EEPROM library.
+
+This doesn't actually use EEPROM in ESP32, but it's the same pattern
+and interface as other versions of Polargraph so I'm keeping the name.
+
+This uses Preferences which is an ESP32 abstraction library to put and get
+value into non-volatile storage based on keys.
 
 But mostly it contains the loadMachineSpecFromEeprom method, which is
 used to retrieve the machines saved values when it restarts, or
@@ -129,7 +133,7 @@ void eeprom_loadSpeed()
 
   currentAcceleration = preferences.getFloat(PREFKEY_MACHINE_MOTOR_ACCEL, DEFAULT_ACCELERATION);
   if (int(currentAcceleration) < 1) {
-    currentAcceleration = 800.0;
+    currentAcceleration = DEFAULT_ACCELERATION;
   }
 }
 

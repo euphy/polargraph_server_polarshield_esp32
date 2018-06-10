@@ -140,46 +140,41 @@ void comms_extractParams(char* inS) {
   int startPos = 0;
   int paramNumber = 0;
   char * param = strtok(inS, COMMA);
-#ifdef DEBUG_COMMS
-  Serial.print(F("Param "));
-  Serial.print(paramNumber);
-  Serial.print(": ");
-  Serial.println(param);
-#endif
+
   while (param != 0) {
-      switch(paramNumber) {
-        case 0:
-          strcpy(inCmd, param);
-          break;
-        case 1:
-          strcpy(inParam1, param);
-          break;
-        case 2:
-          strcpy(inParam2, param);
-          break;
-        case 3:
-          strcpy(inParam3, param);
-          break;
-        case 4:
-          strcpy(inParam4, param);
-          break;
-        default:
-          break;
-      }
-      paramNumber++;
-      param = strtok(NULL, COMMA);
-#ifdef DEBUG_COMMS
-      Serial.print(F("Param "));
-      Serial.print(paramNumber);
-      Serial.print(": ");
-      Serial.print(param);
-      Serial.print("... ");
-      for (int i = 0; i<sizeof(param); i++) {
-        Serial.print(":");
-        Serial.print((int)param[i]);
-      }
-      Serial.println(".");
-#endif
+    #ifdef DEBUG_COMMS
+          Serial.print(F("bParam "));
+          Serial.print(paramNumber);
+          Serial.print(": ");
+          Serial.print(param);
+          Serial.print(" in ascii: ");
+          for (int i = 0; i<sizeof(param); i++) {
+            Serial.print(" ");
+            Serial.print((int)param[i]);
+          }
+          Serial.println(".");
+    #endif
+    switch(paramNumber) {
+      case 0:
+        strcpy(inCmd, param);
+        break;
+      case 1:
+        strcpy(inParam1, param);
+        break;
+      case 2:
+        strcpy(inParam2, param);
+        break;
+      case 3:
+        strcpy(inParam3, param);
+        break;
+      case 4:
+        strcpy(inParam4, param);
+        break;
+      default:
+        break;
+    }
+    paramNumber++;
+    param = strtok(NULL, COMMA);
   }
   inNoOfParams = paramNumber;
 #ifdef DEBUG_COMMS
