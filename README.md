@@ -1,14 +1,20 @@
-polargraph_server_polarshield
-=============================
+polargraph_server_polarshield_esp32
+===================================
 
-Polargraph Server for NodeMCU-32S, which is based on the Espressif ESP32 chip, combined with an SPI-based 240x320 TFT touchscreen, an SD card reader and two A4988 stepper drivers. This is currently breadboarded.
+Polargraph Server for NodeMCU-32S, which is based on the Espressif ESP32 chip, combined with an SPI-based 240x320 TFT touchscreen, an SD card reader and two A4988 stepper drivers.
+
+These parts are integrated onto a board (Polarshield v3).
 
 The display and touch routines are courtesy of Bodmers excellent TFT_eSPI library, which rolls up and optimises some of the Adafruit GFX libraries.
 
-The ESP32 currently has sufficient pins for either:
+The ESP32 currently has sufficient pins for two full sets of:
 
-* Encoders for the two motors, plus endstops, to build a Polargraph Pro type device, OR...
-* Another motor axis.
+* stepper motor (step & direction)
+* position encoder (quadrature, A & B channels) 
+* endstop switches
+
+A full guide on how to wire this up and build the machine will be forthcoming over the summer.
+
 
 The button and menu drawing routines are spread out over a couple of files:
 
@@ -30,12 +36,9 @@ The program has a core part that consists of the following files that are common
 - util.ino
 
 and 
-- polargraph_server_polarshield.ino
+- polargraph_server_polarshield_esp32.ino
 
-which is named for the project.
-
-The other source files include the extended functionality available on ATMEGA2560 boards
-and the Polarshield.
+which is named for the project and has a whole load global variables in it, as Arduino projects are wont to have.
 
 The file called impl_ps contains implementations of a few functions, and also
 contains the extended impl_executeCommand(...) which is the jumping-off point for those 
