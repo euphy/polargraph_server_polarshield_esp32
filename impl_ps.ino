@@ -115,7 +115,7 @@ void impl_runBackgroundProcesses()
   lcd_doScheduledRedraw();
   touch_doScheduledEnable();
 
-  if (heartbeat.check()) {
+  if (broadcastStatus.check()) {
     comms_ready();
   }
   // long motorCutoffTime = millis() - lastOperationTime;

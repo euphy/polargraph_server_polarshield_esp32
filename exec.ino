@@ -28,9 +28,9 @@ boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2,
   else if (inCmd.startsWith(CMD_CHANGEPENWIDTH))
     exec_changePenWidth();
   else if (inCmd.startsWith(CMD_SETMOTORSPEED))
-    exec_setMotorSpeed();
+    exec_setMotorSpeedFromCommand();
   else if (inCmd.startsWith(CMD_SETMOTORACCEL))
-    exec_setMotorAcceleration();
+    exec_setMotorAccelerationFromCommand();
   else if (inCmd.startsWith(CMD_DRAWPIXEL))
     pixel_drawSquarePixel();
   else if (inCmd.startsWith(CMD_DRAWSCRIBBLEPIXEL))
@@ -78,8 +78,6 @@ void exec_changeDrawingDirection()
 
 void exec_reportMachineSpec()
 {
-  eeprom_dumpEeprom();
-
   Serial.print(F("PGSIZE,"));
   Serial.print(machineWidth);
   Serial.print(COMMA);
@@ -117,21 +115,16 @@ void exec_setMachineSizeFromCommand()
   int width = atoi(inParam1);
   int height = atoi(inParam2);
 
-  // load to get current settings
-  int currentValue = width;
-  EEPROM_readAnything(EEPROM_MACHINE_WIDTH, currentValue);
-  if (currentValue != width)
-    if (width > 10)
-    {
-      EEPROM_writeAnything(EEPROM_MACHINE_WIDTH, width);
-    }
+  // load to get current settings, then only update eeprom if it's different.
+  int currentValue = preferences.getInt(PREFKEY_MACHINE_WIDTH, DEFAULT_MACHINE_WIDTH);
+  if ((currentValue != width) && (width > 10)) {
+    preferences.putInt(PREFKEY_MACHINE_WIDTH, width);
+  }
 
-  EEPROM_readAnything(EEPROM_MACHINE_HEIGHT, currentValue);
-  if (currentValue != height)
-    if (height > 10)
-    {
-      EEPROM_writeAnything(EEPROM_MACHINE_HEIGHT, height);
-    }
+  currentValue = preferences.getInt(PREFKEY_MACHINE_HEIGHT, DEFAULT_MACHINE_HEIGHT);
+  if ((currentValue != height) && (height > 10)) {
+    preferences.putInt(PREFKEY_MACHINE_HEIGHT, height);
+  }
 
   // reload
   eeprom_loadMachineSize();
@@ -140,9 +133,9 @@ void exec_setMachineSizeFromCommand()
 void exec_setMachineMmPerRevFromCommand()
 {
   float newMmPerRev = atof(inParam1);
-  eeprom_loadMachineSpecFromEeprom();
-  if (mmPerRev != newMmPerRev) {
-    EEPROM_writeAnything(EEPROM_MACHINE_MM_PER_REV, newMmPerRev);
+  float currentValue = preferences.getFloat(PREFKEY_MACHINE_MM_PER_REV, DEFAULT_MM_PER_REV);
+  if (currentValue != newMmPerRev) {
+    preferences.putFloat(PREFKEY_MACHINE_MM_PER_REV, newMmPerRev);
     eeprom_loadMachineSpecFromEeprom();
   }
 }
@@ -150,18 +143,18 @@ void exec_setMachineMmPerRevFromCommand()
 void exec_setMachineStepsPerRevFromCommand()
 {
   int newStepsPerRev = atoi(inParam1);
-  eeprom_loadMachineSpecFromEeprom();
-  if (motorStepsPerRev != newStepsPerRev) {
-    EEPROM_writeAnything(EEPROM_MACHINE_STEPS_PER_REV, newStepsPerRev);
+  int currentValue = preferences.getInt(PREFKEY_MACHINE_STEPS_PER_REV, DEFAULT_STEPS_PER_REV);
+  if (currentValue != newStepsPerRev) {
+    preferences.putInt(PREFKEY_MACHINE_STEPS_PER_REV, newStepsPerRev);
     eeprom_loadMachineSpecFromEeprom();
   }
 }
 void exec_setMachineStepMultiplierFromCommand()
 {
   int newStepMultiplier = atoi(inParam1);
-  eeprom_loadMachineSpecFromEeprom();
-  if (stepMultiplier != newStepMultiplier) {
-    EEPROM_writeAnything(EEPROM_MACHINE_STEP_MULTIPLIER, newStepMultiplier);
+  int currentValue = preferences.getInt(PREFKEY_MACHINE_STEP_MULTIPLIER, DEFAULT_STEP_MULTIPLIER);
+  if (currentValue != newStepMultiplier) {
+    preferences.putInt(PREFKEY_MACHINE_STEP_MULTIPLIER, newStepMultiplier);
     eeprom_loadMachineSpecFromEeprom();
   }
 }
@@ -170,40 +163,43 @@ void exec_setPenLiftRange()
 {
   int down = atoi(inParam1);
   int up = atoi(inParam2);
+  int write = -1;
+
+  // 4 params (C45,<downpos>,<uppos>,1,END) means save values to EEPROM
+  if (inNoOfParams == 3) {
+    write = atoi(inParam3);
+  }
 
   Serial.print(F("Down: "));
   Serial.println(down);
   Serial.print(F("Up: "));
   Serial.println(up);
 
-  if (inNoOfParams == 3)
-  {
-    // 4 params (C45,<downpos>,<uppos>,1,END) means save values to EEPROM
-    EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
-    EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
-    eeprom_loadPenLiftRange();
-  }
-  else if (inNoOfParams == 2)
+  if (inNoOfParams == 2)
   {
     // 3 params (C45,<downpos>,<uppos>,END) means just do a range test
-    penlift_movePen(up, down, penLiftSpeed);
-    delay(200);
-    penlift_movePen(down, up, penLiftSpeed);
-    delay(200);
-    penlift_movePen(up, down, penLiftSpeed);
-    delay(200);
-    penlift_movePen(down, up, penLiftSpeed);
-    delay(200);
+    penlift_testRange(up, down, penLiftSpeed);
+  }
+
+  if (write == 1) {
+    preferences.putInt(PREFKEY_PENLIFT_UP, up);
+    preferences.putInt(PREFKEY_PENLIFT_DOWN, down);
+    eeprom_loadPenLiftRange();
   }
 }
 
+
 /* Single parameter to set max speed, add a second parameter of "1" to make it persist.
 */
-void exec_setMotorSpeed()
+void exec_setMotorSpeedFromCommand()
 {
-  exec_setMotorSpeed(atof(inParam1));
-  if (inNoOfParams == 3 && atoi(inParam2) == 1)
-    EEPROM_writeAnything(EEPROM_MACHINE_MOTOR_SPEED, currentMaxSpeed);
+  float newSpeed = atof(inParam1);
+
+  if (inNoOfParams == 2 && atoi(inParam2) == 1) {
+    eeprom_storeFloat(PREFKEY_MACHINE_MOTOR_SPEED, DEFAULT_MAX_SPEED, newSpeed);
+  }
+
+  exec_setMotorSpeed(newSpeed);
 }
 
 void exec_setMotorSpeed(float speed)
@@ -217,11 +213,14 @@ void exec_setMotorSpeed(float speed)
 
 /* Single parameter to set acceleration, add a second parameter of "1" to make it persist.
 */
-void exec_setMotorAcceleration()
+void exec_setMotorAccelerationFromCommand()
 {
-  exec_setMotorAcceleration((float)atof(inParam1));
-  if (inNoOfParams == 2 && atoi(inParam2) == 1)
-    EEPROM_writeAnything(EEPROM_MACHINE_MOTOR_ACCEL, currentAcceleration);
+  float newAccel = atof(inParam1);
+  if (inNoOfParams == 2 && atoi(inParam2) == 1) {
+    eeprom_storeFloat(PREFKEY_MACHINE_MOTOR_ACCEL, DEFAULT_ACCELERATION, newAccel);
+  }
+
+  exec_setMotorAcceleration(newAccel);
 }
 void exec_setMotorAcceleration(float accel)
 {

@@ -38,10 +38,14 @@ the User_Setup.h file and add the following lines.
 
 #include <AccelStepper.h>
 #include <ESP32_Servo.h>
-#include <EEPROM.h>
-#include "EEPROMAnything.h"
+// #include <EEPROM.h>
+// #include "EEPROMAnything.h"
+#include <Preferences.h>
+
 #include <ESP32Ticker.h>
 #include <Metro.h>
+
+#include <Encoder.h>
 
 /* Definition of a function that can be attached to a Button Specification
 and will get executed when the button is pushed..
@@ -138,11 +142,19 @@ const String FIRMWARE_VERSION_NO = "2.0";
   const String MB_NAME = "TFTSHIELD";
 #endif
 
+
+/*  ===========================================================
+    Preferences is the way to store non-volatile values in ESP32.
+=========================================================== */
+
+Preferences preferences;
+
+
 // Pen raising servo
 Servo penHeight;
 const int DEFAULT_DOWN_POSITION = 90;
 const int DEFAULT_UP_POSITION = 180;
-static int upPosition = DEFAULT_UP_POSITION; // defaults
+static int upPosition = DEFAULT_UP_POSITION;
 static int downPosition = DEFAULT_DOWN_POSITION;
 static int penLiftSpeed = 3; // ms between steps of moving motor
 #if MOTHERBOARD == RAMPS14
@@ -154,29 +166,28 @@ static int penLiftSpeed = 3; // ms between steps of moving motor
 #endif
 boolean isPenUp = false;
 
+
 // working machine specification
-static int motorStepsPerRev = 200;
-static float mmPerRev = 95;
-static int stepMultiplier = 8;
-static int machineWidth = 650;
-static int machineHeight = 800;
+const int DEFAULT_MACHINE_WIDTH = 650;
+const int DEFAULT_MACHINE_HEIGHT = 800;
+const float DEFAULT_MM_PER_REV = 95.0;
+const int DEFAULT_STEPS_PER_REV = 200;
+const int DEFAULT_STEP_MULTIPLIER = 8;
 
-
-
-static int sqtest = 0;
-
-static int defaultMachineWidth = 650;
-static int defaultMachineHeight = 650;
-static float defaultMmPerRev = 95.0;
-static int defaultStepsPerRev = 200;
-static int defaultStepMultiplier = 8;
+static int motorStepsPerRev = DEFAULT_STEPS_PER_REV;
+static float mmPerRev = DEFAULT_MM_PER_REV;
+static int stepMultiplier = DEFAULT_STEP_MULTIPLIER;
+static int machineWidth = DEFAULT_MACHINE_WIDTH;
+static int machineHeight = DEFAULT_MACHINE_HEIGHT;
 
 static long startLengthStepsA = 8000;
 static long startLengthStepsB = 8000;
 
-float currentMaxSpeed = 2000.0;
-float currentAcceleration = 2000.0;
-boolean usingAcceleration = true;
+const float DEFAULT_MAX_SPEED = 2000.0;
+const float DEFAULT_ACCELERATION = 2000.0;
+static float currentMaxSpeed = DEFAULT_MAX_SPEED;
+static float currentAcceleration = DEFAULT_ACCELERATION;
+static boolean usingAcceleration = true;
 
 float mmPerStep = 0.0F;
 float stepsPerMM = 0.0F;
@@ -184,6 +195,10 @@ float stepsPerMM = 0.0F;
 long pageWidth = machineWidth * stepsPerMM;
 long pageHeight = machineHeight * stepsPerMM;
 long maxLength = 0;
+
+const float DEFAULT_PEN_WIDTH = 0.8f;
+static float penWidth = DEFAULT_PEN_WIDTH; // line width in mm
+
 
 /*==========================================================================
     COMMUNICATION PROTOCOL, how to chat
@@ -210,11 +225,31 @@ boolean usingCrc = false;
 boolean reportingPosition = true;
 boolean requestResend = false;
 
-float penWidth = 0.8f; // line width in mm
+#define READY_STR "READY_200"
+#define RESEND_STR "RESEND"
+#define DRAWING_STR "DRAWING"
+#define OUT_CMD_SYNC_STR "SYNC,"
 
+char MSG_E_STR[] = "MSG,E,";
+char MSG_I_STR[] = "MSG,I,";
+char MSG_D_STR[] = "MSG,D,";
+
+// period between status rebroadcasts
+long comms_rebroadcastStatusInterval = 4000;
+Metro broadcastStatus = Metro(comms_rebroadcastStatusInterval);
+
+/*==========================================================================
+    MOTOR interfaces
+  ========================================================================*/
 
 extern AccelStepper motorA;
 extern AccelStepper motorB;
+
+Encoder encA(36, 39);
+Encoder encB(34, 35);
+
+static int endstopPinA = 21;
+static int endstopPinB = 17;
 
 volatile boolean currentlyRunning = true;
 volatile boolean backgroundRunning = false;
@@ -223,14 +258,13 @@ hw_timer_t * motorTimer = NULL;
 portMUX_TYPE motorTimerMux = portMUX_INITIALIZER_UNLOCKED;
 
 volatile long lastOperationTime = 0L;
-long motorIdleTimeBeforePowerDown = 600000L;
-boolean automaticPowerDown = true;
-
+static long motorIdleTimeBeforePowerDown = 600000L;
+static boolean automaticPowerDown = true;
 volatile long lastInteractionTime = 0L;
 
-// period between status rebroadcasts
-long comms_rebroadcastStatusInterval = 4000;
-Metro heartbeat = Metro(comms_rebroadcastStatusInterval);
+/*==========================================================================
+    Touchscreen bits
+  ========================================================================*/
 
 static int touchX = 0;
 static int touchY = 0;
@@ -249,15 +283,6 @@ static boolean updateValuesOnScreen = true;
 static byte highlightedButton = NO_HIGHLIGHTED_BUTTON;
 
 volatile LcdPlan lcdPlan = {0L, 0L, 0L, 0L, 0L, 6};
-
-#define READY_STR "READY_200"
-#define RESEND_STR "RESEND"
-#define DRAWING_STR "DRAWING"
-#define OUT_CMD_SYNC_STR "SYNC,"
-
-char MSG_E_STR[] = "MSG,E,";
-char MSG_I_STR[] = "MSG,I,";
-char MSG_D_STR[] = "MSG,D,";
 
 
 // Pixel drawing
@@ -352,6 +377,8 @@ void setup()
   Serial.println(PEN_HEIGHT_SERVO_PIN);
 
   configuration_motorSetup();
+
+  preferences.begin("polargraphsd", false);
   eeprom_loadMachineSpecFromEeprom();
   configuration_setup();
 
@@ -396,11 +423,8 @@ void loop()
 
 
 /*===========================================================
-    These variables are for the polarshield / mega
+    These variables are for the polarshield
 =========================================================== */
-//#include <UTFT.h>
-//#include <URTouch.h>
-
 
 
 const static String CMD_TESTPENWIDTHSCRIBBLE = "C12";

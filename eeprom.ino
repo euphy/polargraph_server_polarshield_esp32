@@ -17,59 +17,40 @@ whenever a value is written to the EEPROM.
 
 */
 
-//  EEPROM offsets
-const byte EEPROM_START_POSITION = 32;
+// Preference keys
 
-const int EEPROM_MACHINE_WIDTH = 0;
-const int EEPROM_MACHINE_HEIGHT = 2;
-const int EEPROM_MACHINE_MM_PER_REV = 14; // 4 bytes (float)
-const int EEPROM_MACHINE_STEPS_PER_REV = 18;
-const int EEPROM_MACHINE_STEP_MULTIPLIER = 20;
+const char* PREFKEY_MACHINE_WIDTH = "mWidth";
+const char* PREFKEY_MACHINE_HEIGHT = "mHeight";
+const char* PREFKEY_MACHINE_MM_PER_REV = "mMmPerRev";
+const char* PREFKEY_MACHINE_STEPS_PER_REV = "mStepsPerRev";
+const char* PREFKEY_MACHINE_STEP_MULTIPLIER = "mStepMultiplier";
 
-const int EEPROM_MACHINE_MOTOR_SPEED = 22; // 4 bytes float
-const int EEPROM_MACHINE_MOTOR_ACCEL = 26; // 4 bytes float
-const int EEPROM_MACHINE_PEN_WIDTH = 30; // 4 bytes float
+const char* PREFKEY_MACHINE_MOTOR_SPEED = "mMotorSpeed";
+const char* PREFKEY_MACHINE_MOTOR_ACCEL = "mMotorAccel";
+const char* PREFKEY_PEN_WIDTH = "penWidth";
 
-const long EEPROM_MACHINE_HOME_A = 34; // 4 bytes
-const long EEPROM_MACHINE_HOME_B = 38; // 4 bytes
-
-const int EEPROM_PENLIFT_DOWN = 42; // 2 bytes
-const int EEPROM_PENLIFT_UP = 44; // 2 bytes
-
+const char* PREFKEY_PENLIFT_DOWN = "penliftDown";
+const char* PREFKEY_PENLIFT_UP = "penliftUp";
 
 
 void eeprom_resetEeprom()
 {
-  for (int i = 0; i < (EEPROM_PENLIFT_UP +2); i++)
-  {
-    EEPROM.write(i, 0);
-  }
+  preferences.clear();
   eeprom_loadMachineSpecFromEeprom();
-}
-void eeprom_dumpEeprom()
-{
-  for (int i = 0; i <40; i++)
-  {
-    Serial.print(i);
-    Serial.print(". ");
-    Serial.println(EEPROM.read(i));
-  }
 }
 
 void eeprom_loadMachineSize()
 {
-  EEPROM_readAnything(EEPROM_MACHINE_WIDTH, machineWidth);
-  if (machineWidth < 1)
-  {
-    machineWidth = defaultMachineWidth;
+  machineWidth = preferences.getInt(PREFKEY_MACHINE_WIDTH, DEFAULT_MACHINE_WIDTH);
+  if (machineWidth < 1) {
+    machineWidth = DEFAULT_MACHINE_WIDTH;
   }
   Serial.print(F("Loaded machine width:"));
   Serial.println(machineWidth);
 
-  EEPROM_readAnything(EEPROM_MACHINE_HEIGHT, machineHeight);
-  if (machineHeight < 1)
-  {
-    machineHeight = defaultMachineHeight;
+  machineHeight = preferences.getInt(PREFKEY_MACHINE_HEIGHT, DEFAULT_MACHINE_HEIGHT);
+  if (machineHeight < 1) {
+    machineHeight = DEFAULT_MACHINE_HEIGHT;
   }
   Serial.print(F("Loaded machine height:"));
   Serial.println(machineHeight);
@@ -77,24 +58,24 @@ void eeprom_loadMachineSize()
 
 void eeprom_loadSpoolSpec()
 {
-  EEPROM_readAnything(EEPROM_MACHINE_MM_PER_REV, mmPerRev);
+  mmPerRev = preferences.getFloat(PREFKEY_MACHINE_MM_PER_REV, DEFAULT_MM_PER_REV);
   if (isnan(mmPerRev)) {
     Serial.println("mmPerRev is nan, being corrected.");
-    mmPerRev = defaultMmPerRev;
+    mmPerRev = DEFAULT_MM_PER_REV;
   }
   else if (mmPerRev < 1) {
-    mmPerRev = defaultMmPerRev;
+    mmPerRev = DEFAULT_MM_PER_REV;
   }
   Serial.print(F("Loaded mm per rev:"));
   Serial.println(mmPerRev);
 
-  EEPROM_readAnything(EEPROM_MACHINE_STEPS_PER_REV, motorStepsPerRev);
+  motorStepsPerRev = preferences.getInt(PREFKEY_MACHINE_STEPS_PER_REV, DEFAULT_STEPS_PER_REV);
   if (isnan(motorStepsPerRev)) {
     Serial.println("motorStepsPerRev is nan, being corrected.");
-    motorStepsPerRev = defaultStepsPerRev;
+    motorStepsPerRev = DEFAULT_STEPS_PER_REV;
   }
   else if (motorStepsPerRev < 1) {
-    motorStepsPerRev = defaultStepsPerRev;
+    motorStepsPerRev = DEFAULT_STEPS_PER_REV;
   }
   Serial.print(F("Loaded motor steps per rev:"));
   Serial.println(motorStepsPerRev);
@@ -102,17 +83,15 @@ void eeprom_loadSpoolSpec()
 
 void eeprom_loadPenLiftRange()
 {
-  EEPROM_readAnything(EEPROM_PENLIFT_DOWN, downPosition);
-  if ((downPosition < 0) || (downPosition > 360))
-  {
+  downPosition = preferences.getInt(PREFKEY_PENLIFT_DOWN, DEFAULT_DOWN_POSITION);
+  if ((downPosition < 0) || (downPosition > 360)) {
     downPosition = DEFAULT_DOWN_POSITION;
   }
   Serial.print(F("Loaded down pos:"));
   Serial.println(downPosition);
 
-  EEPROM_readAnything(EEPROM_PENLIFT_UP, upPosition);
-  if ((upPosition < 0) || (upPosition > 360))
-  {
+  upPosition = preferences.getInt(PREFKEY_PENLIFT_UP, DEFAULT_UP_POSITION);
+  if ((upPosition < 0) || (upPosition > 360)) {
     upPosition = DEFAULT_UP_POSITION;
   }
   Serial.print(F("Loaded up pos:"));
@@ -121,17 +100,16 @@ void eeprom_loadPenLiftRange()
 
 void eeprom_storePenLiftRange(int up, int down)
 {
-  EEPROM_writeAnything(EEPROM_PENLIFT_DOWN, down);
-  EEPROM_writeAnything(EEPROM_PENLIFT_UP, up);
+  preferences.putInt(PREFKEY_PENLIFT_UP, up);
+  preferences.putInt(PREFKEY_PENLIFT_DOWN, down);
 }
 
 
 void eeprom_loadStepMultiplier()
 {
-  EEPROM_readAnything(EEPROM_MACHINE_STEP_MULTIPLIER, stepMultiplier);
-  if (stepMultiplier < 1)
-  {
-    stepMultiplier = defaultStepMultiplier;
+  stepMultiplier = preferences.getInt(PREFKEY_MACHINE_STEP_MULTIPLIER, DEFAULT_STEP_MULTIPLIER);
+  if (stepMultiplier < 1) {
+    stepMultiplier = DEFAULT_STEP_MULTIPLIER;
   }
   Serial.print(F("Loaded motor step multiplier:"));
   Serial.println(stepMultiplier);
@@ -140,18 +118,35 @@ void eeprom_loadStepMultiplier()
 void eeprom_loadSpeed()
 {
   // load speed, acceleration
-  EEPROM_readAnything(EEPROM_MACHINE_MOTOR_SPEED, currentMaxSpeed);
+  currentMaxSpeed = preferences.getFloat(PREFKEY_MACHINE_MOTOR_SPEED, DEFAULT_MAX_SPEED);
 
   // not sure why this requires a cast to int for the comparision, but a
   // if (currentMaxSpeed < 1.0) wasn't catching cases where
   // currentMaxSpeed == 0.00, ODD.
   if (int(currentMaxSpeed) < 1) {
-    currentMaxSpeed = 800.0;
+    currentMaxSpeed = DEFAULT_MAX_SPEED;
   }
 
-  EEPROM_readAnything(EEPROM_MACHINE_MOTOR_ACCEL, currentAcceleration);
+  currentAcceleration = preferences.getFloat(PREFKEY_MACHINE_MOTOR_ACCEL, DEFAULT_ACCELERATION);
   if (int(currentAcceleration) < 1) {
     currentAcceleration = 800.0;
+  }
+}
+
+void eeprom_storeFloat(const char* key, float defaultValue, float newValue)
+{
+  float currentValue = preferences.getFloat(key, defaultValue);
+  if (currentValue != newValue) {
+    preferences.putFloat(key, newValue);
+  }
+}
+
+void eeprom_loadPenWidth()
+{
+  // load penwidth
+  penWidth = preferences.getFloat("penWidth", DEFAULT_PEN_WIDTH);
+  if (penWidth < 0.001) {
+    penWidth = DEFAULT_PEN_WIDTH;
   }
 }
 
@@ -164,11 +159,7 @@ void eeprom_loadMachineSpecFromEeprom()
   eeprom_loadStepMultiplier();
   eeprom_loadPenLiftRange();
   eeprom_loadSpeed();
-
-  // load penwidth
-  EEPROM_readAnything(EEPROM_MACHINE_PEN_WIDTH, penWidth);
-  if (penWidth < 0.0001)
-    penWidth = 0.8;
+  eeprom_loadPenWidth();
 
   mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
   stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;

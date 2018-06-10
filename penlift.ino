@@ -98,7 +98,14 @@ void penlift_penDown()
   isPenUp = false;
 }
 
-void penlift_testRange()
+void penlift_testRange(int up, int down, int penLiftSpeed)
 {
-
+  penlift_movePen(up, down, penLiftSpeed);
+  delay(200);
+  penlift_movePen(down, up, penLiftSpeed);
+  delay(200);
+  penlift_movePen(up, down, penLiftSpeed);
+  delay(200);
+  penlift_movePen(down, up, penLiftSpeed);
+  delay(200);
 }
