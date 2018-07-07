@@ -27,21 +27,30 @@ void lcd_scheduleRedraw(ButtonSpec *button, boolean syncTouchEnable)
   ButtonSpec *b;
 
   if (button->nextButton) {
+    #ifdef DEBUG_MENU_DRAWING
     printf("\t\tUsing nextButton (%d), rather than this one (%d)\n",
       button->nextButton, button->id);
+    #endif
     b = &buttons[button->nextButton];
   } else {
+    #ifdef DEBUG_MENU_DRAWING
     printf("\t\tUsing this button (%d)\n",
       button->id);
+    #endif
     b = button;
   }
 
+  #ifdef DEBUG_MENU_DRAWING
   printf("\t\tB.id: %d, b.labelText: %s, b.nextButton: %d, b.type: %d\n",
     b->id, b->labelText, b->nextButton, b->type);
+  #endif
 
   ButtonType buttonType = buttonTypes[b->type];
+  #ifdef DEBUG_MENU_DRAWING
   printf("\t\tScheduling redraw (%d) in %dms (%d))\n",
-  buttonType.whatToRedraw, 0, millis());
+    buttonType.whatToRedraw, 0, millis());
+  #endif
+
   switch (buttonType.whatToRedraw) {
     case REDRAW_BUTTON:
       lcdPlan.buttonDue = millis();
@@ -143,7 +152,7 @@ void lcd_doScheduledRedraw()
     lcd_resetRedrawSchedule();
   }
   #ifdef DEBUG_FUNCTION_BOUNDARIES
-  printf("\t\tExit %s at %d\n", __FUNCTION__, millis());
+  printf("\t\tExit %s at %ld\n", __FUNCTION__, millis());
   #endif
 }
 
@@ -175,10 +184,12 @@ and -1 if it wans't on a button.
 */
 byte lcd_getButtonPosition(int x, int y)
 {
+  #ifdef DEBUG_MENU_DRAWING
   Serial.print("lcd_getButtonPosition X:");
   Serial.print(x);
   Serial.print(", Y:");
   Serial.println(y);
+  #endif
   if (x >= buttonCoords[0][0] && x <= buttonCoords[1][0]
      && y >= buttonCoords[0][1] && y <= buttonCoords[1][1])
     return 0;

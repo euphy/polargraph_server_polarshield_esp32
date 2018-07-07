@@ -18,7 +18,9 @@ void touch_sense()
   uint16_t x, y;
   boolean touchResponse = lcd.getTouch(&x, &y, TOUCH_SENSITIVITY_THRESHOLD);
   if (touchResponse) {
+    #ifdef DEBUG_TOUCH
     printf("lcd.getTouch() returned true");
+    #endif
     if ((x != -1) && (y != -1)) {
       // Display was touched, and it's in-bounds.
       touchX = x;
@@ -114,7 +116,9 @@ void touch_input()
   byte buttonPosition = -1;
   ButtonSpec pressedButton = {0};
   if (displayTouched || displayReleased) {
+    #ifdef DEBUG_TOUCH
     printf("\t\tIn %s: displayReleased: %d, displayTouched: %d\n", __FUNCTION__, (int)displayReleased, (int)displayTouched);
+    #endif
     buttonPosition = lcd_getButtonPosition(touchX, touchY);
     if (buttonPosition>=0 && buttonPosition<BUTTONS_PER_MENU) {
       pressedButton = lcd_getButtonThatWasPressed(buttonPosition, currentMenu);

@@ -79,29 +79,27 @@ void comms_clearParams() {
 }
 
 void comms_commandLoop() {
-  while (true) {
-    impl_runBackgroundProcesses();
-    if (commandConfirmed) {
+  impl_runBackgroundProcesses();
+  if (commandConfirmed) {
 #ifdef DEBUG_COMMS
-      Serial.print(F("Command Confirmed: "));
-      Serial.println(nextCommand);
+    Serial.print(F("Command Confirmed: "));
+    Serial.println(nextCommand);
 #endif
-      paramsExtracted = comms_parseCommand(nextCommand);
-      if (paramsExtracted) {
-        Serial.println(F("Params extracted."));
-        strcpy(nextCommand, "");
-        commandConfirmed = false;
-        comms_ready(); // signal ready for next
-        comms_executeParsedCommand();
-        comms_clearParams();
-      }
-      else
-      {
-        Serial.println(F("Command not parsed."));
-        strcpy(nextCommand, "");
-        comms_clearParams();
-        commandConfirmed = false;
-      }
+    paramsExtracted = comms_parseCommand(nextCommand);
+    if (paramsExtracted) {
+      Serial.println(F("Params extracted."));
+      strcpy(nextCommand, "");
+      commandConfirmed = false;
+      comms_ready(); // signal ready for next
+      comms_executeParsedCommand();
+      comms_clearParams();
+    }
+    else
+    {
+      Serial.println(F("Command not parsed."));
+      strcpy(nextCommand, "");
+      comms_clearParams();
+      commandConfirmed = false;
     }
   }
 }
@@ -240,6 +238,7 @@ void comms_establishContact()
 void comms_ready()
 {
   reportPosition();
+  reportStepRate();
   Serial.println(READY_STR);
 }
 void comms_drawing()

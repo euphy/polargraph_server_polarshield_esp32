@@ -38,14 +38,13 @@ the User_Setup.h file and add the following lines.
 
 #include <AccelStepper.h>
 #include <ESP32_Servo.h>
-// #include <EEPROM.h>
-// #include "EEPROMAnything.h"
+#include <Encoder.h>
+
 #include <Preferences.h>
 
 #include <ESP32Ticker.h>
 #include <Metro.h>
 
-#include <Encoder.h>
 
 /* Definition of a function that can be attached to a Button Specification
 and will get executed when the button is pushed..
@@ -119,13 +118,19 @@ typedef struct {
 =========================================================== */
 
 #define DEBUG_SD
-#define DEBUG_STATE
-#define DEBUG_COMMS
-#define DEBUG_COMMS_BUFF
+// #define DEBUG_STATE
+// #define DEBUG_COMMS
+// #define DEBUG_COMMS_BUFF
 // #define DEBUG_TOUCH
-#define DEBUG_PENLIFT
+// #define DEBUG_MENU_DRAWING
+// #define DEBUG_PENLIFT
 // #define DEBUG_FUNCTION_BOUNDARIES
 boolean debugComms = false;
+
+// Set REPEAT_CAL to true instead of false to run calibration
+// again, otherwise it will only be done once.
+// Repeat calibration if you change the screen rotation.
+#define REPEAT_CAL false
 
 /*  ===========================================================
     These variables are common to all polargraph server builds
@@ -187,7 +192,7 @@ const float DEFAULT_MAX_SPEED = 2000.0;
 const float DEFAULT_ACCELERATION = 2000.0;
 static float currentMaxSpeed = DEFAULT_MAX_SPEED;
 static float currentAcceleration = DEFAULT_ACCELERATION;
-static boolean usingAcceleration = true;
+volatile static boolean usingAcceleration = true;
 
 float mmPerStep = 0.0F;
 float stepsPerMM = 0.0F;
@@ -348,8 +353,17 @@ const static String CMD_SET_DEBUGCOMMS = "C47";
 Ticker motorRunner;
 Ticker commsRunner;
 
+volatile DRAM_ATTR long runCounter = 0L;
+volatile DRAM_ATTR long lastPeriodStartTime = 0L;
+volatile DRAM_ATTR long sampleBuffer[3] = {0L, 0L, 0L};
+volatile DRAM_ATTR int sampleBufferSlot = 0;
+volatile DRAM_ATTR long totalTriggers = 0L;
+volatile DRAM_ATTR long totalSamplePeriods = 0L;
+volatile SemaphoreHandle_t timerSemaphore;
+
 void IRAM_ATTR runMotors() {
   portENTER_CRITICAL_ISR(&motorTimerMux);
+
   if (backgroundRunning) {
     if (usingAcceleration) {
       motorA.run();
@@ -360,6 +374,17 @@ void IRAM_ATTR runMotors() {
       motorB.runSpeed();
     }
   }
+
+  if (millis() > (lastPeriodStartTime + 1000)) {
+    lastPeriodStartTime = millis();
+    (sampleBufferSlot == 2) ? sampleBufferSlot = 0 : sampleBufferSlot++;
+    sampleBuffer[sampleBufferSlot] = runCounter;
+    runCounter = 0L;
+    totalSamplePeriods++;
+  }
+  runCounter++;
+  totalTriggers++;
+
   portEXIT_CRITICAL_ISR(&motorTimerMux);
 }
 
@@ -384,18 +409,21 @@ void setup()
 
   penlift_penUp();
 
-//  comms_clearParams();
-//  comms_flushCommandAndParams();
-//  comms_ready();
-
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(200);
 
-  // motor time triggers runMotors every 50,000us
-  motorTimer = timerBegin(1, 80, true);  // timer 1, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  // motor time triggers runMotors every 5,000us
+  motorTimer = timerBegin(0, 80, true);  // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  // Standard rate is 80MHz: 80,000,000 interrupts per second,
+  // so "prescale" by dividing by 80 to give a 1MHz rate (1,000,000 per second).
+  // (which is once per microsecond - us.)
   timerAttachInterrupt(motorTimer, &runMotors, true); // edge (not level) triggered
-  timerAlarmWrite(motorTimer, 50000, true); // 1000000 * 1 us = 1 s, autoreload true
+  timerAlarmWrite(motorTimer, 100, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
   timerAlarmEnable(motorTimer); // enable
+
+  // Create semaphore to inform us when the timer has fired
+  timerSemaphore = xSemaphoreCreateBinary();
+
 
 //  // comms timer can go every 200,000us
 //  commsTimer = timerBegin(2, 80, true);  // timer 2, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp

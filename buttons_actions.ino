@@ -47,7 +47,9 @@ boolean replaceButtonInMenus(byte oldId, byte newId)
         if (menus[i][j] == oldId) {
           menus[i][j] = newId;
           changes++;
+          #ifdef DEBUG_MENU_DRAWING
           Serial.println("Swapped a button");
+          #endif
         }
       }
     }
@@ -75,8 +77,10 @@ int button_genericButtonAction(int buttonId)
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\t\t\t\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
+  #ifdef DEBUG_MENU_DRAWING
   Serial.print("ButtonId: ");
   Serial.println(buttonId);
+  #endif
   ButtonSpec button = buttons[buttonId];
   printf("... %s.\n", button.labelText);
 
@@ -284,8 +288,10 @@ int genericChangeMenuAction(int buttonId)
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\t\t\t\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
+  #ifdef DEBUG_MENU_DRAWING
   Serial.print("ButtonId: ");
   Serial.println(buttonId);
+  #endif
   ButtonSpec button = buttons[buttonId];
   printf("... %s.\n", button.labelText);
 

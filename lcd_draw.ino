@@ -158,7 +158,9 @@ Relies on highlightedButton being unset by screen redraws.
 */
 void lcd_draw_buttonHighlight(byte buttonPosition)
 {
+  #ifdef DEBUG_MENU_DRAWING
   printf("\t\t\t\tOutlining button %d\n", buttonPosition);
+  #endif
 
   if (highlightedButton == buttonPosition) {
     // This button is already highlighted.
