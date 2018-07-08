@@ -111,13 +111,9 @@ void impl_runBackgroundProcesses()
   printf("\n\n\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
 
-  touch_input();
-  lcd_doScheduledRedraw();
-  touch_doScheduledEnable();
+  impl_runBackgroundTouchProcesses();
+  impl_runBackgroundDrawProcesses();
 
-  if (broadcastStatus.check()) {
-    comms_ready();
-  }
   // long motorCutoffTime = millis() - lastOperationTime;
   // if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
   // {
@@ -129,6 +125,17 @@ void impl_runBackgroundProcesses()
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\tExit %s at %d\n", __FUNCTION__, millis());
   #endif
+}
+
+void impl_runBackgroundTouchProcesses()
+{
+  touch_input();
+  touch_doScheduledEnable();
+}
+
+void impl_runBackgroundDrawProcesses()
+{
+  lcd_doScheduledRedraw();
 }
 
 void impl_loadMachineSpecFromEeprom()

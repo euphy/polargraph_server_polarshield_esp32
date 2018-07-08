@@ -73,7 +73,6 @@ by polargraphs so far.
 
 AccelStepper motorA(1,MOTOR_A_STEP_PIN, MOTOR_A_DIR_PIN);
 AccelStepper motorB(1,MOTOR_B_STEP_PIN, MOTOR_B_DIR_PIN);
-//AccelStepper motorC(1,MOTOR_C_STEP_PIN, MOTOR_C_DIR_PIN);
 
 void configuration_motorSetup()
 {
@@ -102,6 +101,8 @@ void configuration_motorSetup()
   motorA.setPinsInverted(false, false, true);
   motorB.setEnablePin(MOTOR_B_ENABLE_PIN);
   motorB.setPinsInverted(true, false, true); // this one turns the opposite direction to A, hence inverted.
+
+
 }
 
 void configuration_setup()
@@ -131,6 +132,9 @@ void configuration_setup()
 
   motorA.setCurrentPosition(startLengthStepsA);
   motorB.setCurrentPosition(startLengthStepsB);
+
+  motors.addStepper(motorA);
+  motors.addStepper(motorB);
 }
 
 // end of Polarshield definition

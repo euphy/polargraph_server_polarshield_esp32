@@ -197,26 +197,18 @@ int button_genericButtonAction(int buttonId)
       break;
     case BUTTON_MOVE_INC_A:
       motorA.move(moveIncrement);
-      while (motorA.distanceToGo() != 0)
-        motorA.run();
       lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, motorA.currentPosition());
       break;
     case BUTTON_MOVE_DEC_A:
       motorA.move(0 - moveIncrement);
-      while (motorA.distanceToGo() != 0)
-        motorA.run();
       lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, motorA.currentPosition());
       break;
     case BUTTON_MOVE_INC_B:
       motorB.move(moveIncrement);
-      while (motorB.distanceToGo() != 0)
-        motorB.run();
       lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, motorB.currentPosition());
       break;
     case BUTTON_MOVE_DEC_B:
       motorB.move(0 - moveIncrement);
-      while (motorB.distanceToGo() != 0)
-        motorB.run();
       lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, motorB.currentPosition());
       break;
     case BUTTON_CALIBRATE:

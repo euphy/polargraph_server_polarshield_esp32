@@ -281,12 +281,13 @@ void exec_changeLengthDirect()
 {
   float endA = multiplier(atof(inParam1));
   float endB = multiplier(atof(inParam2));
-  int maxSegmentLength = atoi(inParam3);
+  int maxSegmentLength = atoi(inParam3) * stepMultiplier;
 
   float startA = motorA.currentPosition();
   float startB = motorB.currentPosition();
 
-  if (endA < 20 || endB < 20 || endA > getMaxLength() || endB > getMaxLength())
+  if (endA < 20 || endB < 20 ||
+    endA > getMaxLength() || endB > getMaxLength())
   {
     Serial.println("MSG,E,This point falls outside the area of this machine. Skipping it.");
   }
@@ -333,26 +334,27 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
 //  Serial.print(",");
 //  Serial.println(c2y);
 
-  // test to see if it's on the page
-  // AND ALSO TO see if the current position is on the page.
+  // test to see if both origin (c1) and target (c2) points are on the page.
   // Remember, the native system can easily specify points that can't exist,
   // particularly up at the top.
-  if (c2x > 20
-    && c2x<pageWidth-20
-    && c2y > 20
-    && c2y <pageHeight-20
-    && c1x > 20
-    && c1x<pageWidth-20
-    && c1y > 20
-    && c1y <pageHeight-20
+  const int unreachableMargin = 20;
+  if ( c2x > unreachableMargin
+    && c2x < pageWidth-unreachableMargin
+    && c2y > unreachableMargin
+    && c2y < pageHeight-unreachableMargin
+
+    && c1x > unreachableMargin
+    && c1x < pageWidth-unreachableMargin
+    && c1y > unreachableMargin
+    && c1y < pageHeight-unreachableMargin
     )
     {
     reportingPosition = false;
-    float deltaX = c2x-c1x;    // distance each must move (signed)
+    float deltaX = c2x-c1x;  // distance each must move (signed)
     float deltaY = c2y-c1y;
     float totalDistance = sqrt(sq(deltaX) + sq(deltaY));
 
-    long linesegs = 1;            // assume at least 1 line segment will get us there.
+    long linesegs = 1;  // assume at least 1 line segment will get us there.
     if (abs(deltaX) > abs(deltaY))
     {
       // slope <=1 case
@@ -380,8 +382,8 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
     usingAcceleration = false;
     while (linesegs > 0)
     {
-//      Serial.print("Line segment: " );
-//      Serial.println(linesegs);
+      Serial.print("Line segment: " );
+      Serial.println(linesegs);
       // compute next new location
       c1x = c1x + deltaX;
       c1y = c1y + deltaY;
@@ -391,14 +393,19 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
       float pB = getMachineB(c1x, c1y);
 
       // do the move
-      runSpeed = desiredSpeed(linesegs, runSpeed, currentAcceleration*4);
+      runSpeed = desiredSpeed(linesegs, runSpeed,
+        currentAcceleration*stepMultiplier);
 
-//      Serial.print("Setting speed:");
-//      Serial.println(runSpeed);
+      Serial.print("Setting speed:");
+      Serial.println(runSpeed);
 
-      motorA.setSpeed(runSpeed);
-      motorB.setSpeed(runSpeed);
+      setMotorConstantSpeed(runSpeed);
       changeLength(pA, pB);
+      while ((motorA.distanceToGo() != 0) &&
+        (motorB.distanceToGo() != 0))
+      {
+        runMotors();
+      }
 
       // one line less to do!
       linesegs--;
@@ -406,6 +413,7 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
     // reset back to "normal" operation
     reportingPosition = true;
     usingAcceleration = true;
+    setMotorConstantSpeed(currentMaxSpeed);
     reportPosition();
   }
   else

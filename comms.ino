@@ -14,7 +14,6 @@ it contains methods for reading commands from the serial port.
 */
 
 void comms_checkForCommand() {
-//  portENTER_CRITICAL_ISR(&commsTimerMux);
 
   if (!commandConfirmed)
   {
@@ -66,7 +65,6 @@ void comms_checkForCommand() {
       lastInteractionTime = millis();
     }
   }
-//  portEXIT_CRITICAL_ISR(&commsTimerMux);
 }
 
 void comms_clearParams() {
@@ -78,13 +76,13 @@ void comms_clearParams() {
   inNoOfParams = 0;
 }
 
-void comms_commandLoop() {
-  impl_runBackgroundProcesses();
+void comms_handleConfirmedCommand() {
+
   if (commandConfirmed) {
-#ifdef DEBUG_COMMS
+    #ifdef DEBUG_COMMS
     Serial.print(F("Command Confirmed: "));
     Serial.println(nextCommand);
-#endif
+    #endif
     paramsExtracted = comms_parseCommand(nextCommand);
     if (paramsExtracted) {
       Serial.println(F("Params extracted."));
@@ -102,6 +100,11 @@ void comms_commandLoop() {
       commandConfirmed = false;
     }
   }
+}
+
+boolean comms_machineIsReadyForNextCommand()
+{
+  return broadcastStatus.check();
 }
 
 boolean comms_parseCommand(char * inS)

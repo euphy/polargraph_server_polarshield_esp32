@@ -37,12 +37,12 @@ the User_Setup.h file and add the following lines.
 #include <TFT_eSPI.h> // Hardware-specific library
 
 #include <AccelStepper.h>
+#include <MultiStepper.h>
 #include <ESP32_Servo.h>
 #include <Encoder.h>
 
 #include <Preferences.h>
-
-#include <ESP32Ticker.h>
+#include <Ticker.h>
 #include <Metro.h>
 
 
@@ -249,6 +249,7 @@ Metro broadcastStatus = Metro(comms_rebroadcastStatusInterval);
 
 extern AccelStepper motorA;
 extern AccelStepper motorB;
+MultiStepper motors;
 
 Encoder encA(36, 39);
 Encoder encB(34, 35);
@@ -257,10 +258,7 @@ static int endstopPinA = 21;
 static int endstopPinB = 17;
 
 volatile boolean currentlyRunning = true;
-volatile boolean backgroundRunning = false;
-
-hw_timer_t * motorTimer = NULL;
-portMUX_TYPE motorTimerMux = portMUX_INITIALIZER_UNLOCKED;
+volatile boolean backgroundRunning = true;
 
 volatile long lastOperationTime = 0L;
 static long motorIdleTimeBeforePowerDown = 600000L;
@@ -350,29 +348,25 @@ const static String CMD_SETPENLIFTRANGE = "C45";
 const static String CMD_PIXELDIAGNOSTIC = "C46";
 const static String CMD_SET_DEBUGCOMMS = "C47";
 
-Ticker motorRunner;
 Ticker commsRunner;
+Ticker lcdRunner;
+Ticker touchRunner;
 
-volatile DRAM_ATTR long runCounter = 0L;
-volatile DRAM_ATTR long lastPeriodStartTime = 0L;
-volatile DRAM_ATTR long sampleBuffer[3] = {0L, 0L, 0L};
-volatile DRAM_ATTR int sampleBufferSlot = 0;
-volatile DRAM_ATTR long totalTriggers = 0L;
-volatile DRAM_ATTR long totalSamplePeriods = 0L;
-volatile SemaphoreHandle_t timerSemaphore;
+volatile  long runCounter = 0L;
+volatile  long lastPeriodStartTime = 0L;
+volatile  long sampleBuffer[3] = {0L, 0L, 0L};
+volatile  int sampleBufferSlot = 0;
+volatile  long totalTriggers = 0L;
+volatile  long totalSamplePeriods = 0L;
 
-void IRAM_ATTR runMotors() {
-  portENTER_CRITICAL_ISR(&motorTimerMux);
-
-  if (backgroundRunning) {
-    if (usingAcceleration) {
-      motorA.run();
-      motorB.run();
-    }
-    else {
-      motorA.runSpeed();
-      motorB.runSpeed();
-    }
+void runMotors()
+{
+  if (usingAcceleration) {
+    motorA.run();
+    motorB.run();
+  }
+  else {
+    motors.run();
   }
 
   if (millis() > (lastPeriodStartTime + 1000)) {
@@ -384,8 +378,6 @@ void IRAM_ATTR runMotors() {
   }
   runCounter++;
   totalTriggers++;
-
-  portEXIT_CRITICAL_ISR(&motorTimerMux);
 }
 
 
@@ -412,41 +404,20 @@ void setup()
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(200);
 
-  // motor time triggers runMotors every 5,000us
-  motorTimer = timerBegin(0, 80, true);  // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
-  // Standard rate is 80MHz: 80,000,000 interrupts per second,
-  // so "prescale" by dividing by 80 to give a 1MHz rate (1,000,000 per second).
-  // (which is once per microsecond - us.)
-  timerAttachInterrupt(motorTimer, &runMotors, true); // edge (not level) triggered
-  timerAlarmWrite(motorTimer, 100, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
-  timerAlarmEnable(motorTimer); // enable
-
-  // Create semaphore to inform us when the timer has fired
-  timerSemaphore = xSemaphoreCreateBinary();
-
-
-//  // comms timer can go every 200,000us
-//  commsTimer = timerBegin(2, 80, true);  // timer 2, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
-//  timerAttachInterrupt(commsTimer, &comms_checkForCommand, true); // edge (not level) triggered
-//  timerAlarmWrite(commsTimer, 200000, true); // 1000000 * 1 us = 1 s, autoreload true
-//  timerAlarmEnable(commsTimer); // enable
-
   commsRunner.attach_ms(50, comms_checkForCommand);
-
-//  // lcd timer is 250,000us
-//  lcdTimer = timerBegin(3, 80, true);  // timer 3, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
-//  timerAttachInterrupt(lcdTimer, &impl_runBackgroundProcesses_f, true); // edge (not level) triggered
-//  timerAlarmWrite(lcdTimer, 250000, true); // 1000000 * 1 us = 1 s, autoreload true
-//  timerAlarmEnable(lcdTimer); // enable
-
-
+  lcdRunner.attach_ms(30, impl_runBackgroundDrawProcesses);
+  touchRunner.attach_ms(100, impl_runBackgroundProcesses);
 
   sd_autorunSD();
 }
 
 void loop()
 {
-  comms_commandLoop();
+  comms_handleConfirmedCommand();
+  runMotors();
+  if (comms_machineIsReadyForNextCommand()) {
+    comms_ready();
+  }
 }
 
 
