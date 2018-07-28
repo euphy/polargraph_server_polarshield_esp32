@@ -76,8 +76,8 @@ void lcd_scheduleRedraw(ButtonSpec *button, boolean syncTouchEnable)
 
 void lcd_printf_lcdPlan()
 {
-  printf("lcdPlan due: menu: %d, button: %d, decoration: %d\n", lcdPlan.menuDue, lcdPlan.buttonDue, lcdPlan.decorationDue);
-  printf("lcdPlan enableTouchDue: %d, lastRedrawnTime: %d, buttonToRedraw: %d\n", lcdPlan.enableTouchDue, lcdPlan.lastRedrawnTime, (int)lcdPlan.buttonToRedraw);
+  printf("lcdPlan due: menu: %ld, button: %ld, decoration: %ld\n", lcdPlan.menuDue, lcdPlan.buttonDue, lcdPlan.decorationDue);
+  printf("lcdPlan enableTouchDue: %ld, lastRedrawnTime: %ld, buttonToRedraw: %d\n", lcdPlan.enableTouchDue, lcdPlan.lastRedrawnTime, lcdPlan.buttonToRedraw);
 }
 
 int lcd_getPositionOfButtonInMenu(byte id, byte menu)

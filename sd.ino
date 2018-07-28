@@ -384,7 +384,7 @@ String sd_getNextFile(String selectedFilename) {
 }
 
 String sd_getPreviousFile(String selectedFilename) {
-  boolean fileIncremented = false;
+  // boolean fileIncremented = false;
   String prevFilename = "";
 
   // see if it is the first one, and just return straight away if so

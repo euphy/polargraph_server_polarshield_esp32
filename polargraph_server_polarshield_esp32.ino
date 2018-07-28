@@ -119,8 +119,8 @@ typedef struct {
 
 #define DEBUG_SD
 // #define DEBUG_STATE
-// #define DEBUG_COMMS
-// #define DEBUG_COMMS_BUFF
+#define DEBUG_COMMS
+#define DEBUG_COMMS_BUFF
 // #define DEBUG_TOUCH
 // #define DEBUG_MENU_DRAWING
 // #define DEBUG_PENLIFT
@@ -213,7 +213,9 @@ static float penWidth = DEFAULT_PEN_WIDTH; // line width in mm
 const int INLENGTH = 60;
 const char INTERMINATOR = 10;
 
+static char currentCommand[INLENGTH+1];
 static char nextCommand[INLENGTH+1];
+
 volatile int bufferPosition = 0;
 static char inCmd[10];
 static char inParam1[14];
@@ -222,10 +224,11 @@ static char inParam3[14];
 static char inParam4[14];
 static byte inNoOfParams = 0;
 boolean paramsExtracted = false;
-boolean readyForNextCommand = false;
-volatile static boolean executing = false;
+boolean readyForcurrentCommand = false;
+volatile static boolean currentlyExecutingACommand = false;
 
 boolean commandConfirmed = false;
+boolean commandBuffered = false;
 boolean usingCrc = false;
 boolean reportingPosition = true;
 boolean requestResend = false;
@@ -254,16 +257,20 @@ MultiStepper motors;
 Encoder encA(36, 39);
 Encoder encB(34, 35);
 
-static int endstopPinA = 21;
-static int endstopPinB = 17;
+// static int endstopPinA = 21;
+// static int endstopPinB = 17;
 
 volatile boolean currentlyRunning = true;
 volatile boolean backgroundRunning = true;
 
+hw_timer_t * motorTimer = NULL;
+portMUX_TYPE motorTimerMux = portMUX_INITIALIZER_UNLOCKED;
+
 volatile long lastOperationTime = 0L;
-static long motorIdleTimeBeforePowerDown = 600000L;
-static boolean automaticPowerDown = true;
+// static long motorIdleTimeBeforePowerDown = 600000L;
+// static boolean automaticPowerDown = true;
 volatile long lastInteractionTime = 0L;
+
 
 /*==========================================================================
     Touchscreen bits
@@ -291,7 +298,6 @@ volatile LcdPlan lcdPlan = {0L, 0L, 0L, 0L, 0L, 6};
 // Pixel drawing
 static boolean pixelDebug = true;
 static boolean lastWaveWasTop = true;
-static boolean lastMotorBiasWasA = true;
 
 //  Drawing direction
 const static byte DIR_NE = 1;
@@ -310,8 +316,6 @@ const static byte DIR_MODE_AUTO = 1;
 const static byte DIR_MODE_PRESET = 2;
 const static byte DIR_MODE_RANDOM = 3;
 static int globalDrawDirectionMode = DIR_MODE_AUTO;
-
-static int currentRow = 0;
 
 static const byte ALONG_A_AXIS = 0;
 static const byte ALONG_B_AXIS = 1;
@@ -349,26 +353,15 @@ const static String CMD_PIXELDIAGNOSTIC = "C46";
 const static String CMD_SET_DEBUGCOMMS = "C47";
 
 Ticker commsRunner;
-Ticker lcdRunner;
-Ticker touchRunner;
 
-volatile  long runCounter = 0L;
-volatile  long lastPeriodStartTime = 0L;
-volatile  long sampleBuffer[3] = {0L, 0L, 0L};
-volatile  int sampleBufferSlot = 0;
-volatile  long totalTriggers = 0L;
-volatile  long totalSamplePeriods = 0L;
+volatile DRAM_ATTR long runCounter = 0L;
+volatile DRAM_ATTR long lastPeriodStartTime = 0L;
+volatile DRAM_ATTR long sampleBuffer[3] = {0L, 0L, 0L};
+volatile DRAM_ATTR int sampleBufferSlot = 0;
+volatile DRAM_ATTR long totalTriggers = 0L;
+volatile DRAM_ATTR long totalSamplePeriods = 0L;
 
-void runMotors()
-{
-  if (usingAcceleration) {
-    motorA.run();
-    motorB.run();
-  }
-  else {
-    motors.run();
-  }
-
+void IRAM_ATTR runMotors2() {
   if (millis() > (lastPeriodStartTime + 1000)) {
     lastPeriodStartTime = millis();
     (sampleBufferSlot == 2) ? sampleBufferSlot = 0 : sampleBufferSlot++;
@@ -380,11 +373,25 @@ void runMotors()
   totalTriggers++;
 }
 
+void IRAM_ATTR runMotors() {
+  portENTER_CRITICAL_ISR(&motorTimerMux);
+  if (backgroundRunning) {
+    if (usingAcceleration) {
+      motorA.run();
+      motorB.run();
+    }
+    else {
+      motors.run();
+    }
+  }
+  portEXIT_CRITICAL_ISR(&motorTimerMux);
+}
+
 
 void setup()
 {
   Serial.begin(57600);           // set up Serial library at 57600 bps
-  Serial.println(F("POLARGRAPH ON!"));
+  Serial.println(F("\nPOLARGRAPH ON!"));
   Serial.print(F("v"));
   Serial.println(FIRMWARE_VERSION_NO);
   Serial.print(F("Hardware: "));
@@ -404,20 +411,28 @@ void setup()
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(200);
 
+  // motor time triggers runMotors every 5,000us
+  motorTimer = timerBegin(0, 80, true);  // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  // Standard rate is 80MHz: 80,000,000 interrupts per second,
+  // so "prescale" by dividing by 80 to give a 1MHz rate (1,000,000 per second).
+  // (which is once per microsecond - us.)
+  timerAttachInterrupt(motorTimer, &runMotors2, true); // edge (not level) triggered
+  timerAlarmWrite(motorTimer, 100, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
+  timerAlarmEnable(motorTimer); // enable
+
   commsRunner.attach_ms(50, comms_checkForCommand);
-  lcdRunner.attach_ms(30, impl_runBackgroundDrawProcesses);
-  touchRunner.attach_ms(100, impl_runBackgroundProcesses);
+
+  // comms_establishContact();
 
   sd_autorunSD();
+
 }
 
 void loop()
 {
+  impl_runBackgroundProcesses();
   comms_handleConfirmedCommand();
-  runMotors();
-  if (comms_machineIsReadyForNextCommand()) {
-    comms_ready();
-  }
+  comms_broadcastStatus();
 }
 
 

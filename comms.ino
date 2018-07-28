@@ -15,55 +15,83 @@ it contains methods for reading commands from the serial port.
 
 void comms_checkForCommand() {
 
-  if (!commandConfirmed)
-  {
-    if (Serial.available() > 0)
-    {
-#ifdef DEBUG_COMMS_BUFF
-      Serial.print("Buf: ");
-      Serial.println(Serial.available());
-      Serial.print("Pos:");
-      Serial.println(bufferPosition);
-#endif
+  if (!commandBuffered) {
+    // bufferPosition = 0;
+    if (Serial.available() > 0) {
+      #ifdef DEBUG_COMMS_BUFF
+            Serial.print("Bufsize: ");
+            Serial.println(Serial.available());
+            Serial.print("Pos:");
+            Serial.println(bufferPosition);
+      #endif
       char ch = Serial.read();       // get it
       nextCommand[bufferPosition] = ch;
-#ifdef DEBUG_COMMS_BUFF
-      Serial.print("Just got ");
-      Serial.print(ch);
-      Serial.print(", so command so far: ");
-      Serial.println(nextCommand);
-#endif
-      if (ch == INTERMINATOR)
-      {
-        nextCommand[bufferPosition] = 0;                     // null terminate the string
+      #ifdef DEBUG_COMMS_BUFF
+            Serial.print("Just got '");
+            Serial.print(ch);
+            Serial.print("', so nextCommand is ");
+            Serial.print(strlen(nextCommand));
+            Serial.print(" chars long, and contains: ");
+            Serial.println(nextCommand);
+      #endif
+
+      if (ch == INTERMINATOR) {
+        Serial.print(bufferPosition);
+        Serial.print(", ");
+        Serial.println(nextCommand);
+        nextCommand[bufferPosition] = 0;  // null terminate the string
+
         if (strlen(nextCommand) <= 0) {
-          Serial.print("Resend (got): ");
-          Serial.println(nextCommand);
-          comms_requestResend();
+          // it's zero! empty it!
           nextCommand[0] = 0;
-          commandConfirmed = false;
+          comms_emptyCommandBuffer(nextCommand, INLENGTH);
+          commandBuffered = false;
+          comms_requestResend();
         }
         else {
-#ifdef DEBUG_COMMS
-          Serial.print("Confirmed: ");
-          Serial.println(nextCommand);
-#endif
-          commandConfirmed = true;
+          // command finished!
+          #ifdef DEBUG_COMMS
+                    Serial.print("command buffered: ");
+                    Serial.println(nextCommand);
+          #endif
+          commandBuffered = true;
           bufferPosition = 0;
-          comms_ready();
         }
       }
       else if (ch >= 40) {
         bufferPosition++;
         if (bufferPosition > INLENGTH)
         { // if the command is too big, chuck it out!
-          nextCommand[0] = 0;
-          commandConfirmed = false;
+          currentCommand[0] = 0;
+          commandBuffered = false;
           bufferPosition = 0;
         }
       }
       lastInteractionTime = millis();
     }
+    else if ((lastInteractionTime+2000 < millis()) && (bufferPosition > 0)) {
+      // 2000 gives a manual inputter some time to fumble at the keyboard
+      // taken a long time for the next char to arrive...
+      // cancel it!
+      Serial.println("Command timed out: Cancelling");
+      bufferPosition = 0;
+      nextCommand[0] = 0;
+      comms_emptyCommandBuffer(nextCommand, INLENGTH);
+      commandBuffered = false;
+      comms_requestResend();
+      lastInteractionTime = millis();
+    }
+  }
+
+  // maybe promote the buffered command to the currentCommand
+  if (!currentlyExecutingACommand && commandBuffered) {
+    // not executing, but there's a command buffered
+    strcpy(currentCommand, nextCommand);
+    nextCommand[0] = 0;
+    comms_emptyCommandBuffer(nextCommand, INLENGTH);
+    commandConfirmed = true;
+    commandBuffered = false;
+    comms_ready();
   }
 }
 
@@ -78,33 +106,39 @@ void comms_clearParams() {
 
 void comms_handleConfirmedCommand() {
 
-  if (commandConfirmed) {
+  if (commandConfirmed && !currentlyExecutingACommand) {
+    currentlyExecutingACommand = true;
     #ifdef DEBUG_COMMS
     Serial.print(F("Command Confirmed: "));
-    Serial.println(nextCommand);
+    Serial.println(currentCommand);
     #endif
-    paramsExtracted = comms_parseCommand(nextCommand);
+
+    paramsExtracted = comms_parseCommand(currentCommand);
     if (paramsExtracted) {
       Serial.println(F("Params extracted."));
-      strcpy(nextCommand, "");
+      strcpy(currentCommand, "");
       commandConfirmed = false;
-      comms_ready(); // signal ready for next
       comms_executeParsedCommand();
       comms_clearParams();
+      // comms_ready(); // signal ready for next
     }
     else
     {
       Serial.println(F("Command not parsed."));
-      strcpy(nextCommand, "");
+      strcpy(currentCommand, "");
       comms_clearParams();
       commandConfirmed = false;
     }
+    currentlyExecutingACommand = false;
   }
 }
 
-boolean comms_machineIsReadyForNextCommand()
+
+void comms_emptyCommandBuffer(char * buf, int length)
 {
-  return broadcastStatus.check();
+  for (int i=0; i<length; i++) {
+    buf[i] = 0;
+  }
 }
 
 boolean comms_parseCommand(char * inS)
@@ -136,9 +170,6 @@ void comms_extractParams(char* inS) {
 
   // get number of parameters
   // by counting commas
-  int length = strlen(inS);
-
-  int startPos = 0;
   int paramNumber = 0;
   char * param = strtok(inS, COMMA);
 
@@ -197,12 +228,12 @@ void comms_extractParams(char* inS) {
 void comms_executeParsedCommand()
 {
 #ifdef DEBUG_COMMS
-  Serial.print(F("Executing: "));
-  Serial.println(executing);
+  Serial.print(F("currentlyExecutingACommand: "));
+  Serial.println(currentlyExecutingACommand);
   Serial.print(F("Params extracted: "));
   Serial.println(paramsExtracted);
 #endif
-  if (!executing && paramsExtracted)
+  if (paramsExtracted)
   {
     impl_processCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams);
     paramsExtracted = false;
@@ -238,12 +269,56 @@ void comms_establishContact()
 {
   comms_ready();
 }
+
+
+boolean comms_nextCommandIsBuffering()
+{
+  return bufferPosition > 0;
+}
+
+boolean comms_isMachineReadyForNextCommand()
+{
+  if (broadcastStatus.check())
+    return !commandBuffered && !comms_nextCommandIsBuffering();
+  else
+    return false;
+}
+
+void comms_broadcastStatus()
+{
+  if (comms_isMachineReadyForNextCommand()) {
+    reportPosition();
+    reportStepRate();
+    comms_reportBufferState();
+    comms_ready();
+  }
+}
+
 void comms_ready()
 {
-  reportPosition();
-  reportStepRate();
   Serial.println(READY_STR);
 }
+
+void comms_reportBufferState()
+{
+  #ifdef DEBUG_COMMS_BUFF
+  Serial.print("Serial.available: ");
+  Serial.println(Serial.available());
+  Serial.print("bufferPosition: ");
+  Serial.println(bufferPosition);
+  Serial.print("currentCommand: '");
+  Serial.print(currentCommand);
+  Serial.print("', nextCommand: '");
+  Serial.print(nextCommand);
+  Serial.println("'.");
+
+  Serial.print("commandBuffered: ");
+  Serial.print(commandBuffered);
+  Serial.print(", commandConfirmed: ");
+  Serial.println(commandConfirmed);
+  #endif
+}
+
 void comms_drawing()
 {
   Serial.println(DRAWING_STR);

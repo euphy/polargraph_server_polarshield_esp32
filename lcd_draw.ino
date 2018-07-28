@@ -221,7 +221,7 @@ void lcd_drawButton(byte buttonPosition)
   highlightedButton = NO_HIGHLIGHTED_BUTTON; // background draws over the highlight, so nix this
 
   // get the screen coords of the button
-  Coord2D *buttonCoords = lcd_getCoordsForButtonPosition(buttonPosition);
+  // Coord2D *buttonCoords = lcd_getCoordsForButtonPosition(buttonPosition);
 
   // find which actual button is in this postion
   byte buttonIndex = menus[currentMenu][buttonPosition]; // is button ID
