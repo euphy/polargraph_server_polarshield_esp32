@@ -3,7 +3,7 @@
 *  Written by Sandy Noble
 *  Released under GNU License version 3.
 *  http://www.polargraph.co.uk
-*  https://github.com/euphy/polargraph_server_polarshield
+*  https://github.com/euphy/polargraph_server_polarshield_esp32
 
 
 This version is for the Polarshield 3, which aggregates:
@@ -371,6 +371,7 @@ void IRAM_ATTR runMotors2() {
   }
   runCounter++;
   totalTriggers++;
+  runMotors();
 }
 
 void IRAM_ATTR runMotors() {
@@ -397,22 +398,24 @@ void setup()
   Serial.print(F("Hardware: "));
   Serial.println(MB_NAME);
 
-  Serial.print(F("Servo "));
+  Serial.print(F("Servo pin: "));
   Serial.println(PEN_HEIGHT_SERVO_PIN);
 
   configuration_motorSetup();
 
+  // Load configuration
   preferences.begin("polargraphsd", false);
   eeprom_loadMachineSpecFromEeprom();
   configuration_setup();
 
+  // set up the pen lift, raise it to begin with.
   penlift_penUp();
-
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(200);
 
   // motor time triggers runMotors every 5,000us
-  motorTimer = timerBegin(0, 80, true);  // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  motorTimer = timerBegin(0, 80, true);  
   // Standard rate is 80MHz: 80,000,000 interrupts per second,
   // so "prescale" by dividing by 80 to give a 1MHz rate (1,000,000 per second).
   // (which is once per microsecond - us.)
@@ -420,18 +423,31 @@ void setup()
   timerAlarmWrite(motorTimer, 100, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
   timerAlarmEnable(motorTimer); // enable
 
-  commsRunner.attach_ms(50, comms_checkForCommand);
-
-  // comms_establishContact();
+  // commsRunner sets up a regular invocation of comms_checkForCommand(), which
+  // checks for characters on the serial port and puts them into a buffer.
+  // When the buffer is terminated, nextCommand is moved into currentCommand.
+  commsRunner.attach_ms(20, comms_checkForCommand);
 
   sd_autorunSD();
-
 }
 
+
+/*
+Loop() is quite simple because reading commands from the serial port is done
+asynchronously by commsRunner.
+Motors are also stepped asynchronously, using motorTimer.
+*/
 void loop()
 {
+// impl_runBackgroundProcesses runs the touch and draw routines.
   impl_runBackgroundProcesses();
-  comms_handleConfirmedCommand();
+
+// comms_pollForConfirmedCommand checks for a completed command in
+// the command buffer, and executes it if it exists.
+  comms_pollForConfirmedCommand();
+
+// comms_broadcastStatus will broadcast the status of the machine 
+// if it's time to do so.
   comms_broadcastStatus();
 }
 

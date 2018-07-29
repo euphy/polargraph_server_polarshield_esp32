@@ -1,9 +1,10 @@
 /**
-*  Polargraph Server for ATMEGA1280+
+*  Polargraph Server for ESP32 based microcontroller boards.
 *  Written by Sandy Noble
 *  Released under GNU License version 3.
 *  http://www.polargraph.co.uk
-*  https://github.com/euphy/polargraph_server_polarshield
+*  https://github.com/euphy/polargraph_server_polarshield_esp32
+
 
 Specific features for Polarshield / arduino mega.
 Implementation.
@@ -102,8 +103,8 @@ void impl_executeCommand(String inCmd, String inParam1, String inParam2, String 
   }
 }
 
-/** Polarshield implementation of runBackgroundProcesses. This is basically stuff to do with
-the screen.
+/* Polarshield implementation of runBackgroundProcesses. 
+*  This is basically stuff to do with the screen.
 */
 void impl_runBackgroundProcesses()
 {

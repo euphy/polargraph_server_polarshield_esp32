@@ -1,3 +1,11 @@
+/**
+*  Polargraph Server for ESP32 based microcontroller boards.
+*  Written by Sandy Noble
+*  Released under GNU License version 3.
+*  http://www.polargraph.co.uk
+*  https://github.com/euphy/polargraph_server_polarshield_esp32
+
+*/
 
 #define BUTTON_GAP 16
 static byte  buttonSize = 60;

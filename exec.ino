@@ -1,9 +1,10 @@
 /**
-*  Polargraph Server. - CORE
+*  Polargraph Server for ESP32 based microcontroller boards.
 *  Written by Sandy Noble
 *  Released under GNU License version 3.
 *  http://www.polargraph.co.uk
-*  https://github.com/euphy/polargraph_server_polarshield
+*  https://github.com/euphy/polargraph_server_polarshield_esp32
+
 
 Exec.
 
@@ -393,16 +394,11 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
       float pB = getMachineB(c1x, c1y);
 
       // do the move
-      runSpeed = desiredSpeed(linesegs, runSpeed,
-        currentAcceleration*stepMultiplier);
+      runSpeed = desiredSpeed(linesegs, runSpeed, currentAcceleration*stepMultiplier);
 
-      // Serial.print("Setting speed:");
-      // Serial.println(runSpeed);
-      //
       setMotorConstantSpeed(runSpeed);
       changeLength(pA, pB);
-      while ((motorA.distanceToGo() != 0) &&
-        (motorB.distanceToGo() != 0))
+      while ((motorA.distanceToGo() != 0) && (motorB.distanceToGo() != 0))
       {
         runMotors();
       }

@@ -1,3 +1,23 @@
+/**
+*  Polargraph Server for ESP32 based microcontroller boards.
+*  Written by Sandy Noble
+*  Released under GNU License version 3.
+*  http://www.polargraph.co.uk
+*  https://github.com/euphy/polargraph_server_polarshield_esp32
+
+buttons_actions.
+
+This is part of the polargraph_server_polarshield_esp32 firmware project.
+
+This contains the functions that are attached to buttons, and that are 
+called when the buttons are pressed. There's a genericButtonAction() method
+that handles all the "normal" button actions with a big case statement.
+
+There's methods here for changing menus too.
+
+
+*/
+
 
 /*
   Starts most button presses.

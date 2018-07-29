@@ -1,9 +1,9 @@
 /**
-*  Polargraph Server. - CORE
+*  Polargraph Server for ESP32 based microcontroller boards.
 *  Written by Sandy Noble
 *  Released under GNU License version 3.
 *  http://www.polargraph.co.uk
-*  http://code.google.com/p/polargraph/
+*  https://github.com/euphy/polargraph_server_polarshield_esp32
 
 Comms.
 
@@ -104,7 +104,7 @@ void comms_clearParams() {
   inNoOfParams = 0;
 }
 
-void comms_handleConfirmedCommand() {
+void comms_pollForConfirmedCommand() {
 
   if (commandConfirmed && !currentlyExecutingACommand) {
     currentlyExecutingACommand = true;
