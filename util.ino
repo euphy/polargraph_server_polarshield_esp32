@@ -94,8 +94,7 @@ void changeLength(long tA, long tB)
     long targets[2];
     targets[0] = tA;
     targets[1] = tB;
-    Serial.printf("In changeLength, setting targets: %ld, %ld.\n",
-      tA, tB);
+    // Serial.printf("In changeLength, setting targets: %ld, %ld.\n", tA, tB);
     motors.moveTo(targets);
   }
 
@@ -105,7 +104,7 @@ void changeLength(long tA, long tB)
 
 void setMotorConstantSpeed(long speed)
 {
-  Serial.printf("Setting speed to %ld\n", speed);
+  // Serial.printf("Setting speed to %ld\n", speed);
   motorA.setMaxSpeed(speed);
   motorB.setMaxSpeed(speed);
 }

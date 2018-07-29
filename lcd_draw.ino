@@ -296,9 +296,26 @@ void lcd_drawSplashScreen()
 }
 
 
-void lcd_echoLastCommandToDisplay(String com, String prefix)
+void lcd_echoLastCommandToDisplay(String command, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams, String prefix)
 {
   if (currentMenu != MENU_INITIAL) return;
-  lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24, TFT_RED);
-  // lcd.print(prefix + com, buttonCoords[0][0],buttonCoords[1][1]+10, TFT_WHITE);
+  // lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24, TFT_RED);
+  lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+  lcd.setTextDatum(TL_DATUM);
+  String output = "";
+
+  Serial.print("inNoOfParams:");
+  Serial.println(inNoOfParams);
+
+  switch (inNoOfParams) {
+    case 6: output = " " + inParam4;
+    case 5: output = " " + inParam3 + output;
+    case 4: output = " " + inParam2 + output;
+    case 3: output = inParam1 + output;
+    default: output = prefix + " " + command + " " + output;
+  }
+
+  lcd.fillRect(buttonCoords[0][0], buttonCoords[1][1]+10, screenWidth, 20, TFT_BLACK);
+  lcd.drawString(output,
+    buttonCoords[0][0], buttonCoords[1][1]+10, 2);
 }

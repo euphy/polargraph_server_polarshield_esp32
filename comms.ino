@@ -120,7 +120,6 @@ void comms_handleConfirmedCommand() {
       commandConfirmed = false;
       comms_executeParsedCommand();
       comms_clearParams();
-      // comms_ready(); // signal ready for next
     }
     else
     {

@@ -118,9 +118,9 @@ typedef struct {
 =========================================================== */
 
 #define DEBUG_SD
-// #define DEBUG_STATE
+#define DEBUG_STATE
 #define DEBUG_COMMS
-#define DEBUG_COMMS_BUFF
+// #define DEBUG_COMMS_BUFF
 // #define DEBUG_TOUCH
 // #define DEBUG_MENU_DRAWING
 // #define DEBUG_PENLIFT
@@ -390,7 +390,7 @@ void IRAM_ATTR runMotors() {
 
 void setup()
 {
-  Serial.begin(57600);           // set up Serial library at 57600 bps
+  Serial.begin(57600);  // set up Serial library at 57600 bps
   Serial.println(F("\nPOLARGRAPH ON!"));
   Serial.print(F("v"));
   Serial.println(FIRMWARE_VERSION_NO);

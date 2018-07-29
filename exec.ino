@@ -382,8 +382,8 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
     usingAcceleration = false;
     while (linesegs > 0)
     {
-      Serial.print("Line segment: " );
-      Serial.println(linesegs);
+      // Serial.print("Line segment: " );
+      // Serial.println(linesegs);
       // compute next new location
       c1x = c1x + deltaX;
       c1y = c1y + deltaY;
@@ -396,9 +396,9 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
       runSpeed = desiredSpeed(linesegs, runSpeed,
         currentAcceleration*stepMultiplier);
 
-      Serial.print("Setting speed:");
-      Serial.println(runSpeed);
-
+      // Serial.print("Setting speed:");
+      // Serial.println(runSpeed);
+      //
       setMotorConstantSpeed(runSpeed);
       changeLength(pA, pB);
       while ((motorA.distanceToGo() != 0) &&
