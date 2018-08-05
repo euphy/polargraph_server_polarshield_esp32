@@ -395,12 +395,13 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
 
       // do the move
       runSpeed = desiredSpeed(linesegs, runSpeed, currentAcceleration*stepMultiplier);
-
       setMotorConstantSpeed(runSpeed);
+      
+      // set targets for both motors
       changeLength(pA, pB);
       while ((motorA.distanceToGo() != 0) && (motorB.distanceToGo() != 0))
       {
-        runMotors();
+        // spin your wheels - actually calling motors.run() is done by motorTimer.
       }
 
       // one line less to do!

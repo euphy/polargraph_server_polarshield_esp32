@@ -373,8 +373,8 @@ void drawRandom()
     Serial.println(i);
     while (motorA.distanceToGo() != 0 && motorB.distanceToGo() != 0)
     {
-      motorA.run();
-      motorB.run();
+      // motorA.run();
+      // motorB.run();
     }
 
     if (motorA.distanceToGo() == 0)

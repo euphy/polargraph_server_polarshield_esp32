@@ -152,8 +152,8 @@ void moveA(int dist)
   while (motorA.distanceToGo() != 0)
   {
     impl_runBackgroundProcesses();
-    if (currentlyRunning)
-      motorA.run();
+    // if (currentlyRunning)
+    //   motorA.run();
   }
   lastOperationTime = millis();
 }
@@ -164,8 +164,8 @@ void moveB(int dist)
   while (motorB.distanceToGo() != 0)
   {
     impl_runBackgroundProcesses();
-    if (currentlyRunning)
-      motorB.run();
+    // if (currentlyRunning)
+    //   motorB.run();
   }
   lastOperationTime = millis();
 }

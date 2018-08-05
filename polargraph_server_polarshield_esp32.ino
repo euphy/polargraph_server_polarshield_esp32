@@ -353,6 +353,7 @@ const static String CMD_PIXELDIAGNOSTIC = "C46";
 const static String CMD_SET_DEBUGCOMMS = "C47";
 
 Ticker commsRunner;
+Ticker motorRunner;
 
 volatile DRAM_ATTR long runCounter = 0L;
 volatile DRAM_ATTR long lastPeriodStartTime = 0L;
@@ -360,6 +361,21 @@ volatile DRAM_ATTR long sampleBuffer[3] = {0L, 0L, 0L};
 volatile DRAM_ATTR int sampleBufferSlot = 0;
 volatile DRAM_ATTR long totalTriggers = 0L;
 volatile DRAM_ATTR long totalSamplePeriods = 0L;
+
+
+void IRAM_ATTR runMotors() {
+  portENTER_CRITICAL_ISR(&motorTimerMux);
+
+  if (usingAcceleration) {
+    motorA.run();
+    motorB.run();
+  }
+  else {
+    motors.run();
+  }
+  portEXIT_CRITICAL_ISR(&motorTimerMux);
+}
+
 
 void IRAM_ATTR runMotors2() {
   if (millis() > (lastPeriodStartTime + 1000)) {
@@ -371,22 +387,12 @@ void IRAM_ATTR runMotors2() {
   }
   runCounter++;
   totalTriggers++;
-  runMotors();
+  if (backgroundRunning) {
+    runMotors();
+  }
 }
 
-void IRAM_ATTR runMotors() {
-  portENTER_CRITICAL_ISR(&motorTimerMux);
-  if (backgroundRunning) {
-    if (usingAcceleration) {
-      motorA.run();
-      motorB.run();
-    }
-    else {
-      motors.run();
-    }
-  }
-  portEXIT_CRITICAL_ISR(&motorTimerMux);
-}
+
 
 
 void setup()
@@ -413,15 +419,16 @@ void setup()
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(200);
 
-  // motor time triggers runMotors every 5,000us
-  // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
-  motorTimer = timerBegin(0, 80, true);  
-  // Standard rate is 80MHz: 80,000,000 interrupts per second,
-  // so "prescale" by dividing by 80 to give a 1MHz rate (1,000,000 per second).
-  // (which is once per microsecond - us.)
-  timerAttachInterrupt(motorTimer, &runMotors2, true); // edge (not level) triggered
-  timerAlarmWrite(motorTimer, 100, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
-  timerAlarmEnable(motorTimer); // enable
+  // // motor time triggers runMotors every 5,000us
+  // // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  // motorTimer = timerBegin(0, 80, true);  
+  // // Standard rate is 80MHz: 80,000,000 interrupts per second,
+  // // so "prescale" by dividing by 80 to give a 1MHz rate (1,000,000 per second).
+  // // (which is once per microsecond - us.)
+  // timerAttachInterrupt(motorTimer, &runMotors2, true); // edge (not level) triggered
+  // timerAlarmWrite(motorTimer, 100000, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
+  // timerAlarmEnable(motorTimer); // enable
+  motorRunner.attach_micros(100, runMotors2);
 
   // commsRunner sets up a regular invocation of comms_checkForCommand(), which
   // checks for characters on the serial port and puts them into a buffer.
