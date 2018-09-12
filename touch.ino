@@ -263,13 +263,13 @@ void touch_calibrate()
     Serial.print(CALIBRATION_FILE);
     Serial.println(" exists.");
 #endif
-    if (REPEAT_CAL)
+    if (recalibrateTouchScreen)
     {
 #ifdef DEBUG_TOUCH
       Serial.println("Deleting CALIBRATION_FILE...");
 #endif
       // Delete if we want to re-calibrate
-      SPIFFS.remove("CALIBRATION_FILE");
+      SPIFFS.remove(CALIBRATION_FILE);
     }
     else
     {
@@ -295,7 +295,7 @@ void touch_calibrate()
     }
   }
 
-  if (calDataOK && !REPEAT_CAL) {
+  if (calDataOK && !recalibrateTouchScreen) {
     // calibration data valid
 #ifdef DEBUG_TOUCH
     Serial.println("Using the calibration data.");
@@ -319,9 +319,9 @@ void touch_calibrate()
     lcd.setTextFont(1);
     lcd.println();
 
-    if (REPEAT_CAL) {
+    if (recalibrateTouchScreen) {
       lcd.setTextColor(TFT_RED, TFT_BLACK);
-      lcd.println("Set REPEAT_CAL to false to stop this running again!");
+      lcd.println("Didn't expect to see this? Did you press the screen while starting up?!");
     }
 
     lcd.calibrateTouch(calData, TFT_MAGENTA, TFT_BLACK, 15);

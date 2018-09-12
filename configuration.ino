@@ -113,8 +113,61 @@ void configuration_setup()
   // init SD card
   sd_initSD();
   lcd_initLCD();
+
+  long timeOfStartSensing = millis();
+  long timeOfFirstTouch = 0L;
+
+  while (millis() < (timeOfStartSensing+500)) {
+    touch_sense();
+    if (displayTouched && (timeOfFirstTouch==0L)) {
+      timeOfFirstTouch = millis();
+      printf("Touched at beginning, timeOfFirstTouch: %d\n\n\n\n", timeOfFirstTouch);
+    }
+  }
+
+  if (timeOfFirstTouch > timeOfStartSensing) {
+    // display is touched at startup - this is a signal to re-calibrate the touchscreen
+    // IF it continues for four seconds
+    printf("timeOfFirstTouch %d > timeOfStartSensing %d \n\n", timeOfFirstTouch, timeOfStartSensing);
+    int releaseCount = 0;
+    int touchCount = 0;
+    int progressBlockPosition = 12;
+    int lastProgressBlockCounted = 0;
+
+    while (releaseCount < 3) {
+      touch_sense();
+
+      printf("%d: displayTouched: %d, touchCount: %d, releaseCount: %d \n", millis(), displayTouched, touchCount, releaseCount);
+
+      // bit of hysteresis to combat noisy touches triggering a release
+      if (displayTouched) {
+        touchCount++;
+        releaseCount = 0;
+      } else {
+        releaseCount++;
+      }
+
+      if (touchCount > 133) {
+        recalibrateTouchScreen = true;
+      }
+      else {
+        // put something on the screen to show it's happening
+        if (touchCount > lastProgressBlockCounted + 10) {
+          printf("Drawing");
+          progressBlockPosition += 14;
+          lcd.fillRect(progressBlockPosition, 20, 10, 10, TFT_WHITE);
+          lastProgressBlockCounted = touchCount;
+        }
+      }
+    }
+  }
+  
+  if (recalibrateTouchScreen) {
+    // display a message saying "back off"!
+    delay(2000);
+  }
   touch_calibrate();
-  delay(1000);
+  delay(500);
 
   // calibration pins
   pinMode(ENDSTOP_X_MIN, INPUT_PULLUP);

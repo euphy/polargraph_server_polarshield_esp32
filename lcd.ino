@@ -263,7 +263,7 @@ void lcd_initLCD()
   button_setup_loadButtonTypes();
   button_setup_loadButtons();
 
-  touch_scheduleEnable(1000);
+  touch_scheduleEnable(200);
 
   lcd_drawSplashScreen();
 }

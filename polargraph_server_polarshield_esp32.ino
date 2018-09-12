@@ -501,10 +501,10 @@ TFT_eSPI lcd = TFT_eSPI();       // Invoke custom library
 // calibration data. Cahnge the name to start a new calibration.
 #define CALIBRATION_FILE "/PolargraphCalData" // TouchCalData3
 
-// Set REPEAT_CAL to true instead of false to run calibration
+// Set recalibrateTouchScreen to true instead of false to run calibration
 // again, otherwise it will only be done once.
 // Repeat calibration if you change the screen rotation.
-#define REPEAT_CAL false
+boolean recalibrateTouchScreen = false;
 
 
 // size and location of rove area
