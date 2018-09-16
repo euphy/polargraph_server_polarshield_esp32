@@ -263,9 +263,6 @@ Encoder encB(34, 35);
 volatile boolean currentlyRunning = true;
 volatile boolean backgroundRunning = true;
 
-hw_timer_t * motorTimer = NULL;
-portMUX_TYPE motorTimerMux = portMUX_INITIALIZER_UNLOCKED;
-
 volatile long lastOperationTime = 0L;
 // static long motorIdleTimeBeforePowerDown = 600000L;
 // static boolean automaticPowerDown = true;
@@ -355,6 +352,10 @@ const static String CMD_SET_DEBUGCOMMS = "C47";
 Ticker commsRunner;
 Ticker motorRunner;
 
+
+hw_timer_t * motorTimer = NULL;
+portMUX_TYPE motorTimerMux = portMUX_INITIALIZER_UNLOCKED;
+
 volatile DRAM_ATTR long runCounter = 0L;
 volatile DRAM_ATTR long lastPeriodStartTime = 0L;
 volatile DRAM_ATTR long sampleBuffer[3] = {0L, 0L, 0L};
@@ -362,10 +363,16 @@ volatile DRAM_ATTR int sampleBufferSlot = 0;
 volatile DRAM_ATTR long totalTriggers = 0L;
 volatile DRAM_ATTR long totalSamplePeriods = 0L;
 
+static TaskHandle_t runMotorsTaskHandle = NULL;
 
-void IRAM_ATTR runMotors() {
-  portENTER_CRITICAL_ISR(&motorTimerMux);
+const TickType_t xMaxRunMotorsBlockTime = pdMS_TO_TICKS(200);
 
+void IRAM_ATTR runMotorsISR() {
+  
+  xTaskResumeFromISR(runMotorsTaskHandle);
+}
+
+void runMotorsMinimal() {
   if (usingAcceleration) {
     motorA.run();
     motorB.run();
@@ -373,11 +380,10 @@ void IRAM_ATTR runMotors() {
   else {
     motors.run();
   }
-  portEXIT_CRITICAL_ISR(&motorTimerMux);
 }
 
 
-void IRAM_ATTR runMotors2() {
+void runMotors() {
   if (millis() > (lastPeriodStartTime + 1000)) {
     lastPeriodStartTime = millis();
     (sampleBufferSlot == 2) ? sampleBufferSlot = 0 : sampleBufferSlot++;
@@ -388,11 +394,19 @@ void IRAM_ATTR runMotors2() {
   runCounter++;
   totalTriggers++;
   if (backgroundRunning) {
-    runMotors();
+    runMotorsMinimal();
   }
 }
 
-
+void runMotorsTask( void *pvParameters )
+{
+  for ( ;; )
+  {
+    runMotors();
+    vTaskSuspend(NULL);
+  }
+  vTaskDelete( NULL );
+}
 
 
 void setup()
@@ -419,16 +433,35 @@ void setup()
   pinMode(PEN_HEIGHT_SERVO_PIN, OUTPUT);
   delay(200);
 
-  // // motor time triggers runMotors every 5,000us
-  // // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
-  // motorTimer = timerBegin(0, 80, true);  
-  // // Standard rate is 80MHz: 80,000,000 interrupts per second,
-  // // so "prescale" by dividing by 80 to give a 1MHz rate (1,000,000 per second).
-  // // (which is once per microsecond - us.)
-  // timerAttachInterrupt(motorTimer, &runMotors2, true); // edge (not level) triggered
-  // timerAlarmWrite(motorTimer, 100000, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
-  // timerAlarmEnable(motorTimer); // enable
-  motorRunner.attach_micros(100, runMotors2);
+  BaseType_t xReturned;
+  xReturned = xTaskCreatePinnedToCore(
+      runMotorsTask,            /* Function to implement the task */
+      "RunMotorsTask",      /* Name of the task */
+      4000,                 /* Stack size in words */
+      NULL,                 /* Task input parameter */
+      5,                    /* Priority of the task */
+      &runMotorsTaskHandle,     /* Task handle. */
+      1);
+
+  if (xReturned == pdPASS) {
+    Serial.println("Created task.");
+  }
+  else {
+    Serial.println("Didn't create task!");
+  }
+
+  // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
+  motorTimer = timerBegin(0, 80, true);
+  // Standard rate is 80MHz: 80,000,000 interrupts per second,
+  // so "prescale" by dividing by 80 to give a 1MHz rate (1,000,000 per second).
+  // (which is once per microsecond - us.)
+  timerAttachInterrupt(motorTimer, &runMotorsISR, true); // edge (not level) triggered
+  timerAlarmWrite(motorTimer, 100, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
+  timerAlarmEnable(motorTimer); // enable
+
+
+
+  // motorRunner.attach_micros(100, runMotors2);
 
   // commsRunner sets up a regular invocation of comms_checkForCommand(), which
   // checks for characters on the serial port and puts them into a buffer.
