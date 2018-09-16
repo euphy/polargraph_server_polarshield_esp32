@@ -51,4 +51,4 @@ Released under GNU License version 3.
 
 http://www.polargraph.co.uk
 
-https://github.com/euphy/polargraph_server_polarshield
+https://github.com/euphy/polargraph_server_polarshield_esp32
