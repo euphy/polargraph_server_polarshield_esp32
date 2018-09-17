@@ -368,8 +368,25 @@ static TaskHandle_t runMotorsTaskHandle = NULL;
 const TickType_t xMaxRunMotorsBlockTime = pdMS_TO_TICKS(200);
 
 void IRAM_ATTR runMotorsISR() {
-  
-  xTaskResumeFromISR(runMotorsTaskHandle);
+  BaseType_t xHigherPriorityTaskWoken;
+
+  /* xHigherPriorityTaskWoken must be initialised to pdFALSE.
+  If calling vTaskNotifyGiveFromISR() unblocks the handling
+  task, and the priority of the handling task is higher than
+  the priority of the currently running task, then
+  xHigherPriorityTaskWoken will be automatically set to pdTRUE. */
+  xHigherPriorityTaskWoken = pdFALSE;
+
+  /* Unblock the handling task so the task can perform any processing
+  necessitated by the interrupt.  xHandlingTask is the task's handle, which was
+  obtained when the task was created.  vTaskNotifyGiveFromISR() also increments
+  the receiving task's notification value. */
+  vTaskNotifyGiveFromISR( runMotorsTaskHandle, &xHigherPriorityTaskWoken );
+
+  /* Force a context switch if xHigherPriorityTaskWoken is now set to pdTRUE.
+  The macro used to do this is dependent on the port and may be called
+  portEND_SWITCHING_ISR. */
+  // portEND_SWITCHING_ISR;
 }
 
 void runMotorsMinimal() {
@@ -398,12 +415,31 @@ void runMotors() {
   }
 }
 
+
 void runMotorsTask( void *pvParameters )
 {
+  BaseType_t xEvent;
+  const TickType_t xBlockTime = 500;
+  uint32_t ulNotifiedValue;
   for ( ;; )
   {
-    runMotors();
-    vTaskSuspend(NULL);
+    /* Block to wait for a notification.  Here the RTOS task notification
+    is being used as a counting semaphore.  The task's notification value
+    is incremented each time the ISR calls vTaskNotifyGiveFromISR(), and
+    decremented each time the RTOS task calls ulTaskNotifyTake() - so in
+    effect holds a count of the number of outstanding interrupts.  The first
+    parameter is set to pdFALSE, so the notification value is only decremented
+    and not cleared to zero, and one deferred interrupt event is processed
+    at a time.  See example 2 below for a more pragmatic approach. */
+    ulNotifiedValue = ulTaskNotifyTake( pdTRUE, xBlockTime );
+
+    while (ulNotifiedValue > 0)
+    {
+      runMotors();
+      ulNotifiedValue--;
+    }
+
+    // vTaskSuspend(NULL);
   }
   vTaskDelete( NULL );
 }
@@ -450,6 +486,15 @@ void setup()
     Serial.println("Didn't create task!");
   }
 
+  // ledc_timer_config_t timer_conf; 
+  // timer_conf.duty_resolution = LEDC_TIMER_12_BIT; 
+  // timer_conf.freq_hz         = 1000; 
+  // timer_conf.speed_mode      = LEDC_HIGH_SPEED_MODE; 
+  // timer_conf.timer_num       = LEDC_TIMER_0; 
+  // ledc_timer_config(&timer_conf);
+
+
+
   // timer number, MWDT clock period = 12.5 ns * TIMGn_Tx_WDT_CLK_PRESCALE -> 12.5 ns * 80 -> 1000 ns = 1 us, countUp
   motorTimer = timerBegin(0, 80, true);
   // Standard rate is 80MHz: 80,000,000 interrupts per second,
@@ -458,8 +503,6 @@ void setup()
   timerAttachInterrupt(motorTimer, &runMotorsISR, true); // edge (not level) triggered
   timerAlarmWrite(motorTimer, 100, true); // Fire the alarm every 100us = 10,000 times per sec (10kHz), autoreload true
   timerAlarmEnable(motorTimer); // enable
-
-
 
   // motorRunner.attach_micros(100, runMotors2);
 
