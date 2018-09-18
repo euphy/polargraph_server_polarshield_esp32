@@ -345,6 +345,7 @@ void impl_pixel_testPenWidthScribble()
 
 void impl_engageMotors()
 {
+  backgroundRunning = false;
   motorA.enableOutputs();
   motorB.enableOutputs();
   powerIsOn = true;
@@ -353,7 +354,9 @@ void impl_engageMotors()
   motorB.runToNewPosition(motorB.currentPosition()+multiplier(8));
   motorA.runToNewPosition(motorA.currentPosition()-multiplier(8));
   motorB.runToNewPosition(motorB.currentPosition()-multiplier(8));
+
   Serial.println("Engaged motors.");
+  backgroundRunning = true;
 }
 
 void impl_releaseMotors()

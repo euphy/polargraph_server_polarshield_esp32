@@ -119,7 +119,7 @@ typedef struct {
 
 #define DEBUG_SD
 #define DEBUG_STATE
-#define DEBUG_COMMS
+// #define DEBUG_COMMS
 // #define DEBUG_COMMS_BUFF
 // #define DEBUG_TOUCH
 // #define DEBUG_MENU_DRAWING
@@ -430,7 +430,7 @@ void runMotorsTask( void *pvParameters )
     effect holds a count of the number of outstanding interrupts.  The first
     parameter is set to pdFALSE, so the notification value is only decremented
     and not cleared to zero, and one deferred interrupt event is processed
-    at a time.  See example 2 below for a more pragmatic approach. */
+    at a time.  */
     ulNotifiedValue = ulTaskNotifyTake( pdTRUE, xBlockTime );
 
     while (ulNotifiedValue > 0)
@@ -439,7 +439,6 @@ void runMotorsTask( void *pvParameters )
       ulNotifiedValue--;
     }
 
-    // vTaskSuspend(NULL);
   }
   vTaskDelete( NULL );
 }
