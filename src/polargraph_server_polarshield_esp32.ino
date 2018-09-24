@@ -42,7 +42,7 @@ the User_Setup.h file and add the following lines.
 #include <Encoder.h>
 
 #include <Preferences.h>
-#include <Ticker.h>
+#include <ESP32Ticker.h>
 #include <Metro.h>
 
 
@@ -508,7 +508,7 @@ void setup()
   // commsRunner sets up a regular invocation of comms_checkForCommand(), which
   // checks for characters on the serial port and puts them into a buffer.
   // When the buffer is terminated, nextCommand is moved into currentCommand.
-  commsRunner.attach_ms(20, comms_checkForCommand);
+  commsRunner.attach_micros(2000, comms_checkForCommand);
 
   sd_autorunSD();
 }
