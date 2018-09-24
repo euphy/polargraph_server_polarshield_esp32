@@ -117,8 +117,8 @@ typedef struct {
     Some debugging flags
 =========================================================== */
 
-#define DEBUG_SD
-#define DEBUG_STATE
+// #define DEBUG_SD
+// #define DEBUG_STATE
 // #define DEBUG_COMMS
 // #define DEBUG_COMMS_BUFF
 // #define DEBUG_TOUCH
@@ -509,7 +509,7 @@ void setup()
   // commsRunner sets up a regular invocation of comms_checkForCommand(), which
   // checks for characters on the serial port and puts them into a buffer.
   // When the buffer is terminated, nextCommand is moved into currentCommand.
-  commsRunner.attach_micros(2000, comms_checkForCommand);
+  commsRunner.attach_ms(20, comms_checkForCommand);
 
   sd_autorunSD();
 }

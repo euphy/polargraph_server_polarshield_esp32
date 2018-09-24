@@ -224,3 +224,4 @@ pip-log.txt
 .vscode/launch.json
 .vscode/.BROWSE.C_CPP.*
 .vscode/settings.json
+.vscode/arduino.json

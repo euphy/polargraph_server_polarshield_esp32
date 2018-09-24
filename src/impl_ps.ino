@@ -221,7 +221,7 @@ void impl_exec_execFromStore(String inFilename)
           else Serial.println("Stored command WAS NOT parsed.");
 #endif
           command = "";
-          // lcd_checkForInput();
+          impl_runBackgroundProcesses();
         }
         else {
           command += ch;
