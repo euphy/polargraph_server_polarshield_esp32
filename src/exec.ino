@@ -348,27 +348,22 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
     && c1x < pageWidth-unreachableMargin
     && c1y > unreachableMargin
     && c1y < pageHeight-unreachableMargin
-    )
-    {
+    ) {
     reportingPosition = false;
     float deltaX = c2x-c1x;  // distance each must move (signed)
     float deltaY = c2y-c1y;
     // float totalDistance = sqrt(sq(deltaX) + sq(deltaY));
 
     long linesegs = 1;  // assume at least 1 line segment will get us there.
-    if (abs(deltaX) > abs(deltaY))
-    {
+    if (abs(deltaX) > abs(deltaY)) {
       // slope <=1 case
-      while ((abs(deltaX)/linesegs) > maxSegmentLength)
-      {
+      while ((abs(deltaX)/linesegs) > maxSegmentLength) {
         linesegs++;
       }
     }
-    else
-    {
+    else {
       // slope >1 case
-      while ((abs(deltaY)/linesegs) > maxSegmentLength)
-      {
+      while ((abs(deltaY)/linesegs) > maxSegmentLength) {
         linesegs++;
       }
     }
@@ -380,25 +375,35 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
     // render the line in N shorter segments
     long runSpeed = 0;
 
-    usingAcceleration = false;
-    while (linesegs > 0)
-    {
-      // Serial.print("Line segment: " );
-      // Serial.println(linesegs);
+    // figure out some speeds
+    long maxSegsPerSecond = currentMaxSpeed / maxSegmentLength;
+
+    #ifdef DEBUG_LINESEGS
+    Serial.printf("Linesegs: %ld, deltaX: %d, deltaY: %d\n ", linesegs, deltaX, deltaY);
+    #endif
+    while (linesegs > 0) {
+      #ifdef DEBUG_LINESEGS
+      Serial.printf("Line segment %ld ", linesegs);
+      #endif
+
       // compute next new location
+      Serial.printf("Cartesian: from (%.2f, %.2f) ", c1x, c1y);
       c1x = c1x + deltaX;
       c1y = c1y + deltaY;
+      Serial.printf(" to (%.2f, %.2f)\n", c1x, c1y);
 
       // convert back to machine space
       float pA = getMachineA(c1x, c1y);
       float pB = getMachineB(c1x, c1y);
+      Serial.printf("Native: from (%ld, %ld) to (%ld, %ld)\n", 
+      motorA.currentPosition(), motorB.currentPosition(), (long)pA, (long)pB);
 
       // do the move
-      runSpeed = desiredSpeed(linesegs, runSpeed, currentAcceleration*stepMultiplier);
-      setMotorConstantSpeed(runSpeed);
+      runSpeed = desiredSpeed((linesegs*maxSegmentLength), runSpeed, currentAcceleration);
+      Serial.printf("Go at %ld steps per second\n", runSpeed);
       
       // set targets for both motors
-      changeLength(pA, pB);
+      changeLengthFixedSpeed(pA, pB, runSpeed);
       while ((motorA.distanceToGo() != 0) && (motorB.distanceToGo() != 0))
       {
         // spin your wheels - actually calling motors.run() is done by motorTimer.
@@ -406,15 +411,13 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
 
       // one line less to do!
       linesegs--;
+      reportStepRate();
     }
     // reset back to "normal" operation
     reportingPosition = true;
-    usingAcceleration = true;
-    setMotorConstantSpeed(currentMaxSpeed);
     reportPosition();
   }
-  else
-  {
+  else {
     Serial.println("MSG,E,Line is not on the page. Skipping it.");
   }
 }
@@ -424,21 +427,21 @@ This is a method pinched from AccelStepper (older version).
 */
 float desiredSpeed(long distanceTo, float currentSpeed, float acceleration)
 {
-    float requiredSpeed;
+  float requiredSpeed;
 
-    if (distanceTo == 0)
-	return 0.0f; // We're there
+  if (distanceTo == 0)
+	  return 0.0f; // We're there
 
-    // sqrSpeed is the signed square of currentSpeed.
-    float sqrSpeed = sq(currentSpeed);
-    if (currentSpeed < 0.0)
-      sqrSpeed = -sqrSpeed;
+  // sqrSpeed is the signed square of currentSpeed.
+  float sqrSpeed = sq(currentSpeed);
+  if (currentSpeed < 0.0)
+    sqrSpeed = -sqrSpeed;
 
-    float twoa = 2.0f * acceleration; // 2ag
+  float twoa = 2.0f * acceleration; // 2ag
 
-    // if v^^2/2as is the the left of target, we will arrive at 0 speed too far -ve, need to accelerate clockwise
-    if ((sqrSpeed / twoa) < distanceTo)
-    {
+  // if v^^2/2as is the the left of target, we will arrive at 0 speed too far -ve, need to accelerate clockwise
+  if ((sqrSpeed / twoa) < distanceTo)
+  {
 	// Accelerate clockwise
 	// Need to accelerate in clockwise direction
 	if (currentSpeed == 0.0f)

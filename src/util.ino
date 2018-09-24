@@ -84,29 +84,64 @@ void changeLength(long tA, long tB)
 {
   transform(tA,tB);
 
-  if (usingAcceleration)
-  {
+  // if (usingAcceleration)
+  // {
     motorA.moveTo(tA);
     motorB.moveTo(tB);
-  }
-  else
-  {
-    long targets[2];
-    targets[0] = tA;
-    targets[1] = tB;
-    // Serial.printf("In changeLength, setting targets: %ld, %ld.\n", tA, tB);
-    motors.moveTo(targets);
-  }
+  // }
+  // else
+  // {
+  //   long targets[2];
+  //   targets[0] = tA;
+  //   targets[1] = tB;
+  //   // Serial.printf("In changeLength, setting targets: %ld, %ld.\n", tA, tB);
+  //   motors.moveTo(targets);
+  // }
 
   lastOperationTime = millis();
   reportPosition();
 }
 
-void setMotorConstantSpeed(long speed)
+void changeLengthFixedSpeed(long tA, long tB, long maxSpeed)
 {
-  // Serial.printf("Setting speed to %ld\n", speed);
-  motorA.setMaxSpeed(speed);
-  motorB.setMaxSpeed(speed);
+  changeLength(tA, tB);
+
+  float aDist = tA - motorA.currentPosition();
+  float bDist = tB - motorB.currentPosition();
+
+  #ifdef DEBUG_FIXED_SPEED
+  Serial.print("MaxSpeed: ");Serial.println(maxSpeed);
+  Serial.print("aDist: ");Serial.print(aDist);Serial.print(", bDist: ");Serial.println(bDist);
+  #endif
+
+  long bSpeed = maxSpeed;
+  long aSpeed = maxSpeed;
+
+  if (abs(aDist) > abs(bDist)) {
+    bSpeed = (abs(bDist)/abs(aDist)) * maxSpeed;
+    #ifdef DEBUG_FIXED_SPEED
+    Serial.print("aDist is bigger, so bSpeed is ");Serial.println(bSpeed);
+    #endif
+  } 
+  else {
+    aSpeed = (abs(aDist)/abs(bDist)) * maxSpeed;
+    #ifdef DEBUG_FIXED_SPEED
+    Serial.print("bDist is bigger, so aSpeed is ");Serial.println(aSpeed);
+    #endif
+  }
+
+  if (aDist < 0.0) {
+    aSpeed = -aSpeed;
+  }
+  if (bDist < 0.0) {
+    bSpeed = -bSpeed;
+  }
+
+  #ifdef DEBUG_FIXED_SPEED
+  Serial.print("Setting aSpeed: ");Serial.print(aSpeed);Serial.print(", bSpeed: ");Serial.println(bSpeed);
+  #endif
+  motorA.setSpeed(aSpeed);
+  motorB.setSpeed(bSpeed);
 }
 
 void changeLengthRelative(float tA, float tB)
@@ -196,10 +231,13 @@ void reportPosition()
 
 void reportStepRate()
 {
-  Serial.printf("Step frequencies: %ld, %ld, %ld, total: %ld in %ld seconds.\n",
+  Serial.printf("Step frequencies: %ld (%ld stepped), %ld(%ld stepped), %ld(%ld stepped), total: %ld in %ld seconds.\n",
     sampleBuffer[0],
+    steppedBuffer[0],
     sampleBuffer[1],
+    steppedBuffer[1],
     sampleBuffer[2],
+    steppedBuffer[2],
     totalTriggers,
     totalSamplePeriods);
 }

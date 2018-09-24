@@ -125,6 +125,7 @@ typedef struct {
 // #define DEBUG_MENU_DRAWING
 // #define DEBUG_PENLIFT
 // #define DEBUG_FUNCTION_BOUNDARIES
+#define DEBUG_LINESEGS
 boolean debugComms = false;
 
 // Set REPEAT_CAL to true instead of false to run calibration
@@ -363,6 +364,11 @@ volatile DRAM_ATTR long sampleBuffer[3] = {0L, 0L, 0L};
 volatile DRAM_ATTR int sampleBufferSlot = 0;
 volatile DRAM_ATTR long totalTriggers = 0L;
 volatile DRAM_ATTR long totalSamplePeriods = 0L;
+volatile DRAM_ATTR long steppedCounter = 0L;
+volatile DRAM_ATTR long steppedBuffer[3] = {0L, 0L, 0L};
+volatile DRAM_ATTR boolean aStepped = false;
+volatile DRAM_ATTR boolean bStepped = false;
+
 
 static TaskHandle_t runMotorsTaskHandle = NULL;
 
@@ -391,28 +397,29 @@ void IRAM_ATTR runMotorsISR() {
 }
 
 void runMotorsMinimal() {
-  if (usingAcceleration) {
-    motorA.run();
-    motorB.run();
-  }
-  else {
-    motors.run();
-  }
+  aStepped = motorA.run();
+  bStepped = motorB.run();
 }
 
 
 void runMotors() {
+  if (backgroundRunning) {
+    runMotorsMinimal();
+  }
+
   if (millis() > (lastPeriodStartTime + 1000)) {
     lastPeriodStartTime = millis();
     (sampleBufferSlot == 2) ? sampleBufferSlot = 0 : sampleBufferSlot++;
     sampleBuffer[sampleBufferSlot] = runCounter;
     runCounter = 0L;
+    steppedBuffer[sampleBufferSlot] = steppedCounter;
+    steppedCounter = 0L;
     totalSamplePeriods++;
   }
   runCounter++;
   totalTriggers++;
-  if (backgroundRunning) {
-    runMotorsMinimal();
+  if (aStepped || bStepped) {
+    steppedCounter++;
   }
 }
 
