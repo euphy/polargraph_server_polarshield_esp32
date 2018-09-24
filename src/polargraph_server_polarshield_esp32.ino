@@ -212,6 +212,7 @@ static float penWidth = DEFAULT_PEN_WIDTH; // line width in mm
 // max length of incoming command
 const int INLENGTH = 60;
 const char INTERMINATOR = 10;
+const char SEMICOLON = 59;
 
 static char currentCommand[INLENGTH+1];
 static char nextCommand[INLENGTH+1];

@@ -162,7 +162,7 @@ void impl_exec_execFromStore()
 
 void impl_exec_execFromStore(String inFilename)
 {
- /*  if (inFilename != "")
+  if (inFilename != "")
   {
     String noBlanks = "";
     // remove blanks
@@ -203,8 +203,8 @@ void impl_exec_execFromStore(String inFilename)
 #endif
           // execute the line
           command.trim();
-          command.toCharArray(lastCommand, INLENGTH+1);
-          boolean commandParsed = comms_parseCommand(lastCommand);
+          command.toCharArray(currentCommand, INLENGTH+1);
+          boolean commandParsed = comms_parseCommand(currentCommand);
           if (commandParsed)
           {
 #ifdef DEBUG_SD
@@ -212,17 +212,20 @@ void impl_exec_execFromStore(String inFilename)
 #endif
             Serial.print(F("Executing command:"));
             Serial.println(command);
-            if (echoingStoredCommands) lcd_echoLastCommandToDisplay(command, inFilename+": ");
-            impl_executeCommand(command);
+            if (echoingStoredCommands) {
+              lcd_echoLastCommandToDisplay(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams, inFilename+": ");
+            }
+            impl_executeCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams);
           }
 #ifdef DEBUG_SD
           else Serial.println("Stored command WAS NOT parsed.");
 #endif
           command = "";
-          lcd_checkForInput();
+          // lcd_checkForInput();
         }
-        else
+        else {
           command += ch;
+        }
 
 #ifdef DEBUG_SD
         Serial.print("Command building:");
@@ -244,12 +247,12 @@ void impl_exec_execFromStore(String inFilename)
     Serial.println("No filename supplied to read from.");
     currentlyDrawingFromFile = false;
   }
-   */
+   
 }
 
 void impl_exec_changeToStoreCommandMode()
 {
-  /* String newfilename = inParam1;
+  String newfilename = inParam1;
   String newFile = inParam2;
   if (newfilename != "")
   {
@@ -277,7 +280,7 @@ void impl_exec_changeToStoreCommandMode()
   else
   {
     Serial.println("No filename supplied to write to.");
-  } */
+  }
 }
 
 void impl_exec_changeToLiveCommandMode()
