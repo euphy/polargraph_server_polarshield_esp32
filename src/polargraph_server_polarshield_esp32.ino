@@ -346,6 +346,17 @@ const static String CMD_SET_DEBUGCOMMS = "C47";
 
 Ticker commsRunner;
 
+static TaskHandle_t runBackgroundProcessesTaskHandle = NULL;
+
+void runBackgroundProcessesTask( void *pvParameters )
+{
+  for ( ;; )
+  {
+    impl_runBackgroundProcesses();
+  }
+  vTaskDelete( NULL );
+}
+
 void setup()
 {
   Serial.begin(57600);  // set up Serial library at 57600 bps
@@ -375,6 +386,23 @@ void setup()
   // When the buffer is terminated, nextCommand is moved into currentCommand.
   commsRunner.attach_ms(20, comms_checkForCommand);
 
+  BaseType_t xReturned;
+  xReturned = xTaskCreatePinnedToCore(
+      runBackgroundProcessesTask,            /* Function to implement the task */
+      "runBackgroundProcessesTask",      /* Name of the task */
+      8000,                 /* Stack size in words */
+      NULL,                 /* Task input parameter */
+      2,                    /* Priority of the task */
+      &runBackgroundProcessesTaskHandle,     /* Task handle. */
+      1);
+
+  if (xReturned == pdPASS) {
+    Serial.println("Created runBackgroundProcessesTask.");
+  }
+  else {
+    Serial.println("Didn't create runBackgroundProcessesTask!");
+  }
+
   sd_autorunSD();
 }
 
@@ -386,9 +414,6 @@ Motors are also stepped asynchronously, using motorTimer.
 */
 void loop()
 {
-// impl_runBackgroundProcesses runs the touch and draw routines.
-  impl_runBackgroundProcesses();
-
 // comms_pollForConfirmedCommand checks for a completed command in
 // the command buffer, and executes it if it exists.
   comms_pollForConfirmedCommand();

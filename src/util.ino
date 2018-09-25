@@ -123,7 +123,7 @@ void changeLength(long tA, long tB)
 //    Serial.print(motorA.distanceToGo());
 //    Serial.print(", dB:");
 //    Serial.println(motorB.distanceToGo());
-    impl_runBackgroundProcesses();
+    // impl_runBackgroundProcesses();
     if (currentlyRunning)
     {
       if (usingAcceleration)
@@ -204,7 +204,7 @@ void moveA(int dist)
   motorA.move(dist);
   while (motorA.distanceToGo() != 0)
   {
-    impl_runBackgroundProcesses();
+    // impl_runBackgroundProcesses();
     if (currentlyRunning)
       motorA.run();
   }
@@ -216,7 +216,7 @@ void moveB(int dist)
   motorB.move(dist);
   while (motorB.distanceToGo() != 0)
   {
-    impl_runBackgroundProcesses();
+    // impl_runBackgroundProcesses();
     if (currentlyRunning)
       motorB.run();
   }
