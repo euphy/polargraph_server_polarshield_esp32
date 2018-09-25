@@ -112,7 +112,7 @@ void impl_runBackgroundProcesses()
   printf("\n\n\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
 
-  // impl_runBackgroundTouchProcesses();
+  impl_runBackgroundTouchProcesses();
   impl_runBackgroundDrawProcesses();
 
   long motorCutoffTime = millis() - lastOperationTime;
