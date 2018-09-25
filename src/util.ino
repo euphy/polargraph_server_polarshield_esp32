@@ -82,66 +82,66 @@ void changeLength(float tA, float tB)
 
 void changeLength(long tA, long tB)
 {
+  lastOperationTime = millis();
+
   transform(tA,tB);
 
-  // if (usingAcceleration)
-  // {
-    motorA.moveTo(tA);
-    motorB.moveTo(tB);
-  // }
-  // else
-  // {
-  //   long targets[2];
-  //   targets[0] = tA;
-  //   targets[1] = tB;
-  //   // Serial.printf("In changeLength, setting targets: %ld, %ld.\n", tA, tB);
-  //   motors.moveTo(targets);
-  // }
+  float currSpeedA = motorA.speed();
+  float currSpeedB = motorB.speed();
 
-  lastOperationTime = millis();
+  // Serial.printf("A pos: %ld, A target: %ld\n", motorA.currentPosition(), tA);
+  // Serial.printf("B pos: %ld, B target: %ld\n", motorB.currentPosition(), tB);
+
+
+  motorA.setSpeed(0.0);
+  motorB.setSpeed(0.0);
+  motorA.moveTo(tA);
+  motorB.moveTo(tB);
+
+
+  if (!usingAcceleration)
+  {
+    // The moveTo() function changes the speed in order to do a proper
+    // acceleration. This counteracts it. Ha.
+    
+    if (motorA.speed() < 0)
+      currSpeedA = -currSpeedA;
+    if (motorB.speed() < 0)
+      currSpeedB = -currSpeedB;
+
+  //  Serial.printf("Setting A speed (%ld) back to %ld\n", motorA.speed(), currSpeedA);
+  //  Serial.printf("Setting B speed (%ld) back to %ld\n", motorB.speed(), currSpeedB);
+      
+    motorA.setSpeed(currSpeedA);
+    motorB.setSpeed(currSpeedB);
+  }
+  
+  
+  while (motorA.distanceToGo() != 0 || motorB.distanceToGo() != 0)
+  {
+//    Serial.print("dA:");
+//    Serial.print(motorA.distanceToGo());
+//    Serial.print(", dB:");
+//    Serial.println(motorB.distanceToGo());
+    impl_runBackgroundProcesses();
+    if (currentlyRunning)
+    {
+      if (usingAcceleration)
+      {
+        motorA.run();
+        motorB.run();
+      }
+      else
+      {
+//        Serial.print("Run speed..");
+//        Serial.println(motorA.speed());
+        motorA.runSpeedToPosition();
+        motorB.runSpeedToPosition();
+      }
+    }
+  }
+  
   reportPosition();
-}
-
-void changeLengthFixedSpeed(long tA, long tB, long maxSpeed)
-{
-  changeLength(tA, tB);
-
-  float aDist = tA - motorA.currentPosition();
-  float bDist = tB - motorB.currentPosition();
-
-  #ifdef DEBUG_FIXED_SPEED
-  Serial.print("MaxSpeed: ");Serial.println(maxSpeed);
-  Serial.print("aDist: ");Serial.print(aDist);Serial.print(", bDist: ");Serial.println(bDist);
-  #endif
-
-  long bSpeed = maxSpeed;
-  long aSpeed = maxSpeed;
-
-  if (abs(aDist) > abs(bDist)) {
-    bSpeed = (abs(bDist)/abs(aDist)) * maxSpeed;
-    #ifdef DEBUG_FIXED_SPEED
-    Serial.print("aDist is bigger, so bSpeed is ");Serial.println(bSpeed);
-    #endif
-  } 
-  else {
-    aSpeed = (abs(aDist)/abs(bDist)) * maxSpeed;
-    #ifdef DEBUG_FIXED_SPEED
-    Serial.print("bDist is bigger, so aSpeed is ");Serial.println(aSpeed);
-    #endif
-  }
-
-  if (aDist < 0.0) {
-    aSpeed = -aSpeed;
-  }
-  if (bDist < 0.0) {
-    bSpeed = -bSpeed;
-  }
-
-  #ifdef DEBUG_FIXED_SPEED
-  Serial.print("Setting aSpeed: ");Serial.print(aSpeed);Serial.print(", bSpeed: ");Serial.println(bSpeed);
-  #endif
-  motorA.setSpeed(aSpeed);
-  motorB.setSpeed(bSpeed);
 }
 
 void changeLengthRelative(float tA, float tB)
@@ -154,6 +154,24 @@ void changeLengthRelative(long tA, long tB)
   motorA.move(tA);
   motorB.move(tB);
 
+  while (motorA.distanceToGo() != 0 || motorB.distanceToGo() != 0)
+  {
+    //impl_runBackgroundProcesses();
+    if (currentlyRunning)
+    {
+      if (usingAcceleration)
+      {
+        motorA.run();
+        motorB.run();
+      }
+      else
+      {
+        motorA.runSpeedToPosition();
+        motorB.runSpeedToPosition();
+      }
+    }
+  }
+  
   reportPosition();
 }
 
@@ -187,8 +205,8 @@ void moveA(int dist)
   while (motorA.distanceToGo() != 0)
   {
     impl_runBackgroundProcesses();
-    // if (currentlyRunning)
-    //   motorA.run();
+    if (currentlyRunning)
+      motorA.run();
   }
   lastOperationTime = millis();
 }
@@ -199,8 +217,8 @@ void moveB(int dist)
   while (motorB.distanceToGo() != 0)
   {
     impl_runBackgroundProcesses();
-    // if (currentlyRunning)
-    //   motorB.run();
+    if (currentlyRunning)
+      motorB.run();
   }
   lastOperationTime = millis();
 }
@@ -229,18 +247,18 @@ void reportPosition()
   }
 }
 
-void reportStepRate()
-{
-  Serial.printf("Step frequencies: %ld (%ld stepped), %ld(%ld stepped), %ld(%ld stepped), total: %ld in %ld seconds.\n",
-    sampleBuffer[0],
-    steppedBuffer[0],
-    sampleBuffer[1],
-    steppedBuffer[1],
-    sampleBuffer[2],
-    steppedBuffer[2],
-    totalTriggers,
-    totalSamplePeriods);
-}
+// void reportStepRate()
+// {
+//   Serial.printf("Step frequencies: %ld (%ld stepped), %ld(%ld stepped), %ld(%ld stepped), total: %ld in %ld seconds.\n",
+//     sampleBuffer[0],
+//     steppedBuffer[0],
+//     sampleBuffer[1],
+//     steppedBuffer[1],
+//     sampleBuffer[2],
+//     steppedBuffer[2],
+//     totalTriggers,
+//     totalSamplePeriods);
+// }
 
 
 
@@ -325,3 +343,7 @@ long getCartesianY(long cX, float aPos) {
   long calcY = long(sqrt(pow(aPos,2)-pow(cX,2)));
   return calcY;
 }
+
+
+
+

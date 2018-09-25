@@ -277,18 +277,16 @@ void exec_changeLength()
 
   changeLength(lenA, lenB);
 }
-
 void exec_changeLengthDirect()
 {
   float endA = multiplier(atof(inParam1));
   float endB = multiplier(atof(inParam2));
-  int maxSegmentLength = atoi(inParam3) * stepMultiplier;
+  int maxSegmentLength = atoi(inParam3);
 
   float startA = motorA.currentPosition();
   float startB = motorB.currentPosition();
 
-  if (endA < 20 || endB < 20 ||
-    endA > getMaxLength() || endB > getMaxLength())
+  if (endA < 20 || endB < 20 || endA > getMaxLength() || endB > getMaxLength())
   {
     Serial.println("MSG,E,This point falls outside the area of this machine. Skipping it.");
   }
@@ -296,13 +294,12 @@ void exec_changeLengthDirect()
   {
     exec_drawBetweenPoints(startA, startB, endA, endB, maxSegmentLength);
   }
-}
+}  
 
 /**
-This moves the gondola in a straight line between p1 and p2.  Both input coordinates are in
-the native coordinates system.
-
-The fidelity of the line is controlled by maxLength - this is the longest size a line segment is
+This moves the gondola in a straight line between p1 and p2.  Both input coordinates are in 
+the native coordinates system.  
+The fidelity of the line is controlled by maxLength - this is the longest size a line segment is 
 allowed to be.  1 is finest, slowest.  Use higher values for faster, wobblier.
 */
 void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxSegmentLength)
@@ -316,16 +313,16 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
 //  Serial.print(",");
 //  Serial.println(p2b);
   // ok, we're going to plot some dots between p1 and p2.  Using maths. I know! Brave new world etc.
-
+  
   // First, convert these values to cartesian coordinates
   // We're going to figure out how many segments the line
   // needs chopping into.
   float c1x = getCartesianXFP(p1a, p1b);
   float c1y = getCartesianYFP(c1x, p1a);
-
+  
   float c2x = getCartesianXFP(p2a, p2b);
   float c2y = getCartesianYFP(c2x, p2a);
-
+  
 //  Serial.print("From coords: ");
 //  Serial.print(c1x);
 //  Serial.print(",");
@@ -334,90 +331,84 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
 //  Serial.print(c2x);
 //  Serial.print(",");
 //  Serial.println(c2y);
-
-  // test to see if both origin (c1) and target (c2) points are on the page.
+  
+  // test to see if it's on the page
+  // AND ALSO TO see if the current position is on the page.
   // Remember, the native system can easily specify points that can't exist,
   // particularly up at the top.
-  const int unreachableMargin = 20;
-  if ( c2x > unreachableMargin
-    && c2x < pageWidth-unreachableMargin
-    && c2y > unreachableMargin
-    && c2y < pageHeight-unreachableMargin
-
-    && c1x > unreachableMargin
-    && c1x < pageWidth-unreachableMargin
-    && c1y > unreachableMargin
-    && c1y < pageHeight-unreachableMargin
-    ) {
+  if (c2x > 20 
+    && c2x<pageWidth-20 
+    && c2y > 20 
+    && c2y <pageHeight-20
+    && c1x > 20 
+    && c1x<pageWidth-20 
+    && c1y > 20 
+    && c1y <pageHeight-20 
+    )
+    {
     reportingPosition = false;
-    float deltaX = c2x-c1x;  // distance each must move (signed)
+    float deltaX = c2x-c1x;    // distance each must move (signed)
     float deltaY = c2y-c1y;
-    // float totalDistance = sqrt(sq(deltaX) + sq(deltaY));
+    float totalDistance = sqrt(sq(deltaX) + sq(deltaY));
 
-    long linesegs = 1;  // assume at least 1 line segment will get us there.
-    if (abs(deltaX) > abs(deltaY)) {
-      // slope <=1 case
-      while ((abs(deltaX)/linesegs) > maxSegmentLength) {
+    long linesegs = 1;            // assume at least 1 line segment will get us there.
+    if (abs(deltaX) > abs(deltaY))
+    {
+      // slope <=1 case    
+      while ((abs(deltaX)/linesegs) > maxSegmentLength)
+      {
         linesegs++;
       }
     }
-    else {
+    else
+    {
       // slope >1 case
-      while ((abs(deltaY)/linesegs) > maxSegmentLength) {
+      while ((abs(deltaY)/linesegs) > maxSegmentLength)
+      {
         linesegs++;
       }
     }
-
+    
     // reduce delta to one line segments' worth.
     deltaX = deltaX/linesegs;
     deltaY = deltaY/linesegs;
-
+  
     // render the line in N shorter segments
     long runSpeed = 0;
 
-    // figure out some speeds
-    long maxSegsPerSecond = currentMaxSpeed / maxSegmentLength;
-
-    #ifdef DEBUG_LINESEGS
-    Serial.printf("Linesegs: %ld, deltaX: %d, deltaY: %d\n ", linesegs, deltaX, deltaY);
-    #endif
-    while (linesegs > 0) {
-      #ifdef DEBUG_LINESEGS
-      Serial.printf("Line segment %ld ", linesegs);
-      #endif
-
+    usingAcceleration = false;
+    while (linesegs > 0)
+    {
+//      Serial.print("Line segment: " );
+//      Serial.println(linesegs);
       // compute next new location
-      Serial.printf("Cartesian: from (%.2f, %.2f) ", c1x, c1y);
       c1x = c1x + deltaX;
       c1y = c1y + deltaY;
-      Serial.printf(" to (%.2f, %.2f)\n", c1x, c1y);
-
+  
       // convert back to machine space
       float pA = getMachineA(c1x, c1y);
       float pB = getMachineB(c1x, c1y);
-      Serial.printf("Native: from (%ld, %ld) to (%ld, %ld)\n", 
-      motorA.currentPosition(), motorB.currentPosition(), (long)pA, (long)pB);
-
+    
       // do the move
-      runSpeed = desiredSpeed((linesegs*maxSegmentLength), runSpeed, currentAcceleration);
-      Serial.printf("Go at %ld steps per second\n", runSpeed);
+      runSpeed = desiredSpeed(linesegs, runSpeed, currentAcceleration*4);
       
-      // set targets for both motors
-      changeLengthFixedSpeed(pA, pB, runSpeed);
-      while ((motorA.distanceToGo() != 0) && (motorB.distanceToGo() != 0))
-      {
-        // spin your wheels - actually calling motors.run() is done by motorTimer.
-      }
-
+//      Serial.print("Setting speed:");
+//      Serial.println(runSpeed);
+      
+      motorA.setSpeed(runSpeed);
+      motorB.setSpeed(runSpeed);
+      changeLength(pA, pB);
+  
       // one line less to do!
       linesegs--;
-      reportStepRate();
     }
     // reset back to "normal" operation
     reportingPosition = true;
+    usingAcceleration = true;
     reportPosition();
   }
-  else {
+  else
+  {
     Serial.println("MSG,E,Line is not on the page. Skipping it.");
   }
 }
@@ -427,21 +418,21 @@ This is a method pinched from AccelStepper (older version).
 */
 float desiredSpeed(long distanceTo, float currentSpeed, float acceleration)
 {
-  float requiredSpeed;
+    float requiredSpeed;
 
-  if (distanceTo == 0)
-	  return 0.0f; // We're there
+    if (distanceTo == 0)
+	return 0.0f; // We're there
 
-  // sqrSpeed is the signed square of currentSpeed.
-  float sqrSpeed = sq(currentSpeed);
-  if (currentSpeed < 0.0)
-    sqrSpeed = -sqrSpeed;
-
-  float twoa = 2.0f * acceleration; // 2ag
-
-  // if v^^2/2as is the the left of target, we will arrive at 0 speed too far -ve, need to accelerate clockwise
-  if ((sqrSpeed / twoa) < distanceTo)
-  {
+    // sqrSpeed is the signed square of currentSpeed.
+    float sqrSpeed = sq(currentSpeed);
+    if (currentSpeed < 0.0)
+      sqrSpeed = -sqrSpeed;
+      
+    float twoa = 2.0f * acceleration; // 2ag
+    
+    // if v^^2/2as is the the left of target, we will arrive at 0 speed too far -ve, need to accelerate clockwise
+    if ((sqrSpeed / twoa) < distanceTo)
+    {
 	// Accelerate clockwise
 	// Need to accelerate in clockwise direction
 	if (currentSpeed == 0.0f)
@@ -463,7 +454,8 @@ float desiredSpeed(long distanceTo, float currentSpeed, float acceleration)
 	if (requiredSpeed < -currentMaxSpeed)
 	    requiredSpeed = -currentMaxSpeed;
     }
-
+    
     //Serial.println(requiredSpeed);
     return requiredSpeed;
 }
+

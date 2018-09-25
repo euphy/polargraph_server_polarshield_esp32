@@ -186,8 +186,6 @@ void configuration_setup()
   motorA.setCurrentPosition(startLengthStepsA);
   motorB.setCurrentPosition(startLengthStepsB);
 
-  motors.addStepper(motorA);
-  motors.addStepper(motorB);
 }
 
 // end of Polarshield definition

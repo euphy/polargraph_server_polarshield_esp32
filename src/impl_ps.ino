@@ -38,7 +38,7 @@ void impl_processCommand(String inCmd, String inParam1, String inParam2, String 
   {
     Serial.print(F("Storing command:"));
     Serial.println(inCmd);
-//    sd_storeCommand(inCmd);
+    sd_storeCommand(inCmd);
   }
   else
   {
@@ -99,7 +99,7 @@ void impl_executeCommand(String inCmd, String inParam1, String inParam2, String 
   else
   {
     comms_unrecognisedCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams);
-    // comms_ready();
+    comms_ready();
   }
 }
 
@@ -112,17 +112,16 @@ void impl_runBackgroundProcesses()
   printf("\n\n\tEnter %s at %d\n", __FUNCTION__, millis());
   #endif
 
-  impl_runBackgroundTouchProcesses();
+  // impl_runBackgroundTouchProcesses();
   impl_runBackgroundDrawProcesses();
 
-  // long motorCutoffTime = millis() - lastOperationTime;
-  // if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
-  // {
-    // Serial.println("Powering down because of inactivity.");
-    // buttons_actions_motorsOff();
-    // lcd_updateDisplay();
-  // }
-
+  long motorCutoffTime = millis() - lastOperationTime;
+  if ((automaticPowerDown) && (powerIsOn) && (motorCutoffTime > motorIdleTimeBeforePowerDown))
+  {
+    Serial.println("Powering down because of inactivity.");
+    buttons_actions_motorsOff();
+  }
+ 
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("\tExit %s at %d\n", __FUNCTION__, millis());
   #endif
@@ -158,6 +157,7 @@ void impl_exec_execFromStore()
   {
     Serial.println("No filename supplied to read from.");
   }
+
 }
 
 void impl_exec_execFromStore(String inFilename)
@@ -296,7 +296,7 @@ void impl_pixel_testPenWidthScribble()
   float endWidth = atof(inParam3);
   float incSize = atof(inParam4);
 
-  // boolean ltr = true;
+  boolean ltr = true;
 
   float oldPenWidth = penWidth;
   int iterations = 0;
@@ -304,13 +304,13 @@ void impl_pixel_testPenWidthScribble()
   int posA = motorA.currentPosition();
   int posB = motorB.currentPosition();
 
-  // int startColumn = posA;
+  int startColumn = posA;
   int startRow = posB;
 
   for (float pw = startWidth; pw <= endWidth; pw+=incSize)
   {
     iterations++;
-    // int column = posA;
+    int column = posA;
 
     penWidth = pw;
     int maxDens = pixel_maxDensity(penWidth, rowWidth);
@@ -348,18 +348,15 @@ void impl_pixel_testPenWidthScribble()
 
 void impl_engageMotors()
 {
-  backgroundRunning = false;
   motorA.enableOutputs();
   motorB.enableOutputs();
   powerIsOn = true;
-
   motorA.runToNewPosition(motorA.currentPosition()+multiplier(8));
   motorB.runToNewPosition(motorB.currentPosition()+multiplier(8));
   motorA.runToNewPosition(motorA.currentPosition()-multiplier(8));
   motorB.runToNewPosition(motorB.currentPosition()-multiplier(8));
 
   Serial.println("Engaged motors.");
-  backgroundRunning = true;
 }
 
 void impl_releaseMotors()
@@ -379,8 +376,8 @@ void drawRandom()
     Serial.println(i);
     while (motorA.distanceToGo() != 0 && motorB.distanceToGo() != 0)
     {
-      // motorA.run();
-      // motorB.run();
+      motorA.run();
+      motorB.run();
     }
 
     if (motorA.distanceToGo() == 0)
