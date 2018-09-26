@@ -344,18 +344,22 @@ const static String CMD_SETPENLIFTRANGE = "C45";
 const static String CMD_PIXELDIAGNOSTIC = "C46";
 const static String CMD_SET_DEBUGCOMMS = "C47";
 
-Ticker commsRunner;
+// Instrumentation about running background motor tasks
+volatile DRAM_ATTR long runCounter = 0L;
+volatile DRAM_ATTR long lastPeriodStartTime = 0L;
+volatile DRAM_ATTR long sampleBuffer[3] = {0L, 0L, 0L};
+volatile DRAM_ATTR int sampleBufferSlot = 0;
+volatile DRAM_ATTR long totalTriggers = 0L;
+volatile DRAM_ATTR long totalSamplePeriods = 0L;
+volatile DRAM_ATTR long steppedCounter = 0L;
+volatile DRAM_ATTR long steppedBuffer[3] = {0L, 0L, 0L};
+volatile DRAM_ATTR boolean aStepped = false;
+volatile DRAM_ATTR boolean bStepped = false;
 
-static TaskHandle_t runBackgroundProcessesTaskHandle = NULL;
+static TaskHandle_t backgroundProcessesTaskHandle = NULL;
+static TaskHandle_t commsReaderTaskHandle = NULL;
+static TaskHandle_t motorsTaskHandle = NULL;
 
-void runBackgroundProcessesTask( void *pvParameters )
-{
-  for ( ;; )
-  {
-    impl_runBackgroundProcesses();
-  }
-  vTaskDelete( NULL );
-}
 
 void setup()
 {
@@ -381,27 +385,7 @@ void setup()
   delay(200);
   penlift_penUp();
   
-  // commsRunner sets up a regular invocation of comms_checkForCommand(), which
-  // checks for characters on the serial port and puts them into a buffer.
-  // When the buffer is terminated, nextCommand is moved into currentCommand.
-  commsRunner.attach_ms(20, comms_checkForCommand);
-
-  BaseType_t xReturned;
-  xReturned = xTaskCreatePinnedToCore(
-      runBackgroundProcessesTask,            /* Function to implement the task */
-      "runBackgroundProcessesTask",      /* Name of the task */
-      8000,                 /* Stack size in words */
-      NULL,                 /* Task input parameter */
-      2,                    /* Priority of the task */
-      &runBackgroundProcessesTaskHandle,     /* Task handle. */
-      1);
-
-  if (xReturned == pdPASS) {
-    Serial.println("Created runBackgroundProcessesTask.");
-  }
-  else {
-    Serial.println("Didn't create runBackgroundProcessesTask!");
-  }
+  tasks_startTasks();
 
   sd_autorunSD();
 }
@@ -410,7 +394,7 @@ void setup()
 /*
 Loop() is quite simple because reading commands from the serial port is done
 asynchronously by commsRunner.
-Motors are also stepped asynchronously, using motorTimer.
+Motors are also stepped asynchronously, using tasks.
 */
 void loop()
 {
