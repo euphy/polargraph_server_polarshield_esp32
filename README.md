@@ -1,5 +1,7 @@
 # polargraph_server_polarshield_esp32
 
+** Under development **
+
 This is a port of polargraph_server_polarshield to the Espressif ESP32 chip. I'm using
 this part for a few reasons:
 
