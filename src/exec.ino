@@ -349,7 +349,7 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
     reportingPosition = false;
     float deltaX = c2x-c1x;    // distance each must move (signed)
     float deltaY = c2y-c1y;
-    float totalDistance = sqrt(sq(deltaX) + sq(deltaY));
+    // float totalDistance = sqrt(sq(deltaX) + sq(deltaY));
 
     long linesegs = 1;            // assume at least 1 line segment will get us there.
     if (abs(deltaX) > abs(deltaY))

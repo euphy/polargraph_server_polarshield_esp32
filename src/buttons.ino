@@ -135,7 +135,7 @@ typedef byte Menus[NUM_OF_MENUS][BUTTONS_PER_MENU];
 #define MENU_SETTINGS_2 8
 #define MENU_ADJUST_PENLIFT 9
 
-char currentMenu = 0;
+byte currentMenu = 0;
 
 static Menus menus = {
   {0,0,0,

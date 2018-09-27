@@ -121,14 +121,14 @@ void configuration_setup()
     touch_sense();
     if (displayTouched && (timeOfFirstTouch==0L)) {
       timeOfFirstTouch = millis();
-      printf("Touched at beginning, timeOfFirstTouch: %d\n\n\n\n", timeOfFirstTouch);
+      printf("Touched at beginning, timeOfFirstTouch: %ld\n\n\n\n", timeOfFirstTouch);
     }
   }
 
   if (timeOfFirstTouch > timeOfStartSensing) {
     // display is touched at startup - this is a signal to re-calibrate the touchscreen
     // IF it continues for four seconds
-    printf("timeOfFirstTouch %d > timeOfStartSensing %d \n\n", timeOfFirstTouch, timeOfStartSensing);
+    printf("timeOfFirstTouch %ld > timeOfStartSensing %ld \n\n", timeOfFirstTouch, timeOfStartSensing);
     int releaseCount = 0;
     int touchCount = 0;
     int progressBlockPosition = 12;
@@ -137,7 +137,7 @@ void configuration_setup()
     while (releaseCount < 3) {
       touch_sense();
 
-      printf("%d: displayTouched: %d, touchCount: %d, releaseCount: %d \n", millis(), displayTouched, touchCount, releaseCount);
+      printf("%ld: displayTouched: %d, touchCount: %d, releaseCount: %d \n", millis(), displayTouched, touchCount, releaseCount);
 
       // bit of hysteresis to combat noisy touches triggering a release
       if (displayTouched) {

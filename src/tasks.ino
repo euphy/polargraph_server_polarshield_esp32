@@ -29,6 +29,8 @@ void tasks_runMotorsMinimal() {
 
 
 void tasks_runMotors() {
+  aStepped = false;
+  bStepped = false;
   if (backgroundRunning) {
     tasks_runMotorsMinimal();
   }

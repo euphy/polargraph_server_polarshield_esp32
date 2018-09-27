@@ -296,7 +296,7 @@ void impl_pixel_testPenWidthScribble()
   float endWidth = atof(inParam3);
   float incSize = atof(inParam4);
 
-  boolean ltr = true;
+  // boolean ltr = true;
 
   float oldPenWidth = penWidth;
   int iterations = 0;
@@ -304,13 +304,13 @@ void impl_pixel_testPenWidthScribble()
   int posA = motorA.currentPosition();
   int posB = motorB.currentPosition();
 
-  int startColumn = posA;
+  // int startColumn = posA;
   int startRow = posB;
 
   for (float pw = startWidth; pw <= endWidth; pw+=incSize)
   {
     iterations++;
-    int column = posA;
+    // int column = posA;
 
     penWidth = pw;
     int maxDens = pixel_maxDensity(penWidth, rowWidth);
