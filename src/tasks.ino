@@ -17,7 +17,11 @@ void tasks_commsReaderTask( void *pvParameters )
     // commsRunner sets up a regular invocation of comms_checkForCommand(), which
     // checks for characters on the serial port and puts them into a buffer.
     // When the buffer is terminated, nextCommand is moved into currentCommand.
-    comms_checkForCommand();
+    unsigned long millisNow = millis();
+    if (millisNow > lastCheckedForCommand + commandCheckInterval) {
+      comms_checkForCommand();
+      lastCheckedForCommand = millisNow;
+    }
   }
   vTaskDelete( NULL );
 }
