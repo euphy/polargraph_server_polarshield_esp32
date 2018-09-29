@@ -17,7 +17,9 @@ void tasks_commsReaderTask( void *pvParameters )
     // commsRunner sets up a regular invocation of comms_checkForCommand(), which
     // checks for characters on the serial port and puts them into a buffer.
     // When the buffer is terminated, nextCommand is moved into currentCommand.
-    comms_checkForCommand();
+    if (checkingForReceivedCommand) {
+      comms_checkForCommand();
+    }
   }
   vTaskDelete( NULL );
 }
@@ -31,6 +33,7 @@ void tasks_runMotorsMinimal() {
 void tasks_runMotors() {
   aStepped = false;
   bStepped = false;
+
   if (backgroundRunning) {
     tasks_runMotorsMinimal();
   }
@@ -79,7 +82,7 @@ void tasks_runMotorsTask( void *pvParameters )
 }
 
 
-void tasks_startBackgroundProcessesTask()
+void tasks_startBackgroundProcessesTask(unsigned int priority)
 {
     // Start the task to run the background processes
   BaseType_t returned_backgroundProcessesTask;
@@ -88,7 +91,7 @@ void tasks_startBackgroundProcessesTask()
       "tasks_backgroundProcessesTask",      /* Name of the task */
       8000,                 /* Stack size in words */
       NULL,                 /* Task input parameter */
-      2,                    /* Priority of the task */
+      priority,                    /* Priority of the task */
       &backgroundProcessesTaskHandle,     /* Task handle. */
       1);
 
@@ -100,16 +103,16 @@ void tasks_startBackgroundProcessesTask()
   }
 }
 
-void tasks_startCommsReaderTask()
+void tasks_startCommsReaderTask(unsigned int priority)
 {
 
   BaseType_t returned_commsReaderTask;
   returned_commsReaderTask = xTaskCreatePinnedToCore(
       tasks_commsReaderTask,            /* Function to implement the task */
       "tasks_commsReaderTask",      /* Name of the task */
-      4000,                 /* Stack size in words */
+      6000,                 /* Stack size in words */
       NULL,                 /* Task input parameter */
-      1,                    /* Priority of the task */
+      priority,                    /* Priority of the task */
       &commsReaderTaskHandle,     /* Task handle. */
       1);
 
@@ -121,16 +124,16 @@ void tasks_startCommsReaderTask()
   }
 }
 
-void tasks_startMotorsTask()
+void tasks_startMotorsTask(unsigned int priority)
 {
 
   BaseType_t returned_startMotorsTask;
   returned_startMotorsTask = xTaskCreatePinnedToCore(
       tasks_runMotorsTask,            /* Function to implement the task */
       "tasks_runMotorsTask",      /* Name of the task */
-      4000,                 /* Stack size in words */
+      6000,                 /* Stack size in words */
       NULL,                 /* Task input parameter */
-      4,                    /* Priority of the task */
+      priority,                    /* Priority of the task */
       &motorsTaskHandle,     /* Task handle. */
       1);
 
@@ -144,7 +147,7 @@ void tasks_startMotorsTask()
 
 void tasks_startTasks() 
 {
-  tasks_startBackgroundProcessesTask();
-  tasks_startCommsReaderTask();
-  tasks_startMotorsTask();
+  // tasks_startMotorsTask(2);
+  // tasks_startBackgroundProcessesTask(3);
+  tasks_startCommsReaderTask(2);
 }

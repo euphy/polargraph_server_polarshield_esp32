@@ -234,6 +234,7 @@ boolean commandBuffered = false;
 boolean usingCrc = false;
 boolean reportingPosition = true;
 boolean requestResend = false;
+boolean checkingForReceivedCommand = false;
 
 #define READY_STR "READY_200"
 #define RESEND_STR "RESEND"
@@ -256,7 +257,7 @@ extern AccelStepper motorA;
 extern AccelStepper motorB;
 
 volatile boolean currentlyRunning = true;
-volatile boolean backgroundRunning = true;
+volatile boolean backgroundRunning = false;
 
 volatile long lastOperationTime = 0L;
 static long motorIdleTimeBeforePowerDown = 600000L;
