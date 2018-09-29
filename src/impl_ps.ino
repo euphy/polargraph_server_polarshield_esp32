@@ -76,8 +76,8 @@ void impl_executeCommand(String inCmd, String inParam1, String inParam2, String 
     impl_exec_execFromStore();
 //  else if (inCmd.startsWith(CMD_RANDOM_DRAW))
 //    drawRandom();
-//  else if (inCmd.startsWith(CMD_SET_ROVE_AREA))
-//    rove_setRoveArea();
+ else if (inCmd.startsWith(CMD_SET_ROVE_AREA))
+   rove_setRoveArea();
 //  else if (inCmd.startsWith(CMD_START_TEXT))
 //    rove_startText();
 //  else if (inCmd.startsWith(CMD_DRAW_SPRITE))
@@ -88,10 +88,10 @@ void impl_executeCommand(String inCmd, String inParam1, String inParam2, String 
     exec_changeLength();
 //  else if (inCmd.startsWith(CMD_SWIRLING))
 //    rove_controlSwirling();
-//  else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN))
-//    rove_drawNorwegianFromFile();
-//  else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE))
-//    rove_drawRoveAreaFittedToImage();
+ else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN))
+   rove_drawNorwegianFromFile();
+ else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE))
+   rove_drawRoveAreaFittedToImage();
   else if (inCmd.startsWith(CMD_AUTO_CALIBRATE))
     calibrate_doCalibration();
   else if (inCmd.startsWith(CMD_SET_DEBUGCOMMS))

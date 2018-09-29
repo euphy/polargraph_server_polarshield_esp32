@@ -229,6 +229,9 @@ boolean paramsExtracted = false;
 boolean readyForcurrentCommand = false;
 volatile static boolean currentlyExecutingACommand = false;
 
+static unsigned long lastCheckedForCommand = 0L;
+static unsigned long commandCheckInterval = 50; // milliseconds between checking buffer
+
 boolean commandConfirmed = false;
 boolean commandBuffered = false;
 boolean usingCrc = false;
@@ -246,7 +249,7 @@ char MSG_I_STR[] = "MSG,I,";
 char MSG_D_STR[] = "MSG,D,";
 
 // period between status rebroadcasts
-long comms_rebroadcastStatusInterval = 4000;
+unsigned long comms_rebroadcastStatusInterval = 4000;
 Metro broadcastStatus = Metro(comms_rebroadcastStatusInterval);
 
 /*==========================================================================
