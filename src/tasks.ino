@@ -5,7 +5,11 @@ void tasks_backgroundProcessesTask( void *pvParameters )
   {
     // Does some background tasks - reading touches, redrawing screen, 
     // checking for idle.
+    xSemaphoreTake(xMutex, portMAX_DELAY);
     impl_runBackgroundProcesses();
+    xSemaphoreGive(xMutex);  
+    taskYIELD();
+
   }
   vTaskDelete( NULL );
 }
@@ -19,9 +23,13 @@ void tasks_commsReaderTask( void *pvParameters )
     // When the buffer is terminated, nextCommand is moved into currentCommand.
     unsigned long millisNow = millis();
     if (millisNow > lastCheckedForCommand + commandCheckInterval) {
+xSemaphoreTake(xMutex, portMAX_DELAY);
+      Serial.print(".");
       comms_checkForCommand();
       lastCheckedForCommand = millisNow;
+     xSemaphoreGive(xMutex);  
     }
+    taskYIELD();
   }
   vTaskDelete( NULL );
 }
@@ -33,6 +41,7 @@ void tasks_runMotorsMinimal() {
 
 
 void tasks_runMotors() {
+
   aStepped = false;
   bStepped = false;
 
@@ -75,7 +84,11 @@ void tasks_runMotorsTask( void *pvParameters )
 
     // while (ulNotifiedValue > 0)
     // {
+        xSemaphoreTake(xMutex, portMAX_DELAY);
+
       tasks_runMotors();
+       xSemaphoreGive(xMutex);
+       taskYIELD();
     //   ulNotifiedValue--;
     // }
 
@@ -86,6 +99,8 @@ void tasks_runMotorsTask( void *pvParameters )
 
 void tasks_startBackgroundProcessesTask(unsigned int priority)
 {
+  xSemaphoreTake(xMutex, portMAX_DELAY);
+
     // Start the task to run the background processes
   BaseType_t returned_backgroundProcessesTask;
   returned_backgroundProcessesTask = xTaskCreatePinnedToCore(
@@ -103,11 +118,13 @@ void tasks_startBackgroundProcessesTask(unsigned int priority)
   else {
     Serial.println("Didn't create tasks_backgroundProcessesTask!");
   }
+  xSemaphoreGive(xMutex);  
+
 }
 
 void tasks_startCommsReaderTask(unsigned int priority)
 {
-
+  xSemaphoreTake(xMutex, portMAX_DELAY);
   BaseType_t returned_commsReaderTask;
   returned_commsReaderTask = xTaskCreatePinnedToCore(
       tasks_commsReaderTask,            /* Function to implement the task */
@@ -124,11 +141,13 @@ void tasks_startCommsReaderTask(unsigned int priority)
   else {
     Serial.println("Didn't create tasks_commsReaderTask!");
   }
+  xSemaphoreGive(xMutex);  
 }
 
 void tasks_startMotorsTask(unsigned int priority)
 {
-
+  Serial.println("tasks_startMotorsTask");
+  xSemaphoreTake(xMutex, portMAX_DELAY);
   BaseType_t returned_startMotorsTask;
   returned_startMotorsTask = xTaskCreatePinnedToCore(
       tasks_runMotorsTask,            /* Function to implement the task */
@@ -145,11 +164,13 @@ void tasks_startMotorsTask(unsigned int priority)
   else {
     Serial.println("Didn't create tasks_runMotorsTask!");
   }
+  xSemaphoreGive(xMutex);  
 }
+
 
 void tasks_startTasks() 
 {
-  // tasks_startMotorsTask(2);
-  // tasks_startBackgroundProcessesTask(3);
-  tasks_startCommsReaderTask(2);
+  tasks_startCommsReaderTask(1);
+  tasks_startBackgroundProcessesTask(2);
+  tasks_startMotorsTask(3);
 }

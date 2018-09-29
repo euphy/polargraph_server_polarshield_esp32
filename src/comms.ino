@@ -287,7 +287,7 @@ void comms_broadcastStatus()
 {
   if (comms_isMachineReadyForNextCommand()) {
     reportPosition();
-    // reportStepRate();
+    reportStepRate();
     comms_reportBufferState();
     comms_ready();
   }

@@ -360,6 +360,8 @@ volatile DRAM_ATTR long steppedBuffer[3] = {0L, 0L, 0L};
 volatile DRAM_ATTR boolean aStepped = false;
 volatile DRAM_ATTR boolean bStepped = false;
 
+SemaphoreHandle_t xMutex;
+
 static TaskHandle_t backgroundProcessesTaskHandle = NULL;
 static TaskHandle_t commsReaderTaskHandle = NULL;
 static TaskHandle_t motorsTaskHandle = NULL;
@@ -389,6 +391,7 @@ void setup()
   delay(200);
   penlift_penUp();
   
+  xMutex = xSemaphoreCreateMutex();
   tasks_startTasks();
 
   sd_autorunSD();

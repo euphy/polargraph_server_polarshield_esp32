@@ -247,18 +247,18 @@ void reportPosition()
   }
 }
 
-// void reportStepRate()
-// {
-//   Serial.printf("Step frequencies: %ld (%ld stepped), %ld(%ld stepped), %ld(%ld stepped), total: %ld in %ld seconds.\n",
-//     sampleBuffer[0],
-//     steppedBuffer[0],
-//     sampleBuffer[1],
-//     steppedBuffer[1],
-//     sampleBuffer[2],
-//     steppedBuffer[2],
-//     totalTriggers,
-//     totalSamplePeriods);
-// }
+void reportStepRate()
+{
+  Serial.printf("Step frequencies: %ld (%ld stepped), %ld(%ld stepped), %ld(%ld stepped), total: %ld in %ld seconds.\n",
+    sampleBuffer[0],
+    steppedBuffer[0],
+    sampleBuffer[1],
+    steppedBuffer[1],
+    sampleBuffer[2],
+    steppedBuffer[2],
+    totalTriggers,
+    totalSamplePeriods);
+}
 
 
 
