@@ -134,7 +134,7 @@ void exec_setMachineSizeFromCommand()
 void exec_setMachineMmPerRevFromCommand()
 {
   float newMmPerRev = atof(inParam1);
-  float currentValue = preferences.getFloat(PREFKEY_MACHINE_MM_PER_REV, DEFAULT_MM_PER_REV);
+  float currentValue = preferences.getFloat(PREFKEY_MACHINE_MM_PER_REV, -1.0);
   if (currentValue != newMmPerRev) {
     preferences.putFloat(PREFKEY_MACHINE_MM_PER_REV, newMmPerRev);
     eeprom_loadMachineSpecFromEeprom();
@@ -144,7 +144,7 @@ void exec_setMachineMmPerRevFromCommand()
 void exec_setMachineStepsPerRevFromCommand()
 {
   int newStepsPerRev = atoi(inParam1);
-  int currentValue = preferences.getInt(PREFKEY_MACHINE_STEPS_PER_REV, DEFAULT_STEPS_PER_REV);
+  int currentValue = preferences.getInt(PREFKEY_MACHINE_STEPS_PER_REV, -1.0);
   if (currentValue != newStepsPerRev) {
     preferences.putInt(PREFKEY_MACHINE_STEPS_PER_REV, newStepsPerRev);
     eeprom_loadMachineSpecFromEeprom();
@@ -247,6 +247,10 @@ void exec_changePenWidth()
   Serial.print(F("mm"));
   Serial.println();
   msg_reportMinimumGridSizeForPen();
+
+  if (inNoOfParams == 4 && atoi(inParam2) == 1) {
+    preferences.putFloat(PREFKEY_PEN_WIDTH, penWidth);
+  }
 }
 
 void exec_setPosition()

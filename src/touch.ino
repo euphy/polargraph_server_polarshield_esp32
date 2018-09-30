@@ -178,7 +178,9 @@ int touch_buttonPressAction(ButtonSpec *b)
   #endif
   touch_disable();
   // do button action (change currentMenu)
+  #ifdef DEBUG_TOUCH
   printf("\t\t\tButton ID: %d.\n", b->id);
+  #endif
   int actionResult = b->action(b->id);
   #ifdef DEBUG_TOUCH
   printf("\t\t\tCompleted action at %d\n", millis());

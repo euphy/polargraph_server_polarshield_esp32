@@ -227,8 +227,9 @@ void reportPosition()
 {
   if (reportingPosition)
   {
-    Serial.print(OUT_CMD_SYNC_STR);
     long p = motorA.currentPosition();
+    
+    Serial.print(OUT_CMD_SYNC_STR);
     Serial.print(p);
     Serial.print(COMMA);
     Serial.print(divider(p));
@@ -249,6 +250,7 @@ void reportPosition()
 
 void reportStepRate()
 {
+  #ifdef DEBUG_STEPRATE
   Serial.printf("Step frequencies: %ld (%ld stepped), %ld(%ld stepped), %ld(%ld stepped), total: %ld in %ld seconds.\n",
     sampleBuffer[0],
     steppedBuffer[0],
@@ -258,6 +260,7 @@ void reportStepRate()
     steppedBuffer[2],
     totalTriggers,
     totalSamplePeriods);
+  #endif
 }
 
 

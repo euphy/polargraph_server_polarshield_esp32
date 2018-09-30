@@ -44,6 +44,20 @@ void eeprom_resetEeprom()
   eeprom_loadMachineSpecFromEeprom();
 }
 
+void eeprom_setDefaults()
+{
+  preferences.putInt(PREFKEY_MACHINE_WIDTH, DEFAULT_MACHINE_WIDTH);
+  preferences.putInt(PREFKEY_MACHINE_HEIGHT, DEFAULT_MACHINE_HEIGHT);
+  preferences.putFloat(PREFKEY_MACHINE_MM_PER_REV, DEFAULT_MM_PER_REV);
+  preferences.putInt(PREFKEY_MACHINE_STEPS_PER_REV, DEFAULT_STEPS_PER_REV);
+  preferences.putInt(PREFKEY_MACHINE_STEP_MULTIPLIER, DEFAULT_STEP_MULTIPLIER);
+  preferences.putFloat(PREFKEY_MACHINE_MOTOR_SPEED, DEFAULT_MAX_SPEED);
+  preferences.putFloat(PREFKEY_MACHINE_MOTOR_ACCEL, DEFAULT_ACCELERATION);
+  preferences.putInt(PREFKEY_PENLIFT_DOWN, DEFAULT_DOWN_POSITION);
+  preferences.putInt(PREFKEY_PENLIFT_UP, DEFAULT_UP_POSITION);
+}
+
+
 void eeprom_loadMachineSize()
 {
   machineWidth = preferences.getInt(PREFKEY_MACHINE_WIDTH, DEFAULT_MACHINE_WIDTH);
@@ -149,7 +163,7 @@ void eeprom_storeFloat(const char* key, float defaultValue, float newValue)
 void eeprom_loadPenWidth()
 {
   // load penwidth
-  penWidth = preferences.getFloat("penWidth", DEFAULT_PEN_WIDTH);
+  penWidth = preferences.getFloat(PREFKEY_PEN_WIDTH, DEFAULT_PEN_WIDTH);
   if (penWidth < 0.001) {
     penWidth = DEFAULT_PEN_WIDTH;
   }

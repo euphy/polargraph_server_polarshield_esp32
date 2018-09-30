@@ -119,13 +119,15 @@ typedef struct {
 
 // #define DEBUG_SD
 // #define DEBUG_STATE
+// #define DEBUG_TRACE
 // #define DEBUG_COMMS
 // #define DEBUG_COMMS_BUFF
 // #define DEBUG_TOUCH
 // #define DEBUG_MENU_DRAWING
 // #define DEBUG_PENLIFT
 // #define DEBUG_FUNCTION_BOUNDARIES
-#define DEBUG_LINESEGS
+// #define DEBUG_STEPRATE
+
 boolean debugComms = false;
 
 // Set REPEAT_CAL to true instead of false to run calibration
@@ -228,9 +230,6 @@ static byte inNoOfParams = 0;
 boolean paramsExtracted = false;
 boolean readyForcurrentCommand = false;
 volatile static boolean currentlyExecutingACommand = false;
-
-static unsigned long lastCheckedForCommand = 0L;
-static unsigned long commandCheckInterval = 50; // milliseconds between checking buffer
 
 boolean commandConfirmed = false;
 boolean commandBuffered = false;
@@ -362,9 +361,9 @@ volatile DRAM_ATTR boolean bStepped = false;
 
 SemaphoreHandle_t xMutex;
 
+Ticker commsRunner;
+
 static TaskHandle_t backgroundProcessesTaskHandle = NULL;
-static TaskHandle_t commsReaderTaskHandle = NULL;
-static TaskHandle_t motorsTaskHandle = NULL;
 
 
 void setup()
@@ -391,7 +390,12 @@ void setup()
   delay(200);
   penlift_penUp();
   
-  xMutex = xSemaphoreCreateMutex();
+  // commsRunner sets up a regular invocation of comms_checkForCommand(), which
+  // checks for characters on the serial port and puts them into a buffer.
+  // When the buffer is terminated, nextCommand is moved into currentCommand.
+  commsRunner.attach_ms(20, comms_checkForCommand);
+
+  // xMutex = xSemaphoreCreateMutex();
   tasks_startTasks();
 
   sd_autorunSD();

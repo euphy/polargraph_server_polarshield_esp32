@@ -36,9 +36,12 @@ void comms_checkForCommand() {
       #endif
 
       if (ch == INTERMINATOR) {
+        #ifdef DEBUG_COMMS_BUFF
+        Serial.print("Buffer term'd at position ");
         Serial.print(bufferPosition);
-        Serial.print(", ");
+        Serial.print(", command is: ");
         Serial.println(nextCommand);
+        #endif
         nextCommand[bufferPosition] = 0;  // null terminate the string
 
         if (strlen(nextCommand) <= 0) {
@@ -115,7 +118,9 @@ void comms_pollForConfirmedCommand() {
 
     paramsExtracted = comms_parseCommand(currentCommand);
     if (paramsExtracted) {
+      #ifdef DEBUG_COMMS
       Serial.println(F("Params extracted."));
+      #endif
       strcpy(currentCommand, "");
       commandConfirmed = false;
       comms_executeParsedCommand();

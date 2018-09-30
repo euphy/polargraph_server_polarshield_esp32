@@ -311,8 +311,10 @@ void lcd_echoLastCommandToDisplay(String command, String inParam1, String inPara
   lcd.setTextDatum(TL_DATUM);
   String output = "";
 
+  #ifdef DEBUG_MENU_DRAWING
   Serial.print("inNoOfParams:");
   Serial.println(inNoOfParams);
+  #endif
 
   switch (inNoOfParams) {
     case 6: output = " " + inParam4;

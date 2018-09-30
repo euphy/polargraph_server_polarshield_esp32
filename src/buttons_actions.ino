@@ -53,10 +53,12 @@ boolean replaceButtonInMenus(byte oldId, byte newId)
   #ifdef DEBUG_FUNCTION_BOUNDARIES
   printf("Enter %s at %d\n", __FUNCTION__, millis());
   #endif
+  #ifdef DEBUG_TOUCH
   Serial.print("Replacing ");
   Serial.print(oldId);
   Serial.print(" with ");
   Serial.println(newId);
+  #endif
   int changes = 0;
 
   if ((newId > 0) && (newId < NUM_OF_BUTTONS))
