@@ -298,8 +298,9 @@ void lcd_drawSplashScreen()
   lcd.drawString("An open-source art project", targetPosition+3, barTop+32+(9*3), 2);
 
   lcd.setTextDatum(BR_DATUM);
+  lcd.drawString(MB_NAME, 310, 210, 1);
   lcd.drawString("v"+FIRMWARE_VERSION_NO, 310, 220, 1);
-  lcd.drawString(MB_NAME, 310, 230, 1);
+  lcd.drawString(firmwareBuildName, 310, 230, 1);
 }
 
 

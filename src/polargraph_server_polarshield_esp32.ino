@@ -45,6 +45,8 @@ the User_Setup.h file and add the following lines.
 #include <ESP32Ticker.h>
 #include <Metro.h>
 
+#include "firmware-build-name.h"
+
 
 /* Definition of a function that can be attached to a Button Specification
 and will get executed when the button is pushed..
@@ -139,7 +141,8 @@ boolean debugComms = false;
     These variables are common to all polargraph server builds
 =========================================================== */
 
-const String FIRMWARE_VERSION_NO = "2.0";
+const String FIRMWARE_VERSION_NO = "2.0.1";
+extern String firmwareBuildName;
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == NODEMCU32S
