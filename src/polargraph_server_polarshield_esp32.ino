@@ -225,10 +225,10 @@ static char nextCommand[INLENGTH+1];
 
 volatile int bufferPosition = 0;
 static char inCmd[10];
-static char inParam1[14];
-static char inParam2[14];
-static char inParam3[14];
-static char inParam4[14];
+static char inParam1[20];
+static char inParam2[20];
+static char inParam3[20];
+static char inParam4[20];
 static byte inNoOfParams = 0;
 boolean paramsExtracted = false;
 boolean readyForcurrentCommand = false;
