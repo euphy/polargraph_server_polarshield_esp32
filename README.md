@@ -19,11 +19,17 @@ like to configure most features as tasks, rather than trying to keep it all in t
 single-threaded model of most Arduino stuff.
 
 Roadmap:
-1. Feature parity - especially norwegian pixel.
+1. ~~Feature parity - especially norwegian pixel.~~ v2.0.1
 2. Remove need to use a computer to set up a machine - 
-  * Change machine size using on-screen controls
-3. Set bounding box using on-screen controls
-4. Draw from real image format on SD card
+  * ~~Change machine size using touch UI~~ v2.1.0
+  * Set motor specs using touch UI
+3. ~~Set bounding box using on-screen controls~~ v2.1.0
+  * Spec'd in millimetres
+  * Limited by machine size + margin
+4. Warnings when machine doesn't match controller (connected on USB)
+4. Draw from raw image format on SD card
   * Image bitmap a la norwegian pixel
   * SVG scaled to bounding box area
+5. Web UI built in
+
 
