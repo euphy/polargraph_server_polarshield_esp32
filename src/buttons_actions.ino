@@ -286,6 +286,63 @@ int button_genericButtonAction(int buttonId)
       eeprom_loadPenLiftRange();
       delay(1000);
       break;
+    
+    // machine size
+    case BUTTON_INC_MACHINE_WIDTH:
+      machineWidth += 1;
+      recalculatePageSize();
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, machineWidth);
+      break;
+    case BUTTON_DEC_MACHINE_WIDTH:
+      machineWidth -= 1;
+      recalculatePageSize();
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, machineWidth);
+      break;
+    case BUTTON_INC_MACHINE_HEIGHT:
+      machineHeight += 1;
+      recalculatePageSize();
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, machineHeight);
+      break;
+    case BUTTON_DEC_MACHINE_HEIGHT:
+      machineHeight -= 1;
+      recalculatePageSize();
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, machineHeight);
+      break;
+
+    // Page size
+    case BUTTON_INC_ROVE_WIDTH:
+      roveWidth += 1;
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveWidth);
+      break;
+    case BUTTON_DEC_ROVE_WIDTH:
+      roveWidth -= 1;
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveWidth);
+      break;
+    case BUTTON_INC_ROVE_HEIGHT:
+      roveHeight += 1;
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveHeight);
+      break;
+    case BUTTON_DEC_ROVE_HEIGHT:
+      roveHeight -= 1;
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveHeight);
+      break;
+
+    case BUTTON_INC_ROVE_X:
+      rove1x += 1;
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, rove1x);
+      break;
+    case BUTTON_DEC_ROVE_X:
+      rove1x -= 1;
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, rove1x);
+      break;
+    case BUTTON_INC_ROVE_Y:
+      rove1y += 1;
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, rove1y);
+      break;
+    case BUTTON_DEC_ROVE_Y:
+      rove1y -= 1;
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, rove1y);
+      break;
   }
   button_genericButtonActionEnd(&button);
   #ifdef DEBUG_FUNCTION_BOUNDARIES
@@ -293,6 +350,14 @@ int button_genericButtonAction(int buttonId)
   #endif
   return 1; // one button changed
 }
+
+void setInitialDisplayValues(int col1, int col2)
+{
+  displayValues[1] = col1;
+  displayValues[2] = col2;
+}
+
+
 
 /*
  * Returns a number of buttons affected by this change
@@ -317,12 +382,15 @@ int genericChangeMenuAction(int buttonId)
       break;
     case BUTTON_ADJUST_PENSIZE_MENU:
       currentMenu = MENU_ADJUST_PENSIZE;
+      setInitialDisplayValues(penWidthIncrement, penWidth);
       break;
     case BUTTON_ADJUST_SPEED_MENU:
       currentMenu = MENU_ADJUST_SPEED;
+      setInitialDisplayValues(currentMaxSpeed, currentAcceleration);
       break;
     case BUTTON_ADJUST_POSITION_MENU:
       currentMenu = MENU_ADJUST_POSITION;
+      setInitialDisplayValues(motorA.currentPosition(), motorB.currentPosition());
       break;
     case BUTTON_SETTINGS_MENU:
       currentMenu = MENU_SETTINGS;
@@ -335,6 +403,22 @@ int genericChangeMenuAction(int buttonId)
       break;
     case BUTTON_ADJUST_PENLIFT:
       currentMenu = MENU_ADJUST_PENLIFT;
+      setInitialDisplayValues(downPosition, upPosition);
+      break;
+    case BUTTON_MACHINE_SIZE_MENU:
+      currentMenu = MENU_MACHINE_SIZE;
+      setInitialDisplayValues(machineWidth, machineHeight);
+      break;
+    case BUTTON_ROVE_SPEC_MENU:
+      currentMenu = MENU_ROVE_SPEC;
+      break;
+    case BUTTON_ROVE_SIZE_MENU:
+      currentMenu = MENU_ROVE_SIZE;
+      setInitialDisplayValues(roveWidth, roveHeight);
+      break;
+    case BUTTON_ROVE_POS_MENU:
+      currentMenu = MENU_ROVE_POSITION;
+      setInitialDisplayValues(rove1x, rove1y);
       break;
   }
   button_genericButtonActionEnd(&button);
@@ -344,7 +428,6 @@ int genericChangeMenuAction(int buttonId)
   #endif
   return BUTTONS_PER_MENU; // whole menu changed
 }
-
 
 void buttons_actions_motorsOn()
 {

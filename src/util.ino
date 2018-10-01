@@ -175,6 +175,11 @@ void changeLengthRelative(long tA, long tB)
   reportPosition();
 }
 
+void recalculatePageSize()
+{
+  pageWidth = machineWidth * stepsPerMM;
+  pageHeight = machineHeight * stepsPerMM;
+}
 long getMaxLength()
 {
   if (maxLength == 0)

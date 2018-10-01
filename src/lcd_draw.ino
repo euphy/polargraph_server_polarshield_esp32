@@ -261,6 +261,7 @@ void lcd_drawCurrentMenu()
 {
   lcd.fillScreen(TFT_BLACK);
   lcd_drawButtons();
+  lcd_drawValues();
 }
 
 void lcd_drawButtons()
@@ -274,6 +275,22 @@ void lcd_drawButtons()
   }
 }
 
+void lcd_drawValues()
+{
+  boolean drawValues = false;
+  for (byte buttonPosition = 0; buttonPosition<BUTTONS_PER_MENU; buttonPosition++) {
+    ButtonSpec button = buttons[menus[currentMenu][buttonPosition]];  
+    if (button.type == BUTTONTYPE_CHANGE_VALUE) {
+      drawValues = true;
+      break;
+    }
+  }
+
+  if (drawValues) {
+    lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, displayValues[1]);
+    lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, displayValues[2]);
+  }
+}
 
 void lcd_drawSplashScreen()
 {

@@ -530,6 +530,8 @@ const static byte SCREEN_STATE_NORMAL = 0;
 const static byte SCREEN_STATE_POWER_SAVE = 1;
 byte screenState = SCREEN_STATE_NORMAL;
 
+
+
 boolean powerIsOn = false;
 boolean isCalibrated = false;
 boolean canCalibrate = false;

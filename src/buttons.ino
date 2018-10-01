@@ -17,6 +17,8 @@ static int centreYPosition = 112; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_
 static int decorationTextSize = 2;
 static int buttonTextSize = 1;
 
+static int displayValues[3] = {0, 0, 0};
+
 /*  This defines a particular generic type of button
  *  These settings control some of the behaviour.
  */
@@ -116,10 +118,34 @@ static ButtonType buttonTypes[3];
 #define BUTTON_ADJUST_PENLIFT 44
 #define BUTTON_PENLIFT_SAVE_TO_EEPROM 45
 
+// Machine size
+#define BUTTON_MACHINE_SIZE_MENU 58
+#define BUTTON_INC_MACHINE_HEIGHT 46
+#define BUTTON_DEC_MACHINE_HEIGHT 47
+#define BUTTON_INC_MACHINE_WIDTH 48
+#define BUTTON_DEC_MACHINE_WIDTH 49
+
+// Page size
+#define BUTTON_ROVE_SIZE_MENU 59
+#define BUTTON_INC_ROVE_HEIGHT 50
+#define BUTTON_DEC_ROVE_HEIGHT 51
+#define BUTTON_INC_ROVE_WIDTH 52
+#define BUTTON_DEC_ROVE_WIDTH 53
+
+// Page position
+#define BUTTON_ROVE_POS_MENU 60
+#define BUTTON_INC_ROVE_X 54
+#define BUTTON_DEC_ROVE_X 55
+#define BUTTON_INC_ROVE_Y 56
+#define BUTTON_DEC_ROVE_Y 57
+
+#define BUTTON_ROVE_SPEC_MENU 61
+
+
 // an array of buttons specifications, indexed by button id.
-#define NUM_OF_BUTTONS 46
+#define NUM_OF_BUTTONS 62
 #define BUTTONS_PER_MENU 6
-#define NUM_OF_MENUS 10
+#define NUM_OF_MENUS 14
 
 static ButtonSpec buttons[NUM_OF_BUTTONS];
 int buttonCoords[12][2];
@@ -134,6 +160,11 @@ typedef byte Menus[NUM_OF_MENUS][BUTTONS_PER_MENU];
 #define MENU_SETTINGS 7
 #define MENU_SETTINGS_2 8
 #define MENU_ADJUST_PENLIFT 9
+#define MENU_MACHINE_SIZE 10
+#define MENU_ROVE_SPEC 11
+#define MENU_ROVE_SIZE 12
+#define MENU_ROVE_POSITION 13
+
 
 byte currentMenu = 0;
 
@@ -142,7 +173,7 @@ static Menus menus = {
     0,0,0}, // the empty first element 0
 
   // MENU_INITIAL 1
-  {BUTTON_POWER_ON, BUTTON_DRAW_FROM_SD, BUTTON_CALIBRATE,
+  {BUTTON_POWER_ON, BUTTON_DRAW_FROM_SD, 0,
      BUTTON_PAUSE_RUNNING, BUTTON_PEN_DOWN, BUTTON_SETTINGS_MENU},
 
   // MENU_RUNNING (NOT USED) 2
@@ -170,12 +201,29 @@ static Menus menus = {
      BUTTON_DONE, BUTTON_TOGGLE_ECHO, BUTTON_SETTINGS_MENU_2},
 
   // MENU_SETTINGS_2 8
-  {BUTTON_ADJUST_PENLIFT, 0, 0,
-     BUTTON_DONE, 0, 0},
+  {BUTTON_ADJUST_PENLIFT, BUTTON_ROVE_SPEC_MENU, 0,
+     BUTTON_DONE, BUTTON_MACHINE_SIZE_MENU, 0},
 
   // MENU_ADJUST_PENLIFT 9
   {BUTTON_PENLIFT_SAVE_TO_EEPROM, BUTTON_INC_PENLIFT_DOWN, BUTTON_INC_PENLIFT_UP,
-     BUTTON_DONE, BUTTON_DEC_PENLIFT_DOWN, BUTTON_DEC_PENLIFT_UP}
+     BUTTON_DONE, BUTTON_DEC_PENLIFT_DOWN, BUTTON_DEC_PENLIFT_UP},
+
+  // MENU_MACHINE_SIZE 10
+  {0, BUTTON_INC_MACHINE_WIDTH, BUTTON_INC_MACHINE_HEIGHT,
+     BUTTON_DONE, BUTTON_DEC_MACHINE_WIDTH, BUTTON_DEC_MACHINE_HEIGHT},
+
+  // MENU_ROVE_SPEC 11
+  {0, BUTTON_ROVE_SIZE_MENU, 0,
+     BUTTON_DONE, BUTTON_ROVE_POS_MENU, 0},
+
+  // MENU_ROVE_SIZE 12
+  {BUTTON_ROVE_POS_MENU, BUTTON_INC_ROVE_WIDTH, BUTTON_INC_ROVE_HEIGHT,
+     BUTTON_ROVE_SPEC_MENU, BUTTON_DEC_ROVE_WIDTH, BUTTON_DEC_ROVE_HEIGHT},
+
+  // MENU_ROVE_POSITION 13
+  {BUTTON_ROVE_SIZE_MENU, BUTTON_DEC_ROVE_X, BUTTON_DEC_ROVE_Y,
+     BUTTON_ROVE_SPEC_MENU, BUTTON_INC_ROVE_X, BUTTON_INC_ROVE_Y}
+
 };
 
 
@@ -238,13 +286,38 @@ void button_setup_loadButtons()
   buttons[BUTTON_TOGGLE_ECHO] = (ButtonSpec){BUTTON_TOGGLE_ECHO, "toggle echo", button_genericButtonAction, 0, BUTTONTYPE_TOGGLE};
   buttons[BUTTON_RESET_SD] = (ButtonSpec){BUTTON_RESET_SD, "reload SD", button_genericButtonAction, 0, BUTTONTYPE_TOGGLE};
   buttons[BUTTON_SETTINGS_MENU_2] = (ButtonSpec){BUTTON_SETTINGS_MENU_2, "more settings", genericChangeMenuAction, 0, BUTTONTYPE_CHANGE_MENU};
-  buttons[BUTTON_INC_PENLIFT_UP] = (ButtonSpec){BUTTON_INC_PENLIFT_UP, "inc. penlift up", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
-  buttons[BUTTON_DEC_PENLIFT_UP] = (ButtonSpec){BUTTON_DEC_PENLIFT_UP, "dec. penlift up", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_INC_PENLIFT_UP] = (ButtonSpec){BUTTON_INC_PENLIFT_UP, "inc penlift up", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_PENLIFT_UP] = (ButtonSpec){BUTTON_DEC_PENLIFT_UP, "dec penlift up", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
 
   buttons[BUTTON_INC_PENLIFT_DOWN] = (ButtonSpec){BUTTON_INC_PENLIFT_DOWN, "inc penlift down", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
   buttons[BUTTON_DEC_PENLIFT_DOWN] = (ButtonSpec){BUTTON_DEC_PENLIFT_DOWN, "dec penlift down", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
   buttons[BUTTON_ADJUST_PENLIFT] = (ButtonSpec){BUTTON_ADJUST_PENLIFT, "adjust penlift", genericChangeMenuAction, 0, BUTTONTYPE_CHANGE_MENU};
   buttons[BUTTON_PENLIFT_SAVE_TO_EEPROM] = (ButtonSpec){BUTTON_PENLIFT_SAVE_TO_EEPROM, "save to eeprom", button_genericButtonAction, 0, BUTTONTYPE_TOGGLE};
+
+
+  // Machine size
+  buttons[BUTTON_MACHINE_SIZE_MENU] = (ButtonSpec){BUTTON_MACHINE_SIZE_MENU, "machine size", genericChangeMenuAction, 0, BUTTONTYPE_CHANGE_MENU};
+  buttons[BUTTON_INC_MACHINE_HEIGHT] = (ButtonSpec){BUTTON_INC_MACHINE_HEIGHT, "+ machine height", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_MACHINE_HEIGHT] = (ButtonSpec){BUTTON_DEC_MACHINE_HEIGHT, "machine height -", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_INC_MACHINE_WIDTH] = (ButtonSpec){BUTTON_INC_MACHINE_WIDTH, "+ machine width", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_MACHINE_WIDTH] = (ButtonSpec){BUTTON_DEC_MACHINE_WIDTH, "machine width -", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+
+  // Page size
+  buttons[BUTTON_ROVE_SPEC_MENU] = (ButtonSpec){BUTTON_ROVE_SPEC_MENU, "rove setup", genericChangeMenuAction, 0, BUTTONTYPE_CHANGE_MENU};
+  buttons[BUTTON_ROVE_SIZE_MENU] = (ButtonSpec){BUTTON_ROVE_SIZE_MENU, "rove size", genericChangeMenuAction, 0, BUTTONTYPE_CHANGE_MENU};
+  buttons[BUTTON_INC_ROVE_HEIGHT] = (ButtonSpec){BUTTON_INC_ROVE_HEIGHT, "+ rove height", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_ROVE_HEIGHT] = (ButtonSpec){BUTTON_DEC_ROVE_HEIGHT, "- rove height", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_INC_ROVE_WIDTH] = (ButtonSpec){BUTTON_INC_ROVE_WIDTH, "+ rove width", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_ROVE_WIDTH] = (ButtonSpec){BUTTON_DEC_ROVE_WIDTH, "- rove width", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+
+  // Page position
+  buttons[BUTTON_ROVE_POS_MENU] = (ButtonSpec){BUTTON_ROVE_POS_MENU, "rove position", genericChangeMenuAction, 0, BUTTONTYPE_CHANGE_MENU};
+  buttons[BUTTON_INC_ROVE_X] = (ButtonSpec){BUTTON_DEC_ROVE_X, "< left edge", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_ROVE_X] = (ButtonSpec){BUTTON_INC_ROVE_X, "left edge >", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_INC_ROVE_Y] = (ButtonSpec){BUTTON_DEC_ROVE_Y, "up top edge", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_ROVE_Y] = (ButtonSpec){BUTTON_INC_ROVE_Y, "top edge down", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+
+
 }
 
 void button_setup_generateButtonCoords()
