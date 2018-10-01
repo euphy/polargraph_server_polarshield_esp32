@@ -282,8 +282,11 @@ boolean comms_nextCommandIsBuffering()
 
 boolean comms_isMachineReadyForNextCommand()
 {
-  if (broadcastStatus.check())
+  if (broadcastStatusChrono.hasPassed(comms_rebroadcastStatusInterval))
+  {
+    broadcastStatusChrono.restart();
     return !commandBuffered && !comms_nextCommandIsBuffering();
+  }
   else
     return false;
 }

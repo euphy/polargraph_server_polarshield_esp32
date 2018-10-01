@@ -74,20 +74,10 @@ void impl_executeCommand(String inCmd, String inParam1, String inParam2, String 
     impl_exec_changeToLiveCommandMode();
   else if (inCmd.startsWith(CMD_MODE_EXEC_FROM_STORE))
     impl_exec_execFromStore();
-//  else if (inCmd.startsWith(CMD_RANDOM_DRAW))
-//    drawRandom();
  else if (inCmd.startsWith(CMD_SET_ROVE_AREA))
    rove_setRoveArea();
-//  else if (inCmd.startsWith(CMD_START_TEXT))
-//    rove_startText();
-//  else if (inCmd.startsWith(CMD_DRAW_SPRITE))
-//    sprite_drawSprite();
-//  else if (inCmd.startsWith(CMD_DRAW_RANDOM_SPRITE))
-//    sprite_drawRandomPositionedSprite();
   else if (inCmd.startsWith(CMD_CHANGELENGTH_RELATIVE))
     exec_changeLength();
-//  else if (inCmd.startsWith(CMD_SWIRLING))
-//    rove_controlSwirling();
  else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN))
    rove_drawNorwegianFromFile();
  else if (inCmd.startsWith(CMD_DRAW_NORWEGIAN_OUTLINE))

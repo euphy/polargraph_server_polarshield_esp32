@@ -8,11 +8,12 @@
 
 This version is for the Polarshield 3, which aggregates:
 
-  * NodeMCU32S
-  * 2x stepper drivers
-  * 320x240 LCD
+  * NodeMCU32S          (ESP32-DevKitC https://www.espressif.com/en/products/hardware/esp32-devkitc/overview)
+  * 2x stepper drivers  (Stepstick format)
+  * 320x240 LCD         (240x320 2.4" SPI TFT Panel PBC ILI9341 3.3V with touch)
   * Touch panel
-  * SD card
+  * SD card reader      (Integrated into LCD panel, separate SPI buss)
+  * DC-DC voltage converter (https://solarbotics.com/product/40410/)
 
 This uses Bodmer's excellent TFT_eSPI library to provide graphics and
 touchscreen control. You need to have it installed, and to modify
@@ -43,7 +44,7 @@ the User_Setup.h file and add the following lines.
 
 #include <Preferences.h>
 #include <ESP32Ticker.h>
-#include <Metro.h>
+#include <Chrono.h>
 
 #include "firmware-build-name.h"
 
@@ -88,13 +89,6 @@ typedef struct {
 /*  ===========================================================
          CONFIGURATION!!
     =========================================================== */
-
-//Uncomment the following line to use a 2.4" panel, August 2014 and later
-#define LCD_TYPE TFT01_24_8
-//Uncomment the following line to use an older 2.4" panel, prior to August 2014.
-//#define LCD_TYPE ITDB24E_8
-//Uncomment the following line to use a 2.2" panel
-//#define LCD_TYPE ITDB22
 
 
 /*  ===========================================================
@@ -148,6 +142,7 @@ boolean debugComms = false;
 
 const String FIRMWARE_VERSION_NO = "2.1.0";
 extern String firmwareBuildName;
+
 #if MOTHERBOARD == RAMPS14
   const String MB_NAME = "RAMPS14";
 #elif MOTHERBOARD == NODEMCU32S
@@ -208,7 +203,7 @@ volatile static boolean usingAcceleration = true;
 float mmPerStep = mmPerRev / (stepMultiplier * motorStepsPerRev);
 float stepsPerMm = (stepMultiplier * motorStepsPerRev) / mmPerRev;
 
-static Coord2D machineSizeSteps = {machineSizeMm.x * stepsPerMm, machineSizeMm.y * stepsPerMm};
+static Coord2D machineSizeSteps = {(long)((float)machineSizeMm.x * stepsPerMm), (long)((float)machineSizeMm.y * stepsPerMm)};
 static long maxLength = 0;
 
 const float DEFAULT_PEN_WIDTH = 0.8f;
@@ -220,7 +215,7 @@ static float penWidth = DEFAULT_PEN_WIDTH; // line width in mm
   ========================================================================*/
 
 // max length of incoming command
-const int INLENGTH = 60;
+const int INLENGTH = 90;
 const char INTERMINATOR = 10;
 const char SEMICOLON = 59;
 
@@ -256,7 +251,7 @@ char MSG_D_STR[] = "MSG,D,";
 
 // period between status rebroadcasts
 unsigned long comms_rebroadcastStatusInterval = 4000;
-Metro broadcastStatus = Metro(comms_rebroadcastStatusInterval);
+Chrono broadcastStatusChrono;
 
 /*==========================================================================
     MOTOR interfaces
@@ -477,8 +472,8 @@ boolean recalibrateTouchScreen = false;
 // size and location of rove area
 Rectangle roveAreaMm = {200, 120, 210, 297};
 Rectangle roveAreaSteps = {
-  roveAreaMm.pos.x * stepsPerMm, roveAreaMm.pos.y * stepsPerMm, 
-  roveAreaMm.size.x * stepsPerMm, roveAreaMm.size.y * stepsPerMm};
+  (long)((float)roveAreaMm.pos.x * stepsPerMm), (long)((float)roveAreaMm.pos.y * stepsPerMm), 
+  (long)((float)roveAreaMm.size.x * stepsPerMm), (long)((float)roveAreaMm.size.y * stepsPerMm)};
 
 boolean swirling = false;
 String spritePrefix = "";

@@ -311,37 +311,45 @@ int button_genericButtonAction(int buttonId)
 
     // Page size
     case BUTTON_INC_ROVE_WIDTH:
-      roveAreaSteps.size.x += 1;
-      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveAreaSteps.size.x);
+      roveAreaMm.size.x += 1;
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveAreaMm.size.x);
+      recalculateMachineSizeInSteps();
       break;
     case BUTTON_DEC_ROVE_WIDTH:
-      roveAreaSteps.size.x -= 1;
-      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveAreaSteps.size.x);
+      roveAreaMm.size.x -= 1;
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveAreaMm.size.x);
+      recalculateMachineSizeInSteps();
       break;
     case BUTTON_INC_ROVE_HEIGHT:
-      roveAreaSteps.size.y += 1;
-      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveAreaSteps.size.y);
+      roveAreaMm.size.y += 1;
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveAreaMm.size.y);
+      recalculateMachineSizeInSteps();
       break;
     case BUTTON_DEC_ROVE_HEIGHT:
-      roveAreaSteps.size.y -= 1;
-      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveAreaSteps.size.y);
+      roveAreaMm.size.y -= 1;
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveAreaMm.size.y);
+      recalculateMachineSizeInSteps();
       break;
 
     case BUTTON_INC_ROVE_X:
-      roveAreaSteps.pos.x += 1;
-      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveAreaSteps.pos.x);
+      roveAreaMm.pos.x += 1;
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveAreaMm.pos.x);
+      recalculateMachineSizeInSteps();
       break;
     case BUTTON_DEC_ROVE_X:
-      roveAreaSteps.pos.x -= 1;
-      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveAreaSteps.pos.x);
+      roveAreaMm.pos.x -= 1;
+      lcd_drawNumberWithBackground(buttonCoords[8][0], centreYPosition, roveAreaMm.pos.x);
+      recalculateMachineSizeInSteps();
       break;
     case BUTTON_INC_ROVE_Y:
-      roveAreaSteps.pos.y += 1;
-      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveAreaSteps.pos.y);
+      roveAreaMm.pos.y += 1;
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveAreaMm.pos.y);
+      recalculateMachineSizeInSteps();
       break;
     case BUTTON_DEC_ROVE_Y:
-      roveAreaSteps.pos.y -= 1;
-      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveAreaSteps.pos.y);
+      roveAreaMm.pos.y -= 1;
+      lcd_drawNumberWithBackground(buttonCoords[10][0], centreYPosition, roveAreaMm.pos.y);
+      recalculateMachineSizeInSteps();
       break;
   }
   button_genericButtonActionEnd(&button);
@@ -414,11 +422,11 @@ int genericChangeMenuAction(int buttonId)
       break;
     case BUTTON_ROVE_SIZE_MENU:
       currentMenu = MENU_ROVE_SIZE;
-      setInitialDisplayValues(roveAreaSteps.size.x, roveAreaSteps.size.y);
+      setInitialDisplayValues(roveAreaMm.size.x, roveAreaMm.size.y);
       break;
     case BUTTON_ROVE_POS_MENU:
       currentMenu = MENU_ROVE_POSITION;
-      setInitialDisplayValues(roveAreaSteps.pos.x, roveAreaSteps.pos.y);
+      setInitialDisplayValues(roveAreaMm.pos.x, roveAreaMm.pos.y);
       break;
   }
   button_genericButtonActionEnd(&button);

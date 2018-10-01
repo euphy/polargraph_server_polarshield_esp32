@@ -179,6 +179,11 @@ void recalculateMachineSizeInSteps()
 {
   machineSizeSteps.x = machineSizeMm.x * stepsPerMm;
   machineSizeSteps.y = machineSizeMm.y * stepsPerMm;
+
+  roveAreaSteps.pos.x = roveAreaMm.pos.x * stepsPerMm;
+  roveAreaSteps.pos.y = roveAreaMm.pos.y * stepsPerMm;
+  roveAreaSteps.size.x = roveAreaMm.size.x * stepsPerMm;
+  roveAreaSteps.size.y = roveAreaMm.size.y * stepsPerMm;
 }
 
 void recalculateStepsPerMm()

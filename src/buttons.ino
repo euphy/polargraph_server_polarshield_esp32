@@ -10,9 +10,9 @@
 #define BUTTON_GAP 16
 static byte  buttonSize = 60;
 static byte  grooveSize = 36;
-static int screenWidth = 320; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 320 : 220;
-// static int screenHeight = 240; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 240 : 176;
-static int centreYPosition = 112; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_24_8) ? 112 : 80;
+static int screenWidth = 320;
+static int screenHeight = 240;
+static int centreYPosition = 112;
 
 static int decorationTextSize = 2;
 static int buttonTextSize = 1;
@@ -313,18 +313,18 @@ void button_setup_loadButtons()
 
   // Page position
   buttons[BUTTON_ROVE_POS_MENU] = (ButtonSpec){BUTTON_ROVE_POS_MENU, "rove position", genericChangeMenuAction, 0, BUTTONTYPE_CHANGE_MENU};
-  buttons[BUTTON_INC_ROVE_X] = (ButtonSpec){BUTTON_DEC_ROVE_X, "< left edge", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
-  buttons[BUTTON_DEC_ROVE_X] = (ButtonSpec){BUTTON_INC_ROVE_X, "left edge >", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
-  buttons[BUTTON_INC_ROVE_Y] = (ButtonSpec){BUTTON_DEC_ROVE_Y, "up top edge", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
-  buttons[BUTTON_DEC_ROVE_Y] = (ButtonSpec){BUTTON_INC_ROVE_Y, "top edge down", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_ROVE_X] = (ButtonSpec){BUTTON_DEC_ROVE_X, "< left edge", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_INC_ROVE_X] = (ButtonSpec){BUTTON_INC_ROVE_X, "left edge >", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_DEC_ROVE_Y] = (ButtonSpec){BUTTON_DEC_ROVE_Y, "up top edge", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
+  buttons[BUTTON_INC_ROVE_Y] = (ButtonSpec){BUTTON_INC_ROVE_Y, "top edge down", button_genericButtonAction, 0, BUTTONTYPE_CHANGE_VALUE};
 
 
 }
 
 void button_setup_generateButtonCoords()
 {
-  buttonSize = (320 - (BUTTON_GAP*4)) / 3;
-  grooveSize = 240 - (BUTTON_GAP*2) - (buttonSize*2);
+  buttonSize = (screenWidth - (BUTTON_GAP*4)) / 3;
+  grooveSize = screenHeight - (BUTTON_GAP*2) - (buttonSize*2);
 
   buttonCoords[0][0] = BUTTON_GAP;
   buttonCoords[0][1] = BUTTON_GAP;
