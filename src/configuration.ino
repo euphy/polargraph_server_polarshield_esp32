@@ -107,8 +107,7 @@ void configuration_motorSetup()
 
 void configuration_setup()
 {
-  mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
-  stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
+  recalculateStepsPerMm();
 
   // init SD card
   sd_initSD();

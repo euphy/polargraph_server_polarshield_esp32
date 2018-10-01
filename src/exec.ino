@@ -80,9 +80,9 @@ void exec_changeDrawingDirection()
 void exec_reportMachineSpec()
 {
   Serial.print(F("PGSIZE,"));
-  Serial.print(machineWidth);
+  Serial.print(machineSizeMm.x);
   Serial.print(COMMA);
-  Serial.print(machineHeight);
+  Serial.print(machineSizeMm.y);
   Serial.println(CMD_END);
 
   Serial.print(F("PGMMPERREV,"));
@@ -341,13 +341,13 @@ void exec_drawBetweenPoints(float p1a, float p1b, float p2a, float p2b, int maxS
   // Remember, the native system can easily specify points that can't exist,
   // particularly up at the top.
   if (c2x > 20 
-    && c2x<pageWidth-20 
+    && c2x<machineSizeSteps.x-20 
     && c2y > 20 
-    && c2y <pageHeight-20
+    && c2y <machineSizeSteps.y-20
     && c1x > 20 
-    && c1x<pageWidth-20 
+    && c1x<machineSizeSteps.x-20 
     && c1y > 20 
-    && c1y <pageHeight-20 
+    && c1y <machineSizeSteps.y-20 
     )
     {
     reportingPosition = false;

@@ -175,16 +175,23 @@ void changeLengthRelative(long tA, long tB)
   reportPosition();
 }
 
-void recalculatePageSize()
+void recalculateMachineSizeInSteps()
 {
-  pageWidth = machineWidth * stepsPerMM;
-  pageHeight = machineHeight * stepsPerMM;
+  machineSizeSteps.x = machineSizeMm.x * stepsPerMm;
+  machineSizeSteps.y = machineSizeMm.y * stepsPerMm;
 }
+
+void recalculateStepsPerMm()
+{
+  mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
+  stepsPerMm = multiplier(motorStepsPerRev) / mmPerRev;
+}
+
 long getMaxLength()
 {
   if (maxLength == 0)
   {
-    float length = getMachineA(pageWidth, pageHeight);
+    float length = getMachineA(machineSizeSteps.x, machineSizeSteps.y);
     maxLength = long(length+0.5);
     Serial.print("Calculated maxLength: ");
     Serial.println(maxLength);
@@ -200,7 +207,7 @@ float getMachineA(float cX, float cY)
 }
 float getMachineB(float cX, float cY)
 {
-  float b = sqrt(sq((pageWidth)-cX)+sq(cY));
+  float b = sqrt(sq((machineSizeSteps.x)-cX)+sq(cY));
   return b;
 }
 
@@ -287,28 +294,28 @@ float getCartesianXFP(float aPos, float bPos)
 //  Serial.print(aPos);
 //  Serial.print(" bPos: ");
 //  Serial.print(bPos);
-//  Serial.print(" pageWidth ");
-//  Serial.println(pageWidth);
+//  Serial.print(" machineSizeSteps.x ");
+//  Serial.println(machineSizeSteps.x);
 //
 //  Serial.print("Float calc: sq aPos: ");
 //  Serial.print(sq(aPos));
 //  Serial.print(" bPos: ");
 //  Serial.print(sq(bPos));
-//  Serial.print(" pageWidth*2 ");
-//  Serial.print((float)pageWidth * 2.0);
-//  Serial.print(" pageWidth sq ");
-//  Serial.println(sq((float)pageWidth));
+//  Serial.print(" machineSizeSteps.x*2 ");
+//  Serial.print((float)machineSizeSteps.x * 2.0);
+//  Serial.print(" machineSizeSteps.x sq ");
+//  Serial.println(sq((float)machineSizeSteps.x));
 //
 //  Serial.print("Int calc: sq aPos: ");
 //  Serial.print(sq(aPos));
 //  Serial.print(" bPos: ");
 //  Serial.print(sq(bPos));
-//  Serial.print(" pageWidth*2 ");
-//  Serial.print(pageWidth * 2.0);
-//  Serial.print(" pageWidth sq ");
-//  Serial.println(sq(pageWidth));
+//  Serial.print(" machineSizeSteps.x*2 ");
+//  Serial.print(machineSizeSteps.x * 2.0);
+//  Serial.print(" machineSizeSteps.x sq ");
+//  Serial.println(sq(machineSizeSteps.x));
 
-  float calcX = (sq((float)pageWidth) - sq((float)bPos) + sq((float)aPos)) / ((long) pageWidth * 2.0);
+  float calcX = (sq((float)machineSizeSteps.x) - sq((float)bPos) + sq((float)aPos)) / ((long) machineSizeSteps.x * 2.0);
 
 //  Serial.print("CalcX float: ");
 //  Serial.println(calcX);
@@ -335,7 +342,7 @@ float getCartesianYFP(float cX, float aPos)
 
 long getCartesianX(float aPos, float bPos)
 {
-  long calcX = long((pow(pageWidth, 2) - pow(bPos, 2) + pow(aPos, 2)) / (pageWidth*2));
+  long calcX = long((pow(machineSizeSteps.x, 2) - pow(bPos, 2) + pow(aPos, 2)) / (machineSizeSteps.x*2));
   return calcX;
 }
 

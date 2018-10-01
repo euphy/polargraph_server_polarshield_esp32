@@ -67,12 +67,12 @@ void calibrate_doCalibration()
     endStopSignal = digitalRead(ENDSTOP_X_MIN);
   }
   Serial.println("A End stop signalled");
-  motorARestPoint = abs(motorA.currentPosition()) + (ENDSTOP_X_MIN_POSITION * stepsPerMM);
-  motorA.setCurrentPosition(ENDSTOP_X_MIN_POSITION * stepsPerMM);
+  motorARestPoint = abs(motorA.currentPosition()) + (ENDSTOP_X_MIN_POSITION * stepsPerMm);
+  motorA.setCurrentPosition(ENDSTOP_X_MIN_POSITION * stepsPerMm);
   delay(1000);
   
   // wind out a machines-width of cord from motorA
-  motorA.moveTo(pageWidth);
+  motorA.moveTo(machineSizeSteps.x);
   motorA.setAcceleration(currentAcceleration);
   while (motorA.distanceToGo() != 0)
     motorA.run();
@@ -113,8 +113,8 @@ void calibrate_doCalibration()
     Serial.println(endStopSignal);
   }
   Serial.println("B End stop signalled");
-  motorBRestPoint = abs(motorB.currentPosition()) + (ENDSTOP_Y_MIN_POSITION * stepsPerMM);
-  motorB.setCurrentPosition(ENDSTOP_Y_MIN_POSITION * stepsPerMM);
+  motorBRestPoint = abs(motorB.currentPosition()) + (ENDSTOP_Y_MIN_POSITION * stepsPerMm);
+  motorB.setCurrentPosition(ENDSTOP_Y_MIN_POSITION * stepsPerMm);
 
   reportPosition();
   

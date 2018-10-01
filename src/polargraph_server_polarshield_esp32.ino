@@ -66,9 +66,14 @@ typedef struct {
 
 // 2D coordinates struct
 typedef struct {
-  int x;
-  int y;
+  long x;
+  long y;
 } Coord2D;
+
+typedef struct {
+  Coord2D pos;
+  Coord2D size;
+} Rectangle;
 
 typedef struct {
   long menuDue;         // redraw the menu when this time is reached
@@ -179,8 +184,8 @@ boolean isPenUp = false;
 
 
 // working machine specification
-const int DEFAULT_MACHINE_WIDTH = 650;
-const int DEFAULT_MACHINE_HEIGHT = 800;
+const long DEFAULT_MACHINE_WIDTH = 650;
+const long DEFAULT_MACHINE_HEIGHT = 800;
 const float DEFAULT_MM_PER_REV = 95.0;
 const int DEFAULT_STEPS_PER_REV = 200;
 const int DEFAULT_STEP_MULTIPLIER = 8;
@@ -188,8 +193,8 @@ const int DEFAULT_STEP_MULTIPLIER = 8;
 static int motorStepsPerRev = DEFAULT_STEPS_PER_REV;
 static float mmPerRev = DEFAULT_MM_PER_REV;
 static int stepMultiplier = DEFAULT_STEP_MULTIPLIER;
-static int machineWidth = DEFAULT_MACHINE_WIDTH;
-static int machineHeight = DEFAULT_MACHINE_HEIGHT;
+
+static Coord2D machineSizeMm = {DEFAULT_MACHINE_WIDTH, DEFAULT_MACHINE_HEIGHT};
 
 static long startLengthStepsA = 8000;
 static long startLengthStepsB = 8000;
@@ -200,12 +205,11 @@ static float currentMaxSpeed = DEFAULT_MAX_SPEED;
 static float currentAcceleration = DEFAULT_ACCELERATION;
 volatile static boolean usingAcceleration = true;
 
-float mmPerStep = 0.0F;
-float stepsPerMM = 0.0F;
+float mmPerStep = mmPerRev / (stepMultiplier * motorStepsPerRev);
+float stepsPerMm = (stepMultiplier * motorStepsPerRev) / mmPerRev;
 
-long pageWidth = machineWidth * stepsPerMM;
-long pageHeight = machineHeight * stepsPerMM;
-long maxLength = 0;
+static Coord2D machineSizeSteps = {machineSizeMm.x * stepsPerMm, machineSizeMm.y * stepsPerMm};
+static long maxLength = 0;
 
 const float DEFAULT_PEN_WIDTH = 0.8f;
 static float penWidth = DEFAULT_PEN_WIDTH; // line width in mm
@@ -471,10 +475,10 @@ boolean recalibrateTouchScreen = false;
 
 
 // size and location of rove area
-long rove1x = 1000;
-long rove1y = 1000;
-long roveWidth = 5000;
-long roveHeight = 8000;
+Rectangle roveAreaMm = {200, 120, 210, 297};
+Rectangle roveAreaSteps = {
+  roveAreaMm.pos.x * stepsPerMm, roveAreaMm.pos.y * stepsPerMm, 
+  roveAreaMm.size.x * stepsPerMm, roveAreaMm.size.y * stepsPerMm};
 
 boolean swirling = false;
 String spritePrefix = "";

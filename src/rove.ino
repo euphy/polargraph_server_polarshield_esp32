@@ -15,48 +15,50 @@ the rove area heavily.
 
 void rove_setRoveArea()
 {
- rove1x = stepsPerMM * atol(inParam1);
- rove1y = stepsPerMM * atol(inParam2);
- roveWidth = stepsPerMM * atol(inParam3);
- roveHeight = stepsPerMM * atol(inParam4);
+  Rectangle roveAreaMm = {atol(inParam1), atol(inParam2), atol(inParam3), atol(inParam4)};
+
+ roveAreaSteps.pos.x = stepsPerMm * roveAreaMm.pos.x;
+ roveAreaSteps.pos.y = stepsPerMm * roveAreaMm.pos.y;
+ roveAreaSteps.size.x = stepsPerMm * roveAreaMm.size.x;
+ roveAreaSteps.size.y = stepsPerMm * roveAreaMm.size.y;
  
- if (rove1x > pageWidth)
-   rove1x = pageWidth / 2;
- else if (rove1x < 1)
-   rove1x = 1;
+ if (roveAreaSteps.pos.x > machineSizeSteps.x)
+   roveAreaSteps.pos.x = machineSizeSteps.x / 2;
+ else if (roveAreaSteps.pos.x < 1)
+   roveAreaSteps.pos.x = 1;
    
- if (rove1y > pageHeight)
-   rove1y = pageHeight / 2;
- else if (rove1y < 1)
-   rove1y = 1;
+ if (roveAreaSteps.pos.y > machineSizeSteps.y)
+   roveAreaSteps.pos.y = machineSizeSteps.y / 2;
+ else if (roveAreaSteps.pos.y < 1)
+   roveAreaSteps.pos.y = 1;
  
- if (roveWidth+rove1x > pageWidth)
-   roveWidth = pageWidth - rove1x;
+ if (roveAreaSteps.size.x+roveAreaSteps.pos.x > machineSizeSteps.x)
+   roveAreaSteps.size.x = machineSizeSteps.x - roveAreaSteps.pos.x;
    
- if (roveHeight+rove1y > pageHeight)
-   roveHeight = pageHeight - rove1y;
+ if (roveAreaSteps.size.y+roveAreaSteps.pos.y > machineSizeSteps.y)
+   roveAreaSteps.size.y = machineSizeSteps.y - roveAreaSteps.pos.y;
  
  useRoveArea = true;
 
  Serial.println("Set rove area (steps):");
  Serial.print("X:");
- Serial.print(rove1x);
+ Serial.print(roveAreaSteps.pos.x);
  Serial.print(",Y:");
- Serial.print(rove1y);
+ Serial.print(roveAreaSteps.pos.y);
  Serial.print(",width:");
- Serial.print(roveWidth);
+ Serial.print(roveAreaSteps.size.x);
  Serial.print(",height:");
- Serial.println(roveHeight);
+ Serial.println(roveAreaSteps.size.y);
 
  Serial.println("Set rove area (mm):");
  Serial.print("X:");
- Serial.print(rove1x * mmPerStep);
+ Serial.print(roveAreaSteps.pos.x * mmPerStep);
  Serial.print("mm, Y:");
- Serial.print(rove1y * mmPerStep);
+ Serial.print(roveAreaSteps.pos.y * mmPerStep);
  Serial.print("mm, width:");
- Serial.print(roveWidth * mmPerStep);
+ Serial.print(roveAreaSteps.size.x * mmPerStep);
  Serial.print("mm, height:");
- Serial.print(roveHeight * mmPerStep);
+ Serial.print(roveAreaSteps.size.y * mmPerStep);
  Serial.println("mm.");
 
 }
@@ -105,16 +107,16 @@ boolean rove_inRoveArea(float a, float b)
 //  Serial.println(cY);
 //  
 //  Serial.print("Rove origin: ");
-//  Serial.print(rove1x);
+//  Serial.print(roveAreaSteps.pos.x);
 //  Serial.print(", ");
-//  Serial.println(rove1y);
+//  Serial.println(roveAreaSteps.pos.y);
 //
 //  Serial.print("Rove size: ");
-//  Serial.print(roveWidth);
+//  Serial.print(roveAreaSteps.size.x);
 //  Serial.print(", ");
-//  Serial.println(roveHeight);
+//  Serial.println(roveAreaSteps.size.y);
  
- if (cX < rove1x || cX > rove1x+roveWidth || cY < rove1y || cY > rove1y+roveHeight)
+ if (cX < roveAreaSteps.pos.x || cX > roveAreaSteps.pos.x+roveAreaSteps.size.x || cY < roveAreaSteps.pos.y || cY > roveAreaSteps.pos.y+roveAreaSteps.size.y)
    return false;
  else
    return true;
@@ -143,25 +145,25 @@ boolean rove_moveToBeginningOfNextTextLine()
    Serial.println(nextLine);
 
    // greater than the far corner or less than the near corner
-   if (sq(nextLine) > sq(rove1y+roveHeight) + sq(pageWidth-rove1x)
-     || sq(nextLine) < sq(rove1y) + sq(pageWidth-(rove1x+roveWidth)))
+   if (sq(nextLine) > sq(roveAreaSteps.pos.y+roveAreaSteps.size.y) + sq(machineSizeSteps.x-roveAreaSteps.pos.x)
+     || sq(nextLine) < sq(roveAreaSteps.pos.y) + sq(machineSizeSteps.x-(roveAreaSteps.pos.x+roveAreaSteps.size.x)))
    {
      Serial.println("No space for lines!");
      // no lines left!
    }
-   else if (sq(nextLine) <= sq(rove1y) + sq(pageWidth-rove1x))
+   else if (sq(nextLine) <= sq(roveAreaSteps.pos.y) + sq(machineSizeSteps.x-roveAreaSteps.pos.x))
    {
      Serial.println("On the top edge.");
      // measure on the top edge of the rove area
-     xIntersection = pageWidth-sqrt(sq(nextLine) - sq(rove1y));
-     yIntersection = rove1y;
+     xIntersection = machineSizeSteps.x-sqrt(sq(nextLine) - sq(roveAreaSteps.pos.y));
+     yIntersection = roveAreaSteps.pos.y;
 
      Serial.print("nextline:");
      Serial.print(nextLine * mmPerStep);
-     Serial.print(",rove1x:");
-     Serial.print(rove1x * mmPerStep);
-     Serial.print(",rove1y:");
-     Serial.println(rove1y * mmPerStep);
+     Serial.print(",roveAreaSteps.pos.x:");
+     Serial.print(roveAreaSteps.pos.x * mmPerStep);
+     Serial.print(",roveAreaSteps.pos.y:");
+     Serial.println(roveAreaSteps.pos.y * mmPerStep);
 
      result = true;
    }
@@ -169,8 +171,8 @@ boolean rove_moveToBeginningOfNextTextLine()
    {
      Serial.println("On the left edge.");
      // measure on the left edge of the rove area
-     xIntersection = rove1x;
-     yIntersection = sqrt(sq(nextLine) - sq(pageWidth - rove1x));
+     xIntersection = roveAreaSteps.pos.x;
+     yIntersection = sqrt(sq(nextLine) - sq(machineSizeSteps.x - roveAreaSteps.pos.x));
      result = true;
    }
  }
@@ -227,14 +229,14 @@ void rove_drawNorwegianFromFile()
      Serial.print(pbmWidth, DEC);
      Serial.print(", ");
      Serial.println(pbmHeight, DEC);
-     Serial.print("(roveWidth:");
-     Serial.print(roveWidth);
+     Serial.print("(roveAreaSteps.size.x:");
+     Serial.print(roveAreaSteps.size.x);
      Serial.println(")");
-     pbmScaling = float(roveWidth) / float(pbmWidth);
+     pbmScaling = float(roveAreaSteps.size.x) / float(pbmWidth);
      Serial.print("Scaling factor:");
      Serial.println(pbmScaling);
      Serial.print("Rove width:");
-     Serial.println(roveWidth);
+     Serial.println(roveAreaSteps.size.x);
      Serial.print("Image offset:");
      Serial.println(pbmImageoffset);
    }
@@ -244,18 +246,18 @@ void rove_drawNorwegianFromFile()
    // Move to top of first row:
    // x2 - amplitude
 
-   // set roveHeight so that it is the same shape as the image.  
-   roveHeight = roveWidth * pbmAspectRatio;
-   long rove2x = rove1x + roveWidth;
-   long rove2y = rove1y + roveHeight;
+   // set roveAreaSteps.size.y so that it is the same shape as the image.  
+   roveAreaSteps.size.y = roveAreaSteps.size.x * pbmAspectRatio;
+   long rove2x = roveAreaSteps.pos.x + roveAreaSteps.size.x;
+   long rove2y = roveAreaSteps.pos.y + roveAreaSteps.size.y;
    
    // work out the distance from motor B to the closest corner of the rove area
-   float row = getMachineB(rove2x,rove1y);
+   float row = getMachineB(rove2x,roveAreaSteps.pos.y);
    
    // so the first row will be that value plus half of maxAmplitude
    row += (maxAmplitude / 2);
    
-   changeLength(getMachineA(rove2x, rove1y), row);
+   changeLength(getMachineA(rove2x, roveAreaSteps.pos.y), row);
    penlift_penDown();
    
    // and figure out where the arc with this radius intersects the top edge
@@ -282,24 +284,24 @@ void rove_drawNorwegianFromFile()
        tB = row;
        
        // greater than the far corner or less than the near corner
-       if (sq(row) > sq(rove2y) + sq(pageWidth-rove1x)
-         || sq(row) < sq(rove1y) + sq(pageWidth-(rove2x)))
+       if (sq(row) > sq(rove2y) + sq(machineSizeSteps.x-roveAreaSteps.pos.x)
+         || sq(row) < sq(roveAreaSteps.pos.y) + sq(machineSizeSteps.x-(rove2x)))
        {
          Serial.println("No space for rows!");
          // no lines left!
          finished = true;
        }
-       else if (sq(row) <= sq(rove1y) + sq(pageWidth-rove1x))
+       else if (sq(row) <= sq(roveAreaSteps.pos.y) + sq(machineSizeSteps.x-roveAreaSteps.pos.x))
        {
          Serial.println("On the top edge.");
          // measure on the top edge of the rove area
-         xIntersection = pageWidth-sqrt(sq(row) - sq(rove1y));
-         yIntersection = rove1y;
+         xIntersection = machineSizeSteps.x-sqrt(sq(row) - sq(roveAreaSteps.pos.y));
+         yIntersection = roveAreaSteps.pos.y;
          
          Serial.print("New row starts at (mm) x:");
-         Serial.print(rove1x * mmPerStep);
+         Serial.print(roveAreaSteps.pos.x * mmPerStep);
          Serial.print(",Y:");
-         Serial.print(rove1y * mmPerStep);
+         Serial.print(roveAreaSteps.pos.y * mmPerStep);
      
          // move      
          tA = getMachineA(xIntersection, yIntersection);
@@ -311,13 +313,13 @@ void rove_drawNorwegianFromFile()
        {
          Serial.println("On the left edge.");
          // measure on the left edge of the rove area
-         xIntersection = rove1x;
-         yIntersection = sqrt(sq(row) - sq(pageWidth - rove1x));
+         xIntersection = roveAreaSteps.pos.x;
+         yIntersection = sqrt(sq(row) - sq(machineSizeSteps.x - roveAreaSteps.pos.x));
  
          Serial.print("New row starts at (mm) x:");
-         Serial.print(rove1x * mmPerStep);
+         Serial.print(roveAreaSteps.pos.x * mmPerStep);
          Serial.print(",Y:");
-         Serial.print(rove1y * mmPerStep);
+         Serial.print(roveAreaSteps.pos.y * mmPerStep);
    
          // move      
          tA = getMachineA(xIntersection, yIntersection);
@@ -345,8 +347,8 @@ void rove_drawNorwegianFromFile()
        float cX = getCartesianXFP(tA, tB);
        float cY = getCartesianYFP(cX, tA);
        
-       cX -= rove1x;
-       cY -= rove1y;
+       cX -= roveAreaSteps.pos.x;
+       cY -= roveAreaSteps.pos.y;
        
        Serial.print("Drawing pixel on page at x:");
        Serial.print(cX); //* mmPerStep);
@@ -428,22 +430,22 @@ void rove_drawRoveAreaFittedToImage()
      Serial.print(pbmWidth, DEC);
      Serial.print(", ");
      Serial.println(pbmHeight, DEC);
-     Serial.print("(roveWidth:");
-     Serial.print(roveWidth);
+     Serial.print("(roveAreaSteps.size.x:");
+     Serial.print(roveAreaSteps.size.x);
      Serial.println(")");
-     pbmScaling = roveWidth / pbmWidth;
+     pbmScaling = roveAreaSteps.size.x / pbmWidth;
      Serial.print("Scaling factor:");
      Serial.println(pbmScaling);
      Serial.print("Rove width:");
-     Serial.println(roveWidth);
+     Serial.println(roveAreaSteps.size.x);
      Serial.print("Image offset:");
      Serial.println(pbmImageoffset);
    }
    
-   // set roveHeight so that it is the same shape as the image.  
-   roveHeight = roveWidth * pbmAspectRatio;
-   long rove2x = rove1x + roveWidth;
-   long rove2y = rove1y + roveHeight;
+   // set roveAreaSteps.size.y so that it is the same shape as the image.  
+   roveAreaSteps.size.y = roveAreaSteps.size.x * pbmAspectRatio;
+   long rove2x = roveAreaSteps.pos.x + roveAreaSteps.size.x;
+   long rove2y = roveAreaSteps.pos.y + roveAreaSteps.size.y;
 
    Serial.print("rove2x:");
    Serial.print(rove2x);
@@ -455,8 +457,8 @@ void rove_drawRoveAreaFittedToImage()
 //    Serial.println("Point 1.");
    float mA = motorA.currentPosition();
    float mB = motorB.currentPosition();
-   float tA = getMachineA(rove1x, rove1y);
-   float tB = getMachineB(rove1x, rove1y);
+   float tA = getMachineA(roveAreaSteps.pos.x, roveAreaSteps.pos.y);
+   float tB = getMachineB(roveAreaSteps.pos.x, roveAreaSteps.pos.y);
 //    Serial.print("now a:");
 //    Serial.print(mA);
 //    Serial.print(",b:");
@@ -470,8 +472,8 @@ void rove_drawRoveAreaFittedToImage()
 //    Serial.println("Point 2.");
    mA = motorA.currentPosition();
    mB = motorB.currentPosition();
-   tA = getMachineA(rove2x, rove1y);
-   tB = getMachineB(rove2x, rove1y);
+   tA = getMachineA(rove2x, roveAreaSteps.pos.y);
+   tB = getMachineB(rove2x, roveAreaSteps.pos.y);
 //    Serial.print("now a:");
 //    Serial.print(mA);
 //    Serial.print(",b:");
@@ -500,8 +502,8 @@ void rove_drawRoveAreaFittedToImage()
 //    Serial.println("Point 4.");
    mA = motorA.currentPosition();
    mB = motorB.currentPosition();
-   tA = getMachineA(rove1x, rove2y);
-   tB = getMachineB(rove1x, rove2y);
+   tA = getMachineA(roveAreaSteps.pos.x, rove2y);
+   tB = getMachineB(roveAreaSteps.pos.x, rove2y);
 //    Serial.print("now a:");
 //    Serial.print(mA);
 //    Serial.print(",b:");
@@ -515,8 +517,8 @@ void rove_drawRoveAreaFittedToImage()
 //    Serial.println("Point 5.");
    mA = motorA.currentPosition();
    mB = motorB.currentPosition();
-   tA = getMachineA(rove1x, rove1y);
-   tB = getMachineB(rove1x, rove1y);
+   tA = getMachineA(roveAreaSteps.pos.x, roveAreaSteps.pos.y);
+   tB = getMachineB(roveAreaSteps.pos.x, roveAreaSteps.pos.y);
 //    Serial.print("now a:");
 //    Serial.print(mA);
 //    Serial.print(",b:");
@@ -526,7 +528,7 @@ void rove_drawRoveAreaFittedToImage()
 //    Serial.print(", b:");
 //    Serial.println(tB);
    exec_drawBetweenPoints(mA, mB, tA, tB, 20);
-   exec_drawBetweenPoints(float(motorA.currentPosition()), float(motorB.currentPosition()), getMachineA(rove1x, rove1y), getMachineB(rove1x, rove1y), 20);
+   exec_drawBetweenPoints(float(motorA.currentPosition()), float(motorB.currentPosition()), getMachineA(roveAreaSteps.pos.x, roveAreaSteps.pos.y), getMachineB(roveAreaSteps.pos.x, roveAreaSteps.pos.y), 20);
 //    Serial.println("Done.");
    
  }
@@ -541,8 +543,8 @@ void rove_drawRoveAreaFittedToImage()
 */
 void  rove_moveToRandomPositionInRoveArea()
 {
- long x = random(rove1x, rove1x+roveWidth);
- long y = random(rove1y, rove1y+roveHeight);
+ long x = random(roveAreaSteps.pos.x, roveAreaSteps.pos.x+roveAreaSteps.size.x);
+ long y = random(roveAreaSteps.pos.y, roveAreaSteps.pos.y+roveAreaSteps.size.y);
  float a = getMachineA(x,y);
  float b = getMachineB(x,y);
  
@@ -557,16 +559,16 @@ void rove_swirl()
  
  if (motorA.distanceToGo() == 0)
  {
-   long x = random(rove1x, rove1x+roveWidth);
-   long y = random(rove1y, rove1y+roveHeight);
+   long x = random(roveAreaSteps.pos.x, roveAreaSteps.pos.x+roveAreaSteps.size.x);
+   long y = random(roveAreaSteps.pos.y, roveAreaSteps.pos.y+roveAreaSteps.size.y);
    float a = getMachineA(x,y);
    motorA.moveTo(a);
  }
 
  if (motorB.distanceToGo() == 0)
  {
-   long x = random(rove1x, rove1x+roveWidth);
-   long y = random(rove1y, rove1y+roveHeight);
+   long x = random(roveAreaSteps.pos.x, roveAreaSteps.pos.x+roveAreaSteps.size.x);
+   long y = random(roveAreaSteps.pos.y, roveAreaSteps.pos.y+roveAreaSteps.size.y);
    float b = getMachineB(x,y);
    motorB.moveTo(b);
  }

@@ -229,7 +229,7 @@ void pixel_drawScribblePixel(long originA, long originB, int size, int density)
 
 int pixel_minSegmentSizeForPen(float penSize)
 {
-  float penSizeInSteps = penSize * stepsPerMM;
+  float penSizeInSteps = penSize * stepsPerMm;
 
   int minSegSize = 1;
   if (penSizeInSteps >= 2.0)

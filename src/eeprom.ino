@@ -60,19 +60,19 @@ void eeprom_setDefaults()
 
 void eeprom_loadMachineSize()
 {
-  machineWidth = preferences.getInt(PREFKEY_MACHINE_WIDTH, DEFAULT_MACHINE_WIDTH);
-  if (machineWidth < 1) {
-    machineWidth = DEFAULT_MACHINE_WIDTH;
+  machineSizeMm.x = preferences.getInt(PREFKEY_MACHINE_WIDTH, DEFAULT_MACHINE_WIDTH);
+  if (machineSizeMm.x < 1) {
+    machineSizeMm.x = DEFAULT_MACHINE_WIDTH;
   }
   Serial.print(F("Loaded machine width:"));
-  Serial.println(machineWidth);
+  Serial.println(machineSizeMm.x);
 
-  machineHeight = preferences.getInt(PREFKEY_MACHINE_HEIGHT, DEFAULT_MACHINE_HEIGHT);
-  if (machineHeight < 1) {
-    machineHeight = DEFAULT_MACHINE_HEIGHT;
+  machineSizeMm.y = preferences.getInt(PREFKEY_MACHINE_HEIGHT, DEFAULT_MACHINE_HEIGHT);
+  if (machineSizeMm.y < 1) {
+    machineSizeMm.y = DEFAULT_MACHINE_HEIGHT;
   }
   Serial.print(F("Loaded machine height:"));
-  Serial.println(machineHeight);
+  Serial.println(machineSizeMm.y);
 }
 
 void eeprom_loadSpoolSpec()
@@ -181,23 +181,23 @@ void eeprom_loadMachineSpecFromEeprom()
   eeprom_loadPenWidth();
 
   mmPerStep = mmPerRev / multiplier(motorStepsPerRev);
-  stepsPerMM = multiplier(motorStepsPerRev) / mmPerRev;
+  stepsPerMm = multiplier(motorStepsPerRev) / mmPerRev;
 
   Serial.print(F("Recalc mmPerStep ("));
   Serial.print(mmPerStep);
-  Serial.print(F("), stepsPerMM ("));
-  Serial.print(stepsPerMM);
+  Serial.print(F("), stepsPerMm ("));
+  Serial.print(stepsPerMm);
   Serial.print(F(")"));
   Serial.println();
 
-  pageWidth = machineWidth * stepsPerMM;
-  Serial.print(F("Recalc pageWidth in steps ("));
-  Serial.print(pageWidth);
+  machineSizeSteps.x = machineSizeMm.x * stepsPerMm;
+  Serial.print(F("Recalc machineSizeSteps.x in steps ("));
+  Serial.print(machineSizeSteps.x);
   Serial.print(F(")"));
   Serial.println();
-  pageHeight = machineHeight * stepsPerMM;
-  Serial.print(F("Recalc pageHeight in steps ("));
-  Serial.print(pageHeight);
+  machineSizeSteps.y = machineSizeMm.y * stepsPerMm;
+  Serial.print(F("Recalc machineSizeSteps.y in steps ("));
+  Serial.print(machineSizeSteps.y);
   Serial.print(F(")"));
   Serial.println();
 
