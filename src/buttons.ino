@@ -17,6 +17,8 @@ static int centreYPosition = 112; //(LCD_TYPE == ITDB24E_8 || LCD_TYPE == TFT01_
 static int decorationTextSize = 2;
 static int buttonTextSize = 1;
 
+// These are the placeholders for the initial number values that might display
+// on a freshly drawn menu.
 static int displayValues[3] = {0, 0, 0};
 
 /*  This defines a particular generic type of button
@@ -24,7 +26,6 @@ static int displayValues[3] = {0, 0, 0};
  */
 typedef struct {
   int type; // changemenu, toggle or changevalue
-//  int minTouchDuration; // how long should the button be touched to be noticed
   int whatToRedraw; // whether a redraw includes the button, the whole menu or just the decoration
   int triggerAfter; // how to trigger it, either "on release", or after a certan duration
 } ButtonType;
