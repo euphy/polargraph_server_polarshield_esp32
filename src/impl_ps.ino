@@ -18,7 +18,7 @@ mega/polarshield version of the polargraph.
 have command storage features. */
 void impl_processCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams)
 {
-  lcd_echoLastCommandToDisplay(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams, "usb:");
+  // lcd_echoLastCommandToDisplay(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams, "usb:");
 
   // The MEGA can change from LIVE to STORING modes
   // LIVE is where it acts on the commands,
