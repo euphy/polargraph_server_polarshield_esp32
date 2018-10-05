@@ -43,7 +43,7 @@ the User_Setup.h file and add the following lines.
 #include <Encoder.h>
 
 #include <Preferences.h>
-#include <ESP32Ticker.h>
+#include <Ticker.h>
 #include <Chrono.h>
 
 #include "firmware-build-name.h"
