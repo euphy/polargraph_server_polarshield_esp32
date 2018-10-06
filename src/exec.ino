@@ -109,6 +109,10 @@ void exec_reportMachineSpec()
   Serial.print(currentAcceleration);
   Serial.println(CMD_END);
 
+  Serial.print(F("PGPENWIDTH,"));
+  Serial.print(penWidth);
+  Serial.println(CMD_END);
+
 }
 
 void exec_setMachineSizeFromCommand()
