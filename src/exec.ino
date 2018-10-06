@@ -133,6 +133,7 @@ void exec_setMachineSizeFromCommand()
 
   // reload
   eeprom_loadMachineSize();
+  Serial.printf("New size: %d, %d\n", machineSizeMm.x, machineSizeMm.y);
 }
 
 void exec_setMachineMmPerRevFromCommand()
@@ -143,6 +144,8 @@ void exec_setMachineMmPerRevFromCommand()
     preferences.putFloat(PREFKEY_MACHINE_MM_PER_REV, newMmPerRev);
     eeprom_loadMachineSpecFromEeprom();
   }
+  Serial.print("New mm per rev: ");
+  Serial.println(mmPerRev);
 }
 
 void exec_setMachineStepsPerRevFromCommand()
@@ -153,6 +156,8 @@ void exec_setMachineStepsPerRevFromCommand()
     preferences.putInt(PREFKEY_MACHINE_STEPS_PER_REV, newStepsPerRev);
     eeprom_loadMachineSpecFromEeprom();
   }
+  Serial.print("New steps per rev: ");
+  Serial.println(motorStepsPerRev);
 }
 void exec_setMachineStepMultiplierFromCommand()
 {
@@ -162,6 +167,8 @@ void exec_setMachineStepMultiplierFromCommand()
     preferences.putInt(PREFKEY_MACHINE_STEP_MULTIPLIER, newStepMultiplier);
     eeprom_loadMachineSpecFromEeprom();
   }
+  Serial.print("New step multiplier: ");
+  Serial.println(stepMultiplier);
 }
 
 void exec_setPenLiftRange()
