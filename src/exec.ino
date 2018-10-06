@@ -26,7 +26,7 @@ boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2,
     exec_changeLength();
   else if (inCmd.startsWith(CMD_CHANGELENGTHDIRECT))
     exec_changeLengthDirect();
-  else if (inCmd.startsWith(CMD_CHANGEPENWIDTH))
+  else if (inCmd.startsWith(CMD_SETPENWIDTH))
     exec_changePenWidth();
   else if (inCmd.startsWith(CMD_SETMOTORSPEED))
     exec_setMotorSpeedFromCommand();

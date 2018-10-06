@@ -58,6 +58,7 @@ class Polargraph():
 
     def write_command(self, command):
         if self.ready:
+            self.commands_written_count += 1
             print("Command {}: {}"
                 .format(self.commands_written_count, command))
             self.serial_port.write(command + "\n")

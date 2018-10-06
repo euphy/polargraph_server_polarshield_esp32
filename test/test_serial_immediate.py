@@ -5,10 +5,7 @@ import env
 # Immediate commands are interpreted quickly
 
 CMD_SETPENWIDTH = 'C02,{pen_width},END'
-# CMD_CHANGEMOTORSPEED = 'C03,{motor_speed},END'
-# CMD_CHANGEMOTORACCEL = 'C04,{motor_accel},END'
 CMD_SETMACHINESIZE = 'C24,{width},{height},END'
-# CMD_SETMACHINENAME = 'C25,{name},END'
 CMD_GETMACHINEDETAILS = 'C26,END'
 # CMD_RESETEEPROM = 'C27,END'
 CMD_SETMACHINEMMPERREV = 'C29,{mm_per_rev},END'
@@ -16,13 +13,14 @@ CMD_SETMACHINESTEPSPERREV = 'C30,{steps_per_rev},END'
 CMD_SETMOTORSPEED = 'C31,{motor_speed},END'
 CMD_SETMOTORACCEL = 'C32,{motor_accel},END'
 CMD_SETMACHINESTEPMULTIPLIER = 'C37,{step_multiplier},END'
-# CMD_SETPENLIFTRANGE = 'C45,{down_pos},{up_pos},END'
+CMD_SETPENLIFTRANGE = 'C45,{down_pos},{up_pos},{write},END'
 # CMD_SET_ROVE_AREA = 'C21,{pos_x},{pos_y},{width},{height},END'
 # CMD_SET_DEBUGCOMMS = 'C47,END'
 # CMD_MODE_STORE_COMMANDS = 'C33,{newfilename},{replace},END'
 # CMD_MODE_EXEC_FROM_STORE = 'C34,{filename},END'
 # CMD_MODE_LIVE = 'C35,END'
-# CMD_START_TEXT = 'C38,END'
+
+CMD_SETPENLIFTRANGE_TEST_RANGE = 'C45,{down_pos},{up_pos},END'
 
 class TestImmediateTests(object):
 
@@ -65,6 +63,19 @@ class TestImmediateTests(object):
         current_accel = splitted_spec[2]
 
         return {'speed': current_speed, 'accel': current_accel}
+
+
+    def test_get_machine_details(self):
+        spec = self.get_machine_spec()
+        expected = \
+        ['PGSIZE', 'PGMMPERREV', 'PGSTEPSPERREV', 'PGSTEPMULTIPLIER', 
+         'PGLIFT', 'PGSPEED', 'PGPENWIDTH']
+        assert len(spec) >= len(expected)
+        
+        for response in expected:
+            match = [x for x in spec if x.startswith(response)]
+            assert len(match) == 1
+
 
     @pytest.mark.skip()
     def test_set_pen_width(self):
@@ -129,4 +140,17 @@ class TestImmediateTests(object):
         command = CMD_SETMACHINESIZE.format(width=700, height=800)
         assert 'New size: 700, 800' in self.get_response_to(command)
         assert 'PGSIZE,700,800,END' in self.get_machine_spec()
+
+    def test_set_lift_range(self):
+        command = CMD_SETPENLIFTRANGE.format(down_pos=20, up_pos=60, write=1)
+        responses = self.get_response_to(command)
+        assert 'Down: 20' in responses
+        assert 'Up: 60' in responses
+        assert 'PGLIFT,20,60,END' in self.get_machine_spec()
+
+        command = CMD_SETPENLIFTRANGE.format(down_pos=90, up_pos=180, write=1)
+        responses = self.get_response_to(command)
+        assert 'Down: 90' in responses
+        assert 'Up: 180' in responses
+        assert 'PGLIFT,90,180,END' in self.get_machine_spec()
 
