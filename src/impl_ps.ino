@@ -58,7 +58,8 @@ void impl_executeCommand(String inCmd, String inParam1, String inParam2, String 
   if (exec_executeBasicCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams))
   {
     // that's nice, it worked
-    Serial.println("Executed basic.");
+    Serial.print(MSG_COMPLETE_STR);
+    Serial.println(lastParsedCommandRaw);
   }
   else if (inCmd.startsWith(CMD_DRAWCIRCLEPIXEL))
     curves_pixel_drawCircularPixel();
@@ -89,7 +90,7 @@ void impl_executeCommand(String inCmd, String inParam1, String inParam2, String 
   else
   {
     comms_unrecognisedCommand(inCmd, inParam1, inParam2, inParam3, inParam4, inNoOfParams);
-    comms_ready();
+    // comms_ready();
   }
 }
 

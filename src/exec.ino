@@ -241,7 +241,7 @@ void exec_setMotorAcceleration(float accel)
 void exec_changePenWidth()
 {
   penWidth = atof(inParam1);
-  Serial.print(MSG_I_STR);
+  Serial.print(MSG_INFO_STR);
   Serial.print(F("Changed Pen width to "));
   Serial.print(penWidth);
   Serial.print(F("mm"));

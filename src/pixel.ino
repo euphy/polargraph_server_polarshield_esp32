@@ -252,7 +252,7 @@ int pixel_maxDensity(float penSize, int rowSize)
   float rowSizeInMM = mmPerStep * rowSize;
 
   if (pixelDebug) {
-    Serial.print(MSG_D_STR);
+    Serial.print(MSG_DEBUG_STR);
     Serial.print(F("G,D,rowsize in mm: "));
     Serial.print(rowSizeInMM);
     Serial.print(F(", mmPerStep: "));
@@ -268,14 +268,14 @@ int pixel_maxDensity(float penSize, int rowSize)
 
   if (maxDens <= 1)
   {
-    Serial.print(MSG_I_STR);
+    Serial.print(MSG_INFO_STR);
     Serial.print(F("Max waves for penSize: "));
     Serial.print(penSize);
     Serial.print(F(", grid: "));
     Serial.print(rowSize);
     Serial.print(F(" is "));
     Serial.println(maxDens);
-    Serial.print(MSG_I_STR);
+    Serial.print(MSG_INFO_STR);
     Serial.println(F("Not possible to express any detail."));
   }
 

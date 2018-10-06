@@ -233,6 +233,8 @@ boolean paramsExtracted = false;
 boolean readyForcurrentCommand = false;
 volatile static boolean currentlyExecutingACommand = false;
 
+static char lastParsedCommandRaw[INLENGTH+1];
+
 boolean commandConfirmed = false;
 boolean commandBuffered = false;
 boolean usingCrc = false;
@@ -245,9 +247,10 @@ boolean checkingForReceivedCommand = false;
 #define DRAWING_STR "DRAWING"
 #define OUT_CMD_SYNC_STR "SYNC,"
 
-char MSG_E_STR[] = "MSG,E,";
-char MSG_I_STR[] = "MSG,I,";
-char MSG_D_STR[] = "MSG,D,";
+char MSG_ERROR_STR[] = "MSG,E,";
+char MSG_INFO_STR[] = "MSG,I,";
+char MSG_DEBUG_STR[] = "MSG,D,";
+char MSG_COMPLETE_STR[] = "MSG,C:";
 
 // period between status rebroadcasts
 unsigned long comms_rebroadcastStatusInterval = 4000;

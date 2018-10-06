@@ -94,7 +94,7 @@ void comms_checkForCommand() {
     comms_emptyCommandBuffer(nextCommand, INLENGTH);
     commandConfirmed = true;
     commandBuffered = false;
-    comms_ready();
+    comms_ready(); 
   }
 }
 
@@ -116,6 +116,7 @@ void comms_pollForConfirmedCommand() {
     Serial.println(currentCommand);
     #endif
 
+    strcpy(lastParsedCommandRaw, currentCommand);
     paramsExtracted = comms_parseCommand(currentCommand);
     if (paramsExtracted) {
       #ifdef DEBUG_COMMS
@@ -133,6 +134,7 @@ void comms_pollForConfirmedCommand() {
       comms_clearParams();
       commandConfirmed = false;
     }
+    strcpy(lastParsedCommandRaw, "");
     currentlyExecutingACommand = false;
   }
 }
@@ -157,7 +159,7 @@ boolean comms_parseCommand(char * inS)
 #ifdef DEBUG_COMMS
     Serial.println(F("About to extract params"));
 #endif
-    comms_extractParams(inS);
+    comms_extractParams(inS);    
     return true;
   }
   else if (comp == NULL) {
@@ -336,7 +338,7 @@ void comms_requestResend()
 }
 void comms_unrecognisedCommand(String inCmd, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams)
 {
-  Serial.print(MSG_E_STR);
+  Serial.print(MSG_ERROR_STR);
   Serial.print(inCmd);
   Serial.println(F(" not recognised."));
 
