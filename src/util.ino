@@ -82,8 +82,6 @@ void changeLength(float tA, float tB)
 
 void changeLength(long tA, long tB)
 {
-  lastOperationTime = millis();
-
   transform(tA,tB);
 
   float currSpeedA = motorA.speed();
@@ -140,7 +138,8 @@ void changeLength(long tA, long tB)
       }
     }
   }
-  
+
+  lastOperationTime = millis();
   reportPosition();
 }
 
@@ -150,7 +149,6 @@ void changeLengthRelative(float tA, float tB)
 }
 void changeLengthRelative(long tA, long tB)
 {
-  lastOperationTime = millis();
   motorA.move(tA);
   motorB.move(tB);
 
@@ -172,6 +170,7 @@ void changeLengthRelative(long tA, long tB)
     }
   }
   
+  lastOperationTime = millis();
   reportPosition();
 }
 
