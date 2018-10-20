@@ -538,3 +538,20 @@ boolean canCalibrate = false;
 boolean useAutoStartFromSD = true;
 String autoStartFilename = "/AUTORUN.TXT";
 boolean autoStartFileFound = false;
+
+
+// Colour scheme
+uint16_t tftBackgroundColour = TFT_BLACK;
+uint16_t tftLabelOnBackground = TFT_WHITE;
+
+uint16_t tftButtonLabelColour = TFT_WHITE;
+
+// uint16_t tftButtonColour = TFT_BLUE;
+// uint16_t tftButtonLabelDropShadowColour = TFT_NAVY;
+
+uint16_t tftButtonColour = TFT_RED;
+uint16_t tftButtonLabelDropShadowColour = TFT_MAROON;
+
+// uint16_t tftButtonColour = TFT_ORANGE;
+// uint16_t tftButtonLabelDropShadowColour = TFT_BLACK;
+

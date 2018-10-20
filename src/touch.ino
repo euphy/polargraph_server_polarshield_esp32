@@ -309,11 +309,11 @@ void touch_calibrate()
     Serial.println("Data didn't exist, or wasn't valid, so recalibrating");
 #endif
 
-    lcd.fillScreen(TFT_BLACK);
+    lcd.fillScreen(tftBackgroundColour);
     lcd.setCursor(20, 0);
     lcd.setTextFont(2);
     lcd.setTextSize(1);
-    lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+    lcd.setTextColor(tftButtonLabelColour, tftBackgroundColour);
 
     lcd.println("Touch corners as indicated");
 
@@ -321,13 +321,13 @@ void touch_calibrate()
     lcd.println();
 
     if (recalibrateTouchScreen) {
-      lcd.setTextColor(TFT_RED, TFT_BLACK);
+      lcd.setTextColor(tftButtonColour, tftBackgroundColour);
       lcd.println("Didn't expect to see this? Did you press the screen while starting up?!");
     }
 
-    lcd.calibrateTouch(calData, TFT_MAGENTA, TFT_BLACK, 15);
+    lcd.calibrateTouch(calData, TFT_MAGENTA, tftBackgroundColour, 15);
 
-    lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    lcd.setTextColor(TFT_GREEN, tftBackgroundColour);
     lcd.println("Calibration complete!");
 #ifdef DEBUG_TOUCH
     Serial.print("Calibration complete, data: ");

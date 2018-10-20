@@ -44,8 +44,8 @@ void lcd_draw_menuDecorations(byte menu)
 
 void lcd_drawNumberWithBackground(int x, int y, long value)
 {
-  lcd.fillRect(x, y, buttonSize, 20, TFT_BLACK);
-  lcd.setTextColor(TFT_WHITE);
+  lcd.fillRect(x, y, buttonSize, 20, tftBackgroundColour);
+  lcd.setTextColor(tftButtonLabelColour);
   lcd.setCursor(x, y);
   lcd.setTextSize(decorationTextSize);
   lcd.print(value);
@@ -53,8 +53,8 @@ void lcd_drawNumberWithBackground(int x, int y, long value)
 
 void lcd_drawFloatWithBackground(int x, int y, float value)
 {
-  lcd.fillRect(x, y, buttonSize, 20, TFT_BLACK);
-  lcd.setTextColor(TFT_WHITE);
+  lcd.fillRect(x, y, buttonSize, 20, tftBackgroundColour);
+  lcd.setTextColor(tftButtonLabelColour);
   lcd.setCursor(x, y);
   lcd.setTextSize(decorationTextSize);
   lcd.print(value);
@@ -65,7 +65,7 @@ void lcd_drawCurrentSelectedFilename()
   // erase the previous stuff
   lcd.fillRect(buttonCoords[0][0], buttonCoords[1][1],
     screenWidth, grooveSize,
-    TFT_BLACK);
+    tftBackgroundColour);
 
   // see if there's one already found
   String msg = "";
@@ -85,7 +85,7 @@ void lcd_drawCurrentSelectedFilename()
     msg = commandFilename;
   }
 
-  lcd.setTextColor(TFT_WHITE);
+  lcd.setTextColor(tftButtonLabelColour);
   lcd.setTextSize(decorationTextSize);
   lcd.setCursor(buttonCoords[0][0], buttonCoords[1][1]+12);
   lcd.print(msg);
@@ -93,7 +93,7 @@ void lcd_drawCurrentSelectedFilename()
 
 void lcd_displayFirstMenu()
 {
-  lcd.fillScreen(TFT_BLACK);
+  lcd.fillScreen(tftBackgroundColour);
   lcd_setCurrentMenu(MENU_INITIAL);
   lcd_drawCurrentMenu();
 }
@@ -177,10 +177,10 @@ void lcd_draw_buttonHighlight(byte buttonPosition)
     Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
     lcd.drawRect(coords[0].x, coords[0].y,
       coords[1].x-coords[0].x, coords[1].y-coords[0].y,
-      TFT_WHITE);
+      tftButtonLabelColour);
     lcd.drawRect(coords[0].x+1, coords[0].y+1,
       coords[1].x-coords[0].x-2, coords[1].y-coords[0].y-2,
-      TFT_WHITE);
+      tftButtonLabelColour);
     highlightedButton = buttonPosition;
   }
 }
@@ -190,7 +190,7 @@ void lcd_drawButtonBackground(byte buttonPosition)
   Coord2D *coords = lcd_getCoordsForButtonPosition(buttonPosition);
   lcd.fillRect(coords[0].x, coords[0].y,
     coords[1].x-coords[0].x, coords[1].y-coords[0].y,
-    TFT_RED);
+    tftButtonColour);
 }
 
 void lcd_drawButtonLabelTextLine(byte buttonPosition, byte rowNumber, byte totalRows, char *textOfRow)
@@ -214,9 +214,9 @@ void lcd_drawButtonLabelTextLine(byte buttonPosition, byte rowNumber, byte total
 
   lcd.setTextDatum(CC_DATUM);
 
-  lcd.setTextColor(TFT_MAROON);
+  lcd.setTextColor(tftButtonLabelDropShadowColour);
   lcd.drawString(textOfRow, x-1, y-1, 2);
-  lcd.setTextColor(TFT_WHITE);
+  lcd.setTextColor(tftButtonLabelColour);
   lcd.drawString(textOfRow, x, y, 2);
 
 }
@@ -259,7 +259,7 @@ void lcd_drawButton(byte buttonPosition)
 
 void lcd_drawCurrentMenu()
 {
-  lcd.fillScreen(TFT_BLACK);
+  lcd.fillScreen(tftBackgroundColour);
   lcd_drawButtons();
   lcd_drawValues();
 }
@@ -294,24 +294,24 @@ void lcd_drawValues()
 
 void lcd_drawSplashScreen()
 {
-  lcd.fillScreen(TFT_BLACK);
+  lcd.fillScreen(tftBackgroundColour);
   int barTop = 80;
   int barHeight = 100;
   int targetPosition = 35;
 
-  lcd.fillRect(0, barTop, screenWidth, barHeight, TFT_RED);
+  lcd.fillRect(0, barTop, screenWidth, barHeight, tftButtonColour);
   lcd.setTextSize(1);
 
   // write it with a drop shadow
-  lcd.setTextColor(TFT_MAROON);
+  lcd.setTextColor(tftButtonLabelDropShadowColour);
   lcd.drawString("Polargraph.", targetPosition-1, barTop+23, 4);
-  lcd.setTextColor(TFT_WHITE);
+  lcd.setTextColor(tftButtonLabelColour);
   lcd.drawString("Polargraph.", targetPosition, barTop+24, 4);
   lcd.drawString("Polargraph.", targetPosition+1, barTop+24, 4); // bold it with double
 
-  lcd.setTextColor(TFT_MAROON);
+  lcd.setTextColor(tftButtonLabelDropShadowColour);
   lcd.drawString("An open-source art project", targetPosition+2, barTop+31+(9*3), 2);
-  lcd.setTextColor(TFT_WHITE);
+  lcd.setTextColor(tftButtonLabelColour);
   lcd.drawString("An open-source art project", targetPosition+3, barTop+32+(9*3), 2);
 
   lcd.setTextDatum(BR_DATUM);
@@ -324,8 +324,8 @@ void lcd_drawSplashScreen()
 void lcd_echoLastCommandToDisplay(String command, String inParam1, String inParam2, String inParam3, String inParam4, int inNoOfParams, String prefix)
 {
   if (currentMenu != MENU_INITIAL) return;
-  // lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24, TFT_RED);
-  lcd.setTextColor(TFT_WHITE, TFT_BLACK);
+  // lcd.fillRect(buttonCoords[0][0],buttonCoords[1][1]+10, screenWidth, buttonCoords[1][1]+24, tftButtonColour);
+  lcd.setTextColor(tftButtonLabelColour, tftBackgroundColour);
   lcd.setTextDatum(TL_DATUM);
   String output = "";
 
@@ -342,7 +342,7 @@ void lcd_echoLastCommandToDisplay(String command, String inParam1, String inPara
     default: output = prefix + " " + command + " " + output;
   }
 
-  lcd.fillRect(buttonCoords[0][0], buttonCoords[1][1]+10, screenWidth, 20, TFT_BLACK);
+  lcd.fillRect(buttonCoords[0][0], buttonCoords[1][1]+10, screenWidth, 20, tftBackgroundColour);
   lcd.drawString(output,
     buttonCoords[0][0], buttonCoords[1][1]+10, 2);
 }

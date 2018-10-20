@@ -154,7 +154,7 @@ void configuration_setup()
         if (touchCount > lastProgressBlockCounted + 10) {
           printf("Drawing");
           progressBlockPosition += 14;
-          lcd.fillRect(progressBlockPosition, 20, 10, 10, TFT_WHITE);
+          lcd.fillRect(progressBlockPosition, 20, 10, 10, tftButtonLabelColour);
           lastProgressBlockCounted = touchCount;
         }
       }

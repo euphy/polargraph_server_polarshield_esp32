@@ -346,6 +346,8 @@ void impl_engageMotors()
   motorB.runToNewPosition(motorB.currentPosition()+multiplier(8));
   motorA.runToNewPosition(motorA.currentPosition()-multiplier(8));
   motorB.runToNewPosition(motorB.currentPosition()-multiplier(8));
+  
+  lastOperationTime = millis();
 
   Serial.println("Engaged motors.");
 }
