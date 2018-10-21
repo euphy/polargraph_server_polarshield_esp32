@@ -42,6 +42,7 @@ void touch_sense()
     // Display touch, but was already touched.
     // This means a finger was held down, but nothing really else has changed.
     touchDuration = millis() - touchStartTime; // update it
+    lastOperationTime = millis();
   }
   else if (touchResponse && !displayTouched) {
     // If it's not already touching (ie displayTouched is false),
@@ -53,6 +54,7 @@ void touch_sense()
     #ifdef DEBUG_TOUCH
     printf("\t\t\tNew touch registered: %d, %d at %d.\n", touchX, touchY, touchStartTime);
     #endif
+    lastOperationTime = millis();
   }
   else if (!touchResponse && displayTouched) {
     // it was touched before, now it's not: the finger has lifted!
@@ -75,7 +77,7 @@ void touch_sense()
       printf("\t\t\tTouch registered as released, but it was too soon. I don't believe it.\n");
       #endif
     }
-
+    lastOperationTime = millis();
   }
   else if (!touchResponse && !displayTouched){
     // display not touched now, and wasn't before either.
