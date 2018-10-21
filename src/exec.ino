@@ -133,7 +133,7 @@ void exec_setMachineSizeFromCommand()
 
   // reload
   eeprom_loadMachineSize();
-  Serial.printf("New size: %d, %d\n", machineSizeMm.x, machineSizeMm.y);
+  Serial.printf("New size: %ld, %ld\n", machineSizeMm.x, machineSizeMm.y);
 }
 
 void exec_setMachineMmPerRevFromCommand()
