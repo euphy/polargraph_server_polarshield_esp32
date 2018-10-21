@@ -137,6 +137,9 @@ void changeLength(long tA, long tB)
         motorB.runSpeedToPosition();
       }
     }
+    else {
+      impl_runBackgroundProcesses();
+    }
   }
 
   lastOperationTime = millis();
@@ -168,6 +171,9 @@ void changeLengthRelative(long tA, long tB)
         motorB.runSpeedToPosition();
       }
     }
+    else {
+      impl_runBackgroundProcesses();
+    }    
   }
   
   lastOperationTime = millis();

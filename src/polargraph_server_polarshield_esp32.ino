@@ -541,6 +541,7 @@ boolean autoStartFileFound = false;
 
 
 // Colour scheme
+// As seen on http://www.barth-dev.de/online/rgb565-color-picker/
 uint16_t getAsRgb565(uint8_t red, uint8_t green, uint8_t blue) {
   return (((red & 0b11111000)<<8) + ((green & 0b11111100)<<3)+(blue>>3));
 }
