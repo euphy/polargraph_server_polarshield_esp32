@@ -541,6 +541,10 @@ boolean autoStartFileFound = false;
 
 
 // Colour scheme
+uint16_t getAsRgb565(uint8_t red, uint8_t green, uint8_t blue) {
+  return (((red & 0b11111000)<<8) + ((green & 0b11111100)<<3)+(blue>>3));
+}
+
 uint16_t tftBackgroundColour = TFT_BLACK;
 uint16_t tftLabelOnBackground = TFT_WHITE;
 
@@ -549,8 +553,12 @@ uint16_t tftButtonLabelColour = TFT_WHITE;
 // uint16_t tftButtonColour = TFT_BLUE;
 // uint16_t tftButtonLabelDropShadowColour = TFT_NAVY;
 
-uint16_t tftButtonColour = TFT_RED;
-uint16_t tftButtonLabelDropShadowColour = TFT_MAROON;
+//getAsRgb565(166, 113, 32); // sand
+//getAsRgb565(0, 64, 64); // cool cornflower blue
+
+
+uint16_t tftButtonColour = getAsRgb565(200, 30, 0);
+uint16_t tftButtonLabelDropShadowColour = getAsRgb565(50, 0, 0);
 
 // uint16_t tftButtonColour = TFT_ORANGE;
 // uint16_t tftButtonLabelDropShadowColour = TFT_BLACK;
