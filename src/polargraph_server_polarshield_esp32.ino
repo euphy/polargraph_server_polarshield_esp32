@@ -39,7 +39,9 @@ the User_Setup.h file and add the following lines.
 
 #include <AccelStepper.h>
 #include <MultiStepper.h>
-#include <ESP32Servo.h>
+// #include <ESP32Servo.h>
+#include <Servo.h>
+#include "esp32-hal-ledc.h"
 #include <Encoder.h>
 
 #include <Preferences.h>
