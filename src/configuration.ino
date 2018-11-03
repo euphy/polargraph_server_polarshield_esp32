@@ -109,10 +109,9 @@ void configuration_setup()
 {
   recalculateStepsPerMm();
 
-  // init SD card
   sd_initSD();
   lcd_initLCD();
-
+  
   long timeOfStartSensing = millis();
   long timeOfFirstTouch = 0L;
 

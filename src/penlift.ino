@@ -30,24 +30,21 @@ The same goes for the down.
 void penlift_movePen(int start, int end, int delay_ms)
 {
 #ifdef DEBUG_PENLIFT
-      Serial.print("Attaching to pin ");
-      Serial.println(PEN_HEIGHT_SERVO_PIN);
+  Serial.print("Attaching to pin ");
+  Serial.println(PEN_HEIGHT_SERVO_PIN);
 #endif
   penHeight.attach(PEN_HEIGHT_SERVO_PIN);
-
-  ledcSetup(1, 50, 16); // channel 1, 50 Hz, 16-bit depth
-  ledcAttachPin(PEN_HEIGHT_SERVO_PIN, 1);   // GPIO 22 on channel 1
-
   delay(delay_ms);
+
   if(start < end)
   {
     for (int i=start; i<=end; i++)
     {
       penHeight.write(i);
       delay(delay_ms);
-#ifdef DEBUG_PENLIFT
-      Serial.println(i);
-#endif
+      #ifdef DEBUG_PENLIFT
+        Serial.println(i);
+      #endif
     }
   }
   else
@@ -56,9 +53,9 @@ void penlift_movePen(int start, int end, int delay_ms)
     {
       penHeight.write(i);
       delay(delay_ms);
-#ifdef DEBUG_PENLIFT
-      Serial.println(i);
-#endif
+      #ifdef DEBUG_PENLIFT
+        Serial.println(i);
+      #endif
     }
   }
   penHeight.write(end);
