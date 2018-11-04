@@ -140,7 +140,7 @@ boolean debugComms = false;
     These variables are common to all polargraph server builds
 =========================================================== */
 
-const String FIRMWARE_VERSION_NO = "2.1.4";
+const String FIRMWARE_VERSION_NO = "2.1.5";
 extern String firmwareBuildName;
 
 #if MOTHERBOARD == RAMPS14
@@ -278,6 +278,7 @@ volatile long lastInteractionTime = 0L;
 
 static int touchX = 0;
 static int touchY = 0;
+boolean touchscreenAttached = true;
 
 volatile boolean touchEnabled = false;
 #define TOUCH_SENSITIVITY_THRESHOLD 800
