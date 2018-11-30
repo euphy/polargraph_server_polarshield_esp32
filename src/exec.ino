@@ -32,6 +32,8 @@ boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2,
     exec_setMotorSpeedFromCommand();
   else if (inCmd.startsWith(CMD_SETMOTORACCEL))
     exec_setMotorAccelerationFromCommand();
+  else if (inCmd.startsWith(CMD_TESTPENWIDTHSQUARE))
+    pixel_testPenWidth();
   else if (inCmd.startsWith(CMD_DRAWPIXEL))
     pixel_drawSquarePixel();
   else if (inCmd.startsWith(CMD_DRAWSCRIBBLEPIXEL))
@@ -40,8 +42,6 @@ boolean exec_executeBasicCommand(String inCmd, String inParam1, String inParam2,
     exec_changeDrawingDirection();
   else if (inCmd.startsWith(CMD_SETPOSITION))
     exec_setPosition();
-  // else if (com.startsWith(CMD_TESTPENWIDTHSQUARE))
-  //   pixel_testPenWidth();
   else if (inCmd.startsWith(CMD_PENDOWN))
     penlift_penDown();
   else if (inCmd.startsWith(CMD_PENUP))

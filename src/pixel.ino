@@ -363,6 +363,51 @@ void pixel_drawWavePixel(int length, int width, int density, byte drawDirection,
   }
 }
 
+
+void pixel_testPenWidth()
+{
+  int rowWidth = multiplier(atoi(inParam1));
+  float startWidth = atof(inParam2);
+  float endWidth = atof(inParam3);
+  float incSize = atof(inParam4);
+
+  int tempDirectionMode = globalDrawDirectionMode;
+  globalDrawDirectionMode = DIR_MODE_PRESET;
+
+  float oldPenWidth = penWidth;
+  int iterations = 0;
+
+  for (float pw = startWidth; pw <= endWidth; pw+=incSize)
+  {
+    iterations++;
+    penWidth = pw;
+    int maxDens = pixel_maxDensity(penWidth, rowWidth);
+    if (pixelDebug) {
+      Serial.print(F("Penwidth test "));
+      Serial.print(iterations);
+      Serial.print(F(", pen width: "));
+      Serial.print(penWidth);
+      Serial.print(F(", max density: "));
+      Serial.println(maxDens);
+    }
+    pixel_drawSquarePixel(rowWidth, rowWidth, maxDens, DIR_SE);
+  }
+
+  penWidth = oldPenWidth;
+
+  moveB(0-rowWidth);
+  for (int i = 1; i <= iterations; i++)
+  {
+    moveB(0-(rowWidth/2));
+    moveA(0-rowWidth);
+    moveB(rowWidth/2);
+  }
+
+  penWidth = oldPenWidth;
+  globalDrawDirectionMode = tempDirectionMode;
+}
+
+
 void pixel_drawSquarePixel(int length, int width, int density, byte drawDirection)
 {
   // work out how wide each segment should be
@@ -494,46 +539,3 @@ void pixel_flipWaveDirection()
   else
     lastWaveWasTop = true;
 }
-
-  void pixel_testPenWidth()
-  {
-    int rowWidth = multiplier(atoi(inParam1));
-    float startWidth = atof(inParam2);
-    float endWidth = atof(inParam3);
-    float incSize = atof(inParam4);
-
-    int tempDirectionMode = globalDrawDirectionMode;
-    globalDrawDirectionMode = DIR_MODE_PRESET;
-
-    float oldPenWidth = penWidth;
-    int iterations = 0;
-
-    for (float pw = startWidth; pw <= endWidth; pw+=incSize)
-    {
-      iterations++;
-      penWidth = pw;
-      int maxDens = pixel_maxDensity(penWidth, rowWidth);
-      if (pixelDebug) {
-        Serial.print(F("Penwidth test "));
-        Serial.print(iterations);
-        Serial.print(F(", pen width: "));
-        Serial.print(penWidth);
-        Serial.print(F(", max density: "));
-        Serial.println(maxDens);
-      }
-      pixel_drawSquarePixel(rowWidth, rowWidth, maxDens, DIR_SE);
-    }
-
-    penWidth = oldPenWidth;
-
-    moveB(0-rowWidth);
-    for (int i = 1; i <= iterations; i++)
-    {
-      moveB(0-(rowWidth/2));
-      moveA(0-rowWidth);
-      moveB(rowWidth/2);
-    }
-
-    penWidth = oldPenWidth;
-    globalDrawDirectionMode = tempDirectionMode;
-  }
