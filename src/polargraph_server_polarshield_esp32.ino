@@ -140,11 +140,7 @@ boolean debugComms = false;
     These variables are common to all polargraph server builds
 =========================================================== */
 
-<<<<<<< HEAD
 const String FIRMWARE_VERSION_NO = "2.2.0";
-=======
-const String FIRMWARE_VERSION_NO = "2.1.5";
->>>>>>> 7bef658e1051b19548969c704ad8042d676c506c
 extern String firmwareBuildName;
 
 #if MOTHERBOARD == RAMPS14
