@@ -9,6 +9,15 @@ Polargraph server for PolarshieldSD v3
 Change log
 -----------
 
+2018.11.30-19:30 **v2.2.0**
+
+Added the pen width test feature back into the code. Why was it ever gone? I commented 
+out all the features while porting it to ESP32, and looks like I forgot to put this one 
+back in!
+http://www.polargraph.co.uk/forum/polargraphs-group2/troubleshooting-forum5/no-test-pen-widths-thread736.0/#postid-4153
+
+
+
 2018.10.21-11:05 **v2.1.4**
 
 Added some extra calls to impl_runBackgroundTasks() in the main loop to allow the touchUI
