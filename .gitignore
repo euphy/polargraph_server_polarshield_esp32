@@ -226,5 +226,6 @@ pip-log.txt
 .vscode/launch.json
 *.code-workspace
 
+_temp_by_dltool*
 
 

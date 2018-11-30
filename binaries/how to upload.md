@@ -8,6 +8,9 @@ folder by using these four precompiled binary files.
 There are four files that need to be delivered to four specific
 memory addresses on the ESP32.
 
+(The two boot*.bin files are in the arduino/hardware/espressif/esp32 
+folder. The other two bin files are generated here and appear in
+.pioenvs/nodemcu-32s)
 
 |Address    |File                      |
 |-----------|--------------------------|
