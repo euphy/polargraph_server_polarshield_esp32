@@ -267,3 +267,40 @@ void lcd_initLCD()
 
   lcd_drawSplashScreen();
 }
+
+// Converter as seen on http://www.barth-dev.de/online/rgb565-color-picker/
+uint16_t lcd_getAsRgb565(uint8_t red, uint8_t green, uint8_t blue) {
+  return (((red & 0b11111000)<<8) + ((green & 0b11111100)<<3)+(blue>>3));
+}
+
+void lcd_changeColourScheme(int scheme)
+{
+  switch (scheme) {
+    case COLOURSCHEME_NOT_HOMED:  
+      tftBackgroundColour = TFT_BLACK;
+      tftLabelOnBackground = TFT_WHITE;
+      tftButtonLabelColour = TFT_WHITE;
+      tftButtonColour = lcd_getAsRgb565(200, 30, 0);
+      tftButtonLabelDropShadowColour = lcd_getAsRgb565(50, 0, 0);
+      currentMenuColourScheme = COLOURSCHEME_NOT_HOMED;
+      break;
+    case COLOURSCHEME_HOMED:
+      tftBackgroundColour = TFT_BLACK;
+      tftLabelOnBackground = TFT_WHITE;
+      tftButtonLabelColour = TFT_WHITE;
+      tftButtonColour = lcd_getAsRgb565(0, 64, 64);
+      tftButtonLabelDropShadowColour = TFT_NAVY;
+      currentMenuColourScheme = COLOURSCHEME_HOMED;
+      break;
+  }
+
+  lcd_drawCurrentMenu();
+
+// uint16_t tftButtonColour = TFT_BLUE;
+// uint16_t tftButtonLabelDropShadowColour = TFT_NAVY;
+
+//getAsRgb565(166, 113, 32); // sand
+//getAsRgb565(0, 64, 64); // cool cornflower blue
+
+
+}

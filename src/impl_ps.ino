@@ -347,6 +347,7 @@ void impl_engageMotors()
   motorA.runToNewPosition(motorA.currentPosition()-multiplier(8));
   motorB.runToNewPosition(motorB.currentPosition()-multiplier(8));
   
+  lcd_changeColourScheme(COLOURSCHEME_HOMED);
   lastOperationTime = millis();
 
   Serial.println("Engaged motors.");
@@ -357,6 +358,8 @@ void impl_releaseMotors()
   motorA.disableOutputs();
   motorB.disableOutputs();
   powerIsOn = false;
+  isHomed = false;
+  lcd_changeColourScheme(COLOURSCHEME_NOT_HOMED);
   Serial.println("Released motors");
 }
 

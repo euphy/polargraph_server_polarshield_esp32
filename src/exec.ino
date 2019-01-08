@@ -272,6 +272,7 @@ void exec_setPosition()
   motorA.setCurrentPosition(targetA);
   motorB.setCurrentPosition(targetB);
   isHomed = true;
+  // lcd_changeColourScheme(COLOURSCHEME_HOMED);
 
   engageMotors();
 
