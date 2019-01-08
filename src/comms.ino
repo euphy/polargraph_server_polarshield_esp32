@@ -354,3 +354,9 @@ void comms_unrecognisedCommand(String inCmd, String inParam1, String inParam2, S
   Serial.println(inParam4);
   Serial.println(F(" isn't a command I recognise."));
 }
+
+void comms_emitNotHomedError()
+{
+  Serial.print(MSG_ERROR_STR);
+  Serial.println(" Machine is not homed - Send home before trying to move");
+}

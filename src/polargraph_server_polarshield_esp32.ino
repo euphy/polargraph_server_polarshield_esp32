@@ -536,6 +536,7 @@ byte screenState = SCREEN_STATE_NORMAL;
 boolean powerIsOn = false;
 boolean isCalibrated = false;
 boolean canCalibrate = false;
+boolean isHomed = false;
 boolean useAutoStartFromSD = true;
 String autoStartFilename = "/AUTORUN.TXT";
 boolean autoStartFileFound = false;

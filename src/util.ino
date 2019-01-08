@@ -82,6 +82,11 @@ void changeLength(float tA, float tB)
 
 void changeLength(long tA, long tB)
 {
+  if (!util_isHomed()) { 
+    comms_emitNotHomedError();
+    return;
+  }
+
   transform(tA,tB);
 
   float currSpeedA = motorA.speed();
@@ -152,6 +157,11 @@ void changeLengthRelative(float tA, float tB)
 }
 void changeLengthRelative(long tA, long tB)
 {
+  if (!util_isHomed()) { 
+    comms_emitNotHomedError();
+    return;
+  }
+
   motorA.move(tA);
   motorB.move(tB);
 
@@ -223,6 +233,11 @@ float getMachineB(float cX, float cY)
 
 void moveA(int dist)
 {
+  if (!util_isHomed()) { 
+    comms_emitNotHomedError();
+    return;
+  }
+
   motorA.move(dist);
   while (motorA.distanceToGo() != 0)
   {
@@ -235,6 +250,11 @@ void moveA(int dist)
 
 void moveB(int dist)
 {
+  if (!util_isHomed()) { 
+    comms_emitNotHomedError();
+    return;
+  }
+
   motorB.move(dist);
   while (motorB.distanceToGo() != 0)
   {
@@ -369,6 +389,9 @@ long getCartesianY(long cX, float aPos) {
   return calcY;
 }
 
-
+boolean util_isHomed()
+{
+  return isHomed;  
+}
 
 

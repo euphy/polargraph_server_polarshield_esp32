@@ -271,6 +271,7 @@ void exec_setPosition()
 
   motorA.setCurrentPosition(targetA);
   motorB.setCurrentPosition(targetB);
+  isHomed = true;
 
   engageMotors();
 
@@ -436,7 +437,7 @@ float desiredSpeed(long distanceTo, float currentSpeed, float acceleration)
     float requiredSpeed;
 
     if (distanceTo == 0)
-	return 0.0f; // We're there
+	    return 0.0f; // We're there
 
     // sqrSpeed is the signed square of currentSpeed.
     float sqrSpeed = sq(currentSpeed);
