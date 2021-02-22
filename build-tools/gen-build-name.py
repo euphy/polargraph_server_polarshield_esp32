@@ -1,10 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import subprocess
 from datetime import datetime 
 
-version = subprocess.Popen("git describe", shell=True, stdout=subprocess.PIPE).stdout.read()
-git_status = subprocess.Popen("git status -s -uno", shell=True, stdout=subprocess.PIPE).stdout.read()
+version = subprocess.Popen("git describe", shell=True, stdout=subprocess.PIPE).stdout.read().decode()
+git_status = subprocess.Popen("git status -s -uno", shell=True, stdout=subprocess.PIPE).stdout.read().decode()
+
+
+
 
 if git_status:
     local_changes = "+{:d}ch".format(git_status.count('\n'))
@@ -13,4 +16,5 @@ else:
     output = version.strip()
 
 
-print 'String firmwareBuildName="{:s}";'.format(output)
+print('String firmwareBuildName="{:s}";'.format(output))
+
